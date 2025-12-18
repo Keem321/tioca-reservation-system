@@ -157,22 +157,22 @@ git clone <repo-url>
 cd tioca-reservation-system
 ```
 
-#### 2. Set Up the Frontend
+#### 2. Set Up the Frontend (with Vite)
 
 ```bash
-cd frontend
-# Create a new React app with TypeScript template
-npx create-react-app . --template typescript
+cd client
+# Create a new React + TypeScript app using Vite
+npx create-vite@latest . --template react-ts
 
 # Install Redux Toolkit (state management), React-Redux (bindings),
-# RTK Query (API data fetching), React Router (routing), and Axios (HTTP client)
-npm install @reduxjs/toolkit react-redux @reduxjs/toolkit/query react-router-dom axios
+# React Router (routing)
+npm install @reduxjs/toolkit react-redux react-router-dom
 ```
 
 #### 3. Set Up the Backend
 
 ```bash
-cd ../backend
+cd ../server
 # Initialize a new Node.js project
 npm init -y
 
@@ -187,12 +187,7 @@ npm install --save-dev nodemon jest supertest
 
 ```
 
-#### 4. Environment Variables
-
-- Copy `.env.example` to `.env` in both frontend and backend folders.
-- TODO: Fill in required values (API URLs, DB connection, Stripe keys, OAuth secrets, etc).
-
-#### 5. Run Locally
+#### 4. Run Locally
 
 Frontend:
 
@@ -208,12 +203,12 @@ cd backend
 npm run dev # (or nodemon src/app.js)
 ```
 
-#### 6. Linting & Formatting (Optional but recommended)
+#### 5. Linting & Formatting (Optional but recommended)
 
 - Install ESLint and Prettier in both frontend and backend.
 - Add config files (`.eslintrc`, `.prettierrc`). \* Speficically if we have lots of enums to ensure usage of.
 
-### 7. Recommended VS Code Extensions
+### 6. Recommended VS Code Extensions
 
 - **ES7+ React/Redux/React-Native snippets** (dsznajder.es7-react-js-snippets)
 - **Prettier - Code formatter** (esbenp.prettier-vscode)
