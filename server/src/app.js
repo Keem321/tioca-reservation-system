@@ -1,22 +1,30 @@
+/**
+ * Server Entry Point
+ *
+ */
+
 import express, { json } from "express";
 import { connect } from "mongoose";
 import cors from "cors";
-require("dotenv").config();
-
-import hotelRoutes from "./routes/hotel.routes";
+import apiRouter from "./routes/index.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
-
-app.use(cors());
-app.use(json());
-
-app.use("/api/hotels", hotelRoutes);
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI =
 	process.env.MONGO_URI || "mongodb://localhost:27017/tioca-reservation-system";
 
-connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+// Middleware
+app.use(cors());
+app.use(json());
+
+// Routes
+app.use("/api", apiRouter);
+
+// Connect to MongoDB and start server
+connect(MONGO_URI)
 	.then(() => {
 		app.listen(PORT, () => {
 			console.log(`Server running on port ${PORT}`);

@@ -1,5 +1,5 @@
 // services/hotel.service.js
-const HotelRepository = require("../repositories/hotel.repository");
+import HotelRepository from "../repositories/hotel.repository.js";
 
 const HotelService = {
 	async getAllHotels() {
@@ -19,4 +19,4 @@ const HotelService = {
 	},
 };
 
-module.exports = HotelService;
+export default HotelService;

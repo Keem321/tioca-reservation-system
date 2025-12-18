@@ -1,12 +1,18 @@
 // routes/hotelRoutes.js
-const express = require("express");
-const router = express.Router();
-const hotelController = require("../controllers/hotel.controller");
+import { Router } from "express";
+const router = Router();
+import {
+	getHotels,
+	createHotel,
+	getHotelById,
+	updateHotel,
+	deleteHotel,
+} from "../controllers/hotel.controller.js";
 
-router.get("/", hotelController.getHotels);
-router.post("/", hotelController.createHotel);
-router.get("/:id", hotelController.getHotelById);
-router.put("/:id", hotelController.updateHotel);
-router.delete("/:id", hotelController.deleteHotel);
+router.get("/", getHotels);
+router.post("/", createHotel);
+router.get("/:id", getHotelById);
+router.put("/:id", updateHotel);
+router.delete("/:id", deleteHotel);
 
-module.exports = router;
+export default router;

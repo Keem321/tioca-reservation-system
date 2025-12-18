@@ -185,6 +185,9 @@ npm install express mongoose passport passport-google-oauth20 passport-facebook 
 # Install nodemon (auto-reload for development), Jest (testing framework)
 npm install --save-dev nodemon jest supertest
 
+# For easily starting frontend and backend
+npm install --save-dev concurrently
+
 ```
 
 #### 4. Run Locally
