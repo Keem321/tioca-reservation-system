@@ -201,3 +201,5 @@ Payment and transaction records.
 - **Guest Reservation Management**: Modify/cancel bookings, view history, confirmation emails
 - **Error Handling**: User-friendly error messages, backend error logging
 - **Edge Case Handling**: Overbooking prevention, payment failures, session expiration
+- **Language & Currency Support**: Multi-language and currency options for international users
+- **Upsell & Promotions**: Special offers, partners can manage who shows up, for how long, with what hotels.
