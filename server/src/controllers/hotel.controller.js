@@ -2,6 +2,13 @@
 
 import HotelService from "../services/hotel.service.js";
 
+/**
+ * Get all hotels
+ * @route GET /api/hotels
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @returns {void}
+ */
 export async function getHotels(req, res) {
 	try {
 		const hotels = await HotelService.getAllHotels();
@@ -11,6 +18,13 @@ export async function getHotels(req, res) {
 	}
 }
 
+/**
+ * Create a new hotel
+ * @route POST /api/hotels
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @returns {void}
+ */
 export async function createHotel(req, res) {
 	try {
 		const hotel = await HotelService.createHotel(req.body);
@@ -20,6 +34,13 @@ export async function createHotel(req, res) {
 	}
 }
 
+/**
+ * Get a hotel by ID
+ * @route GET /api/hotels/:id
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @returns {void}
+ */
 export async function getHotelById(req, res) {
 	try {
 		const hotel = await HotelService.getHotelById(req.params.id);
@@ -30,6 +51,13 @@ export async function getHotelById(req, res) {
 	}
 }
 
+/**
+ * Update a hotel by ID
+ * @route PUT /api/hotels/:id
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @returns {void}
+ */
 export async function updateHotel(req, res) {
 	try {
 		const hotel = await HotelService.updateHotel(req.params.id, req.body);
@@ -40,6 +68,13 @@ export async function updateHotel(req, res) {
 	}
 }
 
+/**
+ * Delete a hotel by ID
+ * @route DELETE /api/hotels/:id
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @returns {void}
+ */
 export async function deleteHotel(req, res) {
 	try {
 		const hotel = await HotelService.deleteHotel(req.params.id);
