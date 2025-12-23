@@ -2,7 +2,7 @@
 
 ## Key Pages & Components
 
-### 1. Booking Page
+### Booking Page
 
 - Search dates, guest number, and room type
 - Rooms available show up
@@ -10,18 +10,31 @@
 - Booking summary sidebar ?
 - Lock/hold indicator for rooms in progress
 
-### 2. Landing Page
+### Landing Page
 
 - Home/landing page with hotel highlights - star deal, browsing ideas (beach, family, sports, etc.)
 - Deals and promotions section
+- search bar
 
-### 3. Admin/Manager Dashboard ?
+### Reservation Finder Page
+
+- Input reservation confirmation, email, or phone number, or first/last name
+- Show reservation details and options to modify/cancel
+- Important for users without accounts
+
+### Hotel Search & Listing Page
+
+- Filters by location, brand, amenities, royalty program offers
+
+### Admin/Manager Dashboard ?
 
 - Room/booking management
 - User management
 - Analytics and reports
 
-### 4. Shared Components
+- Navigation bar
+
+### Shared Components
 
 - Navigation bar
 - Footer with contact info and links, subhotels

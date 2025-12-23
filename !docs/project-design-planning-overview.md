@@ -203,3 +203,4 @@ Payment and transaction records.
 - **Edge Case Handling**: Overbooking prevention, payment failures, session expiration
 - **Language & Currency Support**: Multi-language and currency options for international users
 - **Upsell & Promotions**: Special offers, partners can manage who shows up, for how long, with what hotels.
+- **Rewards Points**: Points accumulation and redemption system for loyal customers
