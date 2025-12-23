@@ -8,6 +8,7 @@ import { connect } from "mongoose";
 import cors from "cors";
 import apiRouter from "./routes/index.js";
 import dotenv from "dotenv";
+import passport from "passport";
 dotenv.config();
 
 const app = express();
@@ -19,6 +20,7 @@ const MONGO_URI =
 // Middleware
 app.use(cors());
 app.use(json());
+app.use(passport.initialize());
 
 // Routes
 app.use("/api", apiRouter);

@@ -1,6 +1,6 @@
 // routes/hotelRoutes.js
 import { Router } from "express";
-const router = Router();
+const hotelRouter = Router();
 import {
 	getHotels,
 	createHotel,
@@ -9,10 +9,9 @@ import {
 	deleteHotel,
 } from "../controllers/hotel.controller.js";
 
-router.get("/", getHotels);
-router.post("/", createHotel);
-router.get("/:id", getHotelById);
-router.put("/:id", updateHotel);
-router.delete("/:id", deleteHotel);
-
-export default router;
+hotelRouter.get("/", getHotels);
+hotelRouter.post("/", createHotel);
+hotelRouter.get("/:id", getHotelById);
+hotelRouter.put("/:id", updateHotel);
+hotelRouter.delete("/:id", deleteHotel);
+export default hotelRouter;

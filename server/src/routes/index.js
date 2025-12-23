@@ -4,18 +4,16 @@
  *
  */
 
-import express from "express";
+import { Router } from "express";
+import hotelRouter from "./hotel.routes.js";
+import authRouter from "./auth.js";
+
 // middleware
+import passportStateless from "../middleware/passport-stateless.js";
 
-import hotelRoutes from "./hotel.routes.js";
+const router = Router();
 
-const router = express.Router();
-
-// Public routes
-
-// Authetification middleware
-
-// Protected routes
-router.use("/hotels", hotelRoutes);
+router.use("/hotels", passportStateless, hotelRouter);
+router.use("/auth", authRouter);
 
 export default router;
