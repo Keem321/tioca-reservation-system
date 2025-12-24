@@ -95,7 +95,7 @@ Develop a hotel reservation platform that streamlines the booking process for gu
 ## Deployment to AWS Elastic Beanstalk
 
 1. **Deploy:**
-   - Zip the project (excluding node_modules)
+   - Zip the project backend (excluding node_modules)
    - Upload to Elastic Beanstalk (Node.js platform)
    - Ensure the `Procfile` is present at the root:
      ```

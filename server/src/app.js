@@ -40,15 +40,21 @@ if (process.env.DOCDB_TLS === "true") {
 	}
 }
 
-// Connect to MongoDB/DocumentDB and start server
+// Try to connect to MongoDB/DocumentDB, but always start server for health check
 connect(MONGO_URI, mongoOptions)
 	.then(() => {
-		app.listen(PORT, () => {
-			console.log(`Server running on port ${PORT}`);
-		});
+		console.log("MongoDB connected successfully");
 	})
 	.catch((err) => {
 		console.error("MongoDB connection error:", err);
+		console.log(
+			"Starting server without database connection for health check."
+		);
+	})
+	.finally(() => {
+		app.listen(PORT, () => {
+			console.log(`Server running on port ${PORT}`);
+		});
 	});
 
 export default app;
