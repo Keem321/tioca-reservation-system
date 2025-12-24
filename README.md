@@ -92,4 +92,44 @@ Develop a hotel reservation platform that streamlines the booking process for gu
 
 ---
 
+## Deployment to AWS Elastic Beanstalk
+
+1. **Deploy:**
+   - Zip the project (excluding node_modules)
+   - Upload to Elastic Beanstalk (Node.js platform)
+   - Ensure the `Procfile` is present at the root:
+     ```
+     web: npm start --prefix server
+     ```
+2. **Verify:**
+   - Visit `/health` to confirm deployment is successful.
+
+---
+
+## Connecting to AWS DocumentDB (MongoDB-Compatible)
+
+additional steps:
+
+1. **Download the AWS RDS CA Bundle:**
+
+   - Download the CA file from: https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
+   - Upload this file to your project or your deployment environment (e.g., `/var/app/current/global-bundle.pem` on Beanstalk).
+
+2. **Set the following environment variables in Elastic Beanstalk:**
+
+   - `MONGO_URI` (your DocumentDB connection string, e.g., `mongodb://<user>:<pass>@<cluster-endpoint>:27017/<dbname>?ssl=true&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false`)
+   - `DOCDB_TLS` = `true`
+   - `DOCDB_CA_PATH` = `/path/to/global-bundle.pem` (update path as needed)
+
+3. **Connection Options:**
+
+   - The server will automatically use TLS and the CA bundle if `DOCDB_TLS` is set to `true` and `DOCDB_CA_PATH` is provided.
+   - `retryWrites` is set to `false` for DocumentDB compatibility.
+
+4. **Troubleshooting:**
+   - Ensure your security group allows inbound traffic from Elastic Beanstalk to DocumentDB.
+   - If you see certificate errors, double-check the CA file path and permissions.
+
+---
+
 ## Notes for Project 2

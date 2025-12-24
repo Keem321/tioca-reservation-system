@@ -22,11 +22,26 @@ app.use(cors());
 app.use(json());
 app.use(passport.initialize());
 
+// Health check endpoint for deployment verification
+app.get("/health", (req, res) => {
+	res.status(200).json({ status: "ok" });
+});
+
 // Routes
 app.use("/api", apiRouter);
 
-// Connect to MongoDB and start server
-connect(MONGO_URI)
+// DocumentDB/MongoDB connection options
+const mongoOptions = {};
+if (process.env.DOCDB_TLS === "true") {
+	mongoOptions.tls = true;
+	mongoOptions.retryWrites = false;
+	if (process.env.DOCDB_CA_PATH) {
+		mongoOptions.tlsCAFile = process.env.DOCDB_CA_PATH;
+	}
+}
+
+// Connect to MongoDB/DocumentDB and start server
+connect(MONGO_URI, mongoOptions)
 	.then(() => {
 		app.listen(PORT, () => {
 			console.log(`Server running on port ${PORT}`);
