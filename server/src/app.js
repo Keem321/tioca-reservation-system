@@ -46,23 +46,14 @@ if (useDocDBTls) {
 	mongoOptions.tls = true;
 	mongoOptions.retryWrites = false;
 
-	const caPath = process.env.DOCDB_CA_PATH;
-	if (caPath) {
-		// prefer absolute path; if relative, resolve from project root
-		const resolved = path.isAbsolute(caPath)
-			? caPath
-			: path.resolve(process.cwd(), caPath);
-		if (fs.existsSync(resolved)) {
-			mongoOptions.tlsCAFile = resolved;
-			console.log(`Using DocumentDB CA file at ${resolved}`);
-		} else {
-			console.warn(
-				`DOCDB_CA_PATH is set to '${caPath}' but file was not found at '${resolved}'. TLS trust may fail.`
-			);
-		}
+	// Always use /var/app/current/global-bundle.pem for Beanstalk compatibility
+	const caPath = "/var/app/current/global-bundle.pem";
+	if (fs.existsSync(caPath)) {
+		mongoOptions.tlsCAFile = caPath;
+		console.log(`Using DocumentDB CA file at ${caPath}`);
 	} else {
 		console.warn(
-			"DOCDB_TLS=true but DOCDB_CA_PATH is not set. Connection may fail due to untrusted certificate."
+			`Expected CA bundle at '${caPath}' but file was not found. TLS trust may fail.`
 		);
 	}
 }
