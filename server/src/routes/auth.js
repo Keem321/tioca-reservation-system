@@ -25,9 +25,6 @@ authRouter.get(
 authRouter.get("/loggedin", (req, res) => {
 	if (req.isAuthenticated && req.isAuthenticated()) {
 		res.json({ message: "Logged in!", user: req.user });
-	} else if (req.user) {
-		// For stateless or JWT setups
-		res.json({ message: "Logged in! (stateless)", user: req.user });
 	} else {
 		res.status(401).json({ message: "Not logged in" });
 	}

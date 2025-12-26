@@ -58,8 +58,8 @@ if (useDocDBTls) {
 	mongoOptions.tls = true;
 	mongoOptions.retryWrites = false;
 
-	// Always use /var/app/current/global-bundle.pem for Beanstalk compatibility
-	const caPath = "/var/app/current/global-bundle.pem";
+	// Use CA bundle committed in repo for AWS DocumentDB TLS
+	const caPath = path.resolve("./global-bundle.pem");
 	if (fs.existsSync(caPath)) {
 		mongoOptions.tlsCAFile = caPath;
 		console.log(`Using DocumentDB CA file at ${caPath}`);

@@ -10,11 +10,10 @@ import authRouter from "./auth.js";
 
 // middleware MUST import strategies to register them with passport
 import "../passport-strategies/googleStrategy.js";
-import passportStateless from "../middleware/passport-stateless.js";
 
 // API router (for /api/*)
 const apiRouter = Router();
-apiRouter.use("/hotels", passportStateless, hotelRouter);
+apiRouter.use("/hotels", hotelRouter);
 
 // Public router (for non-API routes)
 const publicRouter = Router();
