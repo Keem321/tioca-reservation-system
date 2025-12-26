@@ -4,15 +4,15 @@
  */
 
 import express, { json } from "express";
+// must setup sessions when using passport OAuth strategies by default -- it can be done statelessly with more config
+import session from "express-session";
+
 import { connect } from "mongoose";
 import fs from "fs";
 import path from "path";
 import cors from "cors";
-import apiRouter from "./routes/index.js";
-import dotenv from "dotenv";
+import { apiRouter, publicRouter } from "./routes/index.js";
 import passport from "passport";
-dotenv.config();
-
 const app = express();
 
 const PORT = process.env.PORT || 5000;
@@ -22,15 +22,27 @@ const MONGO_URI =
 // Middleware
 app.use(cors());
 app.use(json());
+
+// Session setup
+app.use(
+	session({
+		secret: process.env.SESSION_SECRET || "default_secret",
+		resave: false,
+		saveUninitialized: false,
+	})
+);
 app.use(passport.initialize());
+app.use(passport.session());
 
 // Health check endpoint for deployment verification
 app.get("/health", (req, res) => {
 	res.status(200).json({ status: "ok" });
 });
 
-// Routes
+// API resource routes
 app.use("/api", apiRouter);
+// Public and auth routes
+app.use("/", publicRouter);
 
 // DocumentDB/MongoDB connection options
 const mongoOptions = {

@@ -1,0 +1,2 @@
+# Ignore local development environment files
+.env.development
