@@ -5,6 +5,8 @@
 
 import express, { json } from "express";
 import { connect } from "mongoose";
+import fs from "fs";
+import path from "path";
 import cors from "cors";
 import apiRouter from "./routes/index.js";
 import dotenv from "dotenv";
@@ -31,12 +33,37 @@ app.get("/health", (req, res) => {
 app.use("/api", apiRouter);
 
 // DocumentDB/MongoDB connection options
-const mongoOptions = {};
-if (process.env.DOCDB_TLS === "true") {
+const mongoOptions = {
+	// sensible defaults for server selection and socket timeouts
+	serverSelectionTimeoutMS: 30000,
+	socketTimeoutMS: 45000,
+};
+
+const useDocDBTls =
+	process.env.DOCDB_TLS === "true" ||
+	/ssl=true|tls=true/i.test(MONGO_URI || "");
+if (useDocDBTls) {
 	mongoOptions.tls = true;
 	mongoOptions.retryWrites = false;
-	if (process.env.DOCDB_CA_PATH) {
-		mongoOptions.tlsCAFile = process.env.DOCDB_CA_PATH;
+
+	const caPath = process.env.DOCDB_CA_PATH;
+	if (caPath) {
+		// prefer absolute path; if relative, resolve from project root
+		const resolved = path.isAbsolute(caPath)
+			? caPath
+			: path.resolve(process.cwd(), caPath);
+		if (fs.existsSync(resolved)) {
+			mongoOptions.tlsCAFile = resolved;
+			console.log(`Using DocumentDB CA file at ${resolved}`);
+		} else {
+			console.warn(
+				`DOCDB_CA_PATH is set to '${caPath}' but file was not found at '${resolved}'. TLS trust may fail.`
+			);
+		}
+	} else {
+		console.warn(
+			"DOCDB_TLS=true but DOCDB_CA_PATH is not set. Connection may fail due to untrusted certificate."
+		);
 	}
 }
 
