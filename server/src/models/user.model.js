@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
 	password: { type: String }, // Only for local users
 	avatar: { type: String },
 	createdAt: { type: Date, default: Date.now },
+	lastLogin: { type: Date },
 });
 
 const User = mongoose.model("User", userSchema);

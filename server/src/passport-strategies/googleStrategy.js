@@ -18,19 +18,60 @@ const googleStrategy = new GoogleStrategy(
 	},
 	async (accessToken, refreshToken, profile, done) => {
 		try {
-			// Use findOneAndUpdate to avoid duplicate key errors
-			const user = await User.findOneAndUpdate(
-				{ googleId: profile.id },
-				{
-					$setOnInsert: {
-						googleId: profile.id,
-						email: profile.emails[0].value,
-						name: profile.displayName,
-					},
-				},
-				{ new: true, upsert: true }
-			);
-			return done(null, user);
+			const email = profile.emails?.[0]?.value;
+
+			// 1) Try to find by providerId first (user previously logged in via Google)
+			let user = await User.findOne({
+				provider: "google",
+				providerId: profile.id,
+			});
+			if (user) {
+				user.lastLogin = new Date();
+				await user.save();
+				return done(null, user);
+			}
+
+			// 2) If not found by providerId, try to find by email (user may have registered locally)
+			if (email) {
+				user = await User.findOne({ email });
+				if (user) {
+					// Attach provider info to the existing account and update lastLogin
+					user.provider = "google";
+					user.providerId = profile.id;
+					user.lastLogin = new Date();
+					await user.save();
+					return done(null, user);
+				}
+			}
+
+			// 3) No existing user found -> create a new one
+			const newUser = new User({
+				provider: "google",
+				providerId: profile.id,
+				email,
+				name: profile.displayName,
+				lastLogin: new Date(),
+			});
+			try {
+				await newUser.save();
+				return done(null, newUser);
+			} catch (saveErr) {
+				// Handle rare race / duplicate-key: if a user with this email was created concurrently,
+				// return that existing user instead of failing the OAuth flow.
+				if (saveErr && saveErr.code === 11000 && email) {
+					try {
+						const existing = await User.findOne({ email });
+						if (existing) {
+							existing.lastLogin = new Date();
+							await existing.save();
+							return done(null, existing);
+						}
+					} catch (e) {
+						return done(e);
+					}
+				}
+				return done(saveErr);
+			}
 		} catch (err) {
 			return done(err);
 		}
@@ -43,8 +84,13 @@ passport.serializeUser((user, done) => {
 	done(null, user.id);
 });
 
-passport.deserializeUser(async (user, done) => {
-	done(null, user);
+passport.deserializeUser(async (id, done) => {
+	try {
+		const user = await User.findById(id);
+		done(null, user);
+	} catch (err) {
+		done(err);
+	}
 });
 
 export default googleStrategy;

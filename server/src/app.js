@@ -20,15 +20,27 @@ const MONGO_URI =
 	process.env.MONGO_URI || "mongodb://localhost:27017/tioca-reservation-system";
 
 // Middleware
-app.use(cors());
+// Allow cross-origin requests from the client and include credentials (cookies)
+const clientOrigin = process.env.CLIENT_ORIGIN || true;
+app.use(cors({ origin: clientOrigin, credentials: true }));
 app.use(json());
 
-// Session setup
+// Always set trust proxy (harmless in local dev, needed behind AWS Beanstalk/CloudFront)
+app.set("trust proxy", 1);
+
+// Session setup - detect secure mode by checking if CLIENT_ORIGIN is HTTPS
+const isSecureEnv =
+	process.env.CLIENT_ORIGIN && process.env.CLIENT_ORIGIN.startsWith("https");
 app.use(
 	session({
 		secret: process.env.SESSION_SECRET || "default_secret",
 		resave: false,
 		saveUninitialized: false,
+		cookie: {
+			secure: isSecureEnv,
+			sameSite: isSecureEnv ? "none" : "lax",
+			httpOnly: true,
+		},
 	})
 );
 app.use(passport.initialize());
@@ -86,5 +98,15 @@ connect(MONGO_URI, mongoOptions)
 			console.log(`Server running on port ${PORT}`);
 		});
 	});
+
+// Global error handlers to prevent the server from exiting unexpectedly
+process.on("unhandledRejection", (reason, p) => {
+	console.error("Unhandled Rejection at:", p, "reason:", reason);
+});
+
+process.on("uncaughtException", (err) => {
+	console.error("Uncaught Exception:", err);
+	// Always log and do not exit
+});
 
 export default app;

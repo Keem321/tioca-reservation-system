@@ -21,7 +21,10 @@ export const hotelsApi = createApi({
 	// Unique key for this API slice in the Redux store
 	reducerPath: "hotelsApi",
 	// Base query configuration for all endpoints
-	baseQuery: fetchBaseQuery({ baseUrl: "/api/hotels" }),
+	baseQuery: fetchBaseQuery({
+		baseUrl: "/api/hotels",
+		credentials: "include",
+	}),
 	// Tag types for cache management
 	tagTypes: ["Hotel"],
 	// Define endpoints (queries and mutations)
