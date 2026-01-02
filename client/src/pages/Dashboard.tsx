@@ -38,7 +38,7 @@ const Dashboard: React.FC = () => {
 					setUser(body.user || null);
 				}
 			} catch (err) {
-				// ignore network errors
+				console.error("Failed to check session:", err);
 			}
 		};
 		check();
@@ -65,8 +65,8 @@ const Dashboard: React.FC = () => {
 										method: "POST",
 										credentials: "include",
 									});
-								} catch (e) {
-									// ignore
+								} catch (err) {
+									console.error("Logout failed:", err);
 								}
 								setLoggedIn(false);
 								setUser(null);
