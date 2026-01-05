@@ -19,6 +19,126 @@ Single-property concept: a tapioca-inspired pod hotel in Japan. Emphasis on calm
   - Aggregators: Booking.com and Agoda searches for “capsule hotel Tokyo” to see filters, photos, amenity tags, cancellation policies.
   - Hostelworld capsule listings (focus on shared-facility disclosures and reviews).
 
+## Property Specifications
+
+### Pod Types & Dimensions
+
+Total capacity: 100 pods across 4 floors (25 pods per floor)
+
+**Baseline assumptions**
+
+- Guest height up to ~6'2" (188 cm)
+- Carry-on luggage stored outside pod unless otherwise noted
+- All dimensions in inches: Length × Width × Height
+
+**Pod lineup**
+
+1. **Classic Pearl** (Standard)
+
+   - Dimensions: 80" × 40" × 40"
+   - Positioned as entry-level option
+   - Cozy sleeping capsule with essential amenities
+
+2. **Milk Pearl** (Standard+)
+
+   - Dimensions: 84" × 42" × 45"
+   - Slightly taller and more spacious than Classic
+   - Enhanced headroom and comfort
+
+3. **Golden Pearl** (Premium)
+
+   - Dimensions: 86" × 45" × 50"
+   - Can sit upright comfortably
+   - Includes small side cubby for personal items
+   - Ideal for longer stays or business travelers
+
+4. **Twin Pearl** (Couples)
+
+   - Dimensions: 86" × 70" × 50"
+   - Snug accommodation for two (not spacious)
+   - Located on couples floor
+
+5. **Crystal Boba Suite** (First Class)
+
+   - Dimensions: 90" × 55" × 65"
+   - Allows standing room
+   - Features fold-down desk
+   - More like a micro hotel room experience
+   - Premium tier with enhanced privacy
+
+6. **Matcha Pearl** (Women Only)
+   - Dimensions: 86" × 45" × 50"
+   - Same specs as Golden Pearl
+   - Exclusive to women-only floor
+   - Enhanced security and privacy
+
+### Floor Organization
+
+The property features 4 distinct floors, each with 25 pods:
+
+- **Women-Only Floor**: Matcha Pearl pods with dedicated facilities
+- **Men-Only Floor**: Mix of Classic, Milk, and Golden Pearl options
+- **Couples Floor**: Twin Pearl pods for shared stays
+- **Quiet/Business Floor**: Golden Pearl and Crystal Boba Suites with workspace-friendly environment
+
+### Amenities
+
+**Baseline amenities** (included for all guests)
+
+_In-Pod Features_
+
+- Fresh linen and bedding
+- Reading light with adjustable brightness
+- Privacy curtain/screen
+- Air conditioning and ventilation controls
+- Basic USB charging ports (USB-A)
+- Small shelf and hooks
+- Individual climate control
+
+_Shared Facilities_
+
+- Free high-speed Wi-Fi throughout property
+- Hot showers (gender-separated, multiple stalls per floor)
+- Powder rooms with mirrors and outlets
+- Security lockers with key card access (standard size)
+- Luggage storage area
+- Vending machines featuring tapioca pudding, boba drinks, and snacks
+- 24-hour security monitoring and staff
+- Shoe storage cubbies (no-shoes policy in pod areas)
+
+_Guest Services_
+
+- Contactless check-in/out options
+- Digital key card access
+- Emergency call buttons in pod areas
+- Free toiletries (basic shampoo, body wash)
+
+**Premium amenities** (bundled with advanced pods or available as add-ons)
+
+_Enhanced In-Pod Features_
+
+- Private lockers (larger, in-pod storage) — Golden Pearl and above
+- USB-C fast charging and power outlets — Crystal Boba Suite
+- Aromatherapy diffuser options
+- Premium sleep kit (earplugs, eye mask, slippers)
+- Fold-down workspace — Crystal Boba Suite only
+
+_Enhanced Facilities_
+
+- Premium lounge access (coworking tables, quiet seating, beverages)
+- Self-catering kitchen access (microwave, kettle, refrigerator)
+- Laundry service and coin-operated washers/dryers
+- Towel upgrades (premium cotton, extra towels, bathrobes)
+- Private shower rooms (bookable by the hour)
+
+_Enhanced Services_
+
+- Early check-in / late check-out privileges
+- Breakfast service or meal kit delivery
+- Wake-up call service
+- Luggage forwarding assistance
+- Local area concierge recommendations
+
 ## Development Groups
 
 ### A. User Management (Auth, Roles, Profiles)
