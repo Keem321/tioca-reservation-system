@@ -1,6 +1,45 @@
 import React from "react";
-import { useGetRoomTypesQuery } from "../../features/roomsApi";
+import { useGetRoomsQuery } from "../../features/roomsApi";
+import type { Room, PodQuality } from "../../types/room";
 import "./RoomsSection.css";
+
+/**
+ * Display data interface for room cards
+ */
+interface RoomDisplay {
+	id: string;
+	name: string;
+	price: number;
+	features: string;
+	available: boolean;
+	capacity: number;
+}
+
+/**
+ * Map pod quality to display name
+ */
+const getQualityDisplayName = (quality: PodQuality): string => {
+	const qualityMap: Record<PodQuality, string> = {
+		classic: "Classic Pearl",
+		milk: "Milk Pearl",
+		golden: "Golden Pearl",
+		crystal: "Crystal Boba",
+		matcha: "Matcha Pearl",
+	};
+	return qualityMap[quality];
+};
+
+/**
+ * Convert API Room to display format
+ */
+const mapRoomToDisplay = (room: Room): RoomDisplay => ({
+	id: room._id,
+	name: getQualityDisplayName(room.quality),
+	price: room.pricePerNight,
+	features: room.description || "Comfortable capsule accommodation",
+	available: room.status === "available",
+	capacity: room.capacity,
+});
 
 /**
  * RoomsSection Component
@@ -9,10 +48,10 @@ import "./RoomsSection.css";
  * Uses RTK Query to fetch room data from the API.
  */
 const RoomsSection: React.FC = () => {
-	const { data: rooms, isLoading, error } = useGetRoomTypesQuery();
+	const { data: rooms, isLoading, error } = useGetRoomsQuery(void 0);
 
 	// Fallback data if API is not ready
-	const fallbackRooms = [
+	const fallbackRooms: RoomDisplay[] = [
 		{
 			id: "1",
 			name: "Classic Pearl",
@@ -63,7 +102,10 @@ const RoomsSection: React.FC = () => {
 		},
 	];
 
-	const displayRooms = rooms && rooms.length > 0 ? rooms : fallbackRooms;
+	const displayRooms: RoomDisplay[] = 
+		rooms && rooms.length > 0 
+			? rooms.map(mapRoomToDisplay) 
+			: fallbackRooms;
 
 	return (
 		<section id="rooms" className="rooms-section">

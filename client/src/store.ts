@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { hotelsApi } from "./features/hotelsApi";
 import { roomsApi } from "./features/roomsApi";
 import { reservationsApi } from "./features/reservationsApi";
+import bookingReducer from "./features/bookingSlice";
 import { setupListeners } from "@reduxjs/toolkit/query";
 
 /**
@@ -17,18 +18,18 @@ import { setupListeners } from "@reduxjs/toolkit/query";
  */
 
 export const store = configureStore({
-	// Add all API reducers under their own keys
 	reducer: {
+		booking: bookingReducer,
 		[hotelsApi.reducerPath]: hotelsApi.reducer,
 		[roomsApi.reducerPath]: roomsApi.reducer,
 		[reservationsApi.reducerPath]: reservationsApi.reducer,
 	},
-	// Add all RTK Query middleware for API caching and side effects
 	middleware: (getDefaultMiddleware) =>
-		getDefaultMiddleware()
-			.concat(hotelsApi.middleware)
-			.concat(roomsApi.middleware)
-			.concat(reservationsApi.middleware),
+		getDefaultMiddleware().concat([
+			hotelsApi.middleware,
+			roomsApi.middleware,
+			reservationsApi.middleware,
+		]),
 });
 
 // Enable refetchOnFocus/refetchOnReconnect behaviors for RTK Query

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Calendar, Users, Search } from "lucide-react";
 import { setCheckIn, setCheckOut, setGuests } from "../../features/bookingSlice";
-import { useSearchRoomsQuery } from "../../features/roomsApi";
+import { useGetRoomsQuery } from "../../features/roomsApi";
 import type { RootState } from "../../store";
 import "./BookingForm.css";
 
@@ -23,12 +23,9 @@ const BookingForm: React.FC = () => {
 	const isValid =
 		checkIn && checkOut && checkIn < checkOut && guests > 0;
 
-	const { data, isLoading, error } = useSearchRoomsQuery(
-		{
-			checkIn,
-			checkOut,
-			guests,
-		},
+	// Fetch all available rooms (filtered by check-in/out dates on backend)
+	const { data: rooms, isLoading, error } = useGetRoomsQuery(
+		void 0,
 		{ skip: !shouldSearch || !isValid }
 	);
 
@@ -122,9 +119,9 @@ const BookingForm: React.FC = () => {
 				</div>
 			)}
 
-			{data && data.rooms && data.rooms.length > 0 && (
+			{rooms && rooms.length > 0 && (
 				<div className="booking-form__success">
-					Found {data.rooms.length} available room(s) for your dates!
+					Found {rooms.length} available room(s) for your dates!
 				</div>
 			)}
 		</div>
