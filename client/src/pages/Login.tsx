@@ -14,6 +14,10 @@ const Login: React.FC = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
 
+	const handleBackHome = () => {
+		navigate("/");
+	};
+
 	const handleGoogleLogin = () => {
 		window.location.href = "/auth/google?redirect=/";
 	};
@@ -57,6 +61,13 @@ const Login: React.FC = () => {
 			</div>
 
 			<div className="login-card">
+				<button
+					type="button"
+					onClick={handleBackHome}
+					className="login-back-button"
+				>
+					← Back to home
+				</button>
 				<h1 className="login-title">Welcome back</h1>
 				<p className="login-subtitle">
 					Sign in with Google as a guest, or use management credentials.

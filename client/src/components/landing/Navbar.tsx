@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout, checkAuth } from "../../features/authSlice";
+import { logout } from "../../features/authSlice";
 import type { RootState, AppDispatch } from "../../store";
 import "./Navbar.css";
 
@@ -11,21 +11,17 @@ import "./Navbar.css";
  *
  * Main navigation bar for the landing page.
  * Includes logo, navigation links, account menu, and book now button.
+ * Shows manager dropdown for logged-in managers.
  */
 const Navbar: React.FC = () => {
 	const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+	const [managerMenuOpen, setManagerMenuOpen] = useState(false);
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
 
 	const user = useSelector((state: RootState) => state.auth.user);
 	const isLoggedIn = user !== null;
-
-	useEffect(() => {
-		// Check if user is logged in on mount
-		dispatch(checkAuth()).catch(() => {
-			// Not logged in, that's fine
-		});
-	}, [dispatch]);
+	const isManager = user?.role === "manager";
 
 	const handleSignOut = async () => {
 		await dispatch(logout());
@@ -35,7 +31,13 @@ const Navbar: React.FC = () => {
 
 	return (
 		<nav className="navbar">
-			<div className="navbar__logo">Tapioca</div>
+			<button
+				type="button"
+				onClick={() => navigate("/")}
+				className="navbar__logo"
+			>
+				Tapioca
+			</button>
 
 			<div className="navbar__links">
 				<a href="#rooms" className="navbar__link">
@@ -47,6 +49,47 @@ const Navbar: React.FC = () => {
 				<a href="#location" className="navbar__link">
 					Location
 				</a>
+
+				{/* Manager dropdown - only show for logged-in managers */}
+				{isManager && (
+					<div className="navbar__manager">
+						<button
+							onClick={() => setManagerMenuOpen(!managerMenuOpen)}
+							className="navbar__manager-button"
+						>
+							Manager
+							<ChevronDown
+								size={16}
+								className={`navbar__chevron ${
+									managerMenuOpen ? "navbar__chevron--open" : ""
+								}`}
+							/>
+						</button>
+
+						{managerMenuOpen && (
+							<div className="navbar__dropdown">
+								<button
+									onClick={() => {
+										navigate("/manage/rooms");
+										setManagerMenuOpen(false);
+									}}
+									className="navbar__dropdown-item"
+								>
+									Room Management
+								</button>
+								<button
+									onClick={() => {
+										navigate("/manage/reservations");
+										setManagerMenuOpen(false);
+									}}
+									className="navbar__dropdown-item"
+								>
+									Reservation Management
+								</button>
+							</div>
+						)}
+					</div>
+				)}
 
 				<div className="navbar__account">
 					<button

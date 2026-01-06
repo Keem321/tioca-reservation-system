@@ -151,6 +151,27 @@
 	padding: var(--spacing-xl);
 }
 
+.login-back-button {
+	background: transparent;
+	border: 1px solid var(--color-border);
+	color: var(--color-text-primary);
+	border-radius: var(--border-radius-full);
+	padding: 0.4rem 0.9rem;
+	font-size: 0.95rem;
+	cursor: pointer;
+	margin-bottom: var(--spacing-md);
+	transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.login-back-button:hover {
+	background: var(--color-bone);
+	border-color: color-mix(
+		in srgb,
+		var(--color-border) 60%,
+		var(--color-text-primary) 40%
+	);
+}
+
 .login-title {
 	margin-bottom: var(--spacing-sm);
 	font-size: 2rem;

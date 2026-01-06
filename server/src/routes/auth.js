@@ -44,6 +44,7 @@ authRouter.get("/loggedin", (req, res) => {
 					id: req.user._id || req.user.id,
 					name: req.user.name,
 					email: req.user.email,
+					role: req.user.role || "user",
 			  }
 			: null;
 		res.json({ message: "Logged in!", user });
@@ -109,7 +110,7 @@ authRouter.post("/login", (req, res, next) => {
 				id: user._id,
 				email: user.email,
 				name: user.name,
-				role: user.role,
+				role: user.role || "user",
 			};
 			return res.json({ message: "Logged in", user: safeUser });
 		});

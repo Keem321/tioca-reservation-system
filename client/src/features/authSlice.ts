@@ -14,12 +14,14 @@ export interface User {
 export interface AuthState {
 	user: User | null;
 	isLoading: boolean;
+	hasChecked: boolean;
 	error: string | null;
 }
 
 const initialState: AuthState = {
 	user: null,
-	isLoading: false,
+	isLoading: true,
+	hasChecked: false,
 	error: null,
 };
 
@@ -55,6 +57,8 @@ const authSlice = createSlice({
 		 */
 		setUser(state, action: PayloadAction<User>) {
 			state.user = action.payload;
+			state.hasChecked = true;
+			state.isLoading = false;
 			state.error = null;
 		},
 		/**
@@ -74,9 +78,11 @@ const authSlice = createSlice({
 			.addCase(checkAuth.fulfilled, (state, action) => {
 				state.isLoading = false;
 				state.user = action.payload || null;
+				state.hasChecked = true;
 			})
 			.addCase(checkAuth.rejected, (state) => {
 				state.isLoading = false;
+				state.hasChecked = true;
 				state.user = null;
 			})
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Navbar from "../components/landing/Navbar";
 import {
 	useGetRoomsQuery,
 	useGetRoomsByHotelQuery,
@@ -209,24 +210,26 @@ export default function RoomManagement() {
 	};
 
 	return (
-		<div className="room-management">
-			<h1>Room Management</h1>
+		<>
+			<Navbar />
+			<div className="room-management">
+				<h1>Room Management</h1>
 
-			{/* Filter by Hotel */}
-			<div className="filters">
-				<label>
-					Filter by Hotel:
-					<select
-						value={selectedHotelId}
-						onChange={(e) => setSelectedHotelId(e.target.value)}
-					>
-						<option value="">All Hotels</option>
-						{hotels.map((hotel: Hotel) => (
-							<option key={hotel._id} value={hotel._id}>
-								{hotel.name}
-							</option>
-						))}
-					</select>
+				{/* Filter by Hotel */}
+				<div className="filters">
+					<label>
+						Filter by Hotel:
+						<select
+							value={selectedHotelId}
+							onChange={(e) => setSelectedHotelId(e.target.value)}
+						>
+							<option value="">All Hotels</option>
+							{hotels.map((hotel: Hotel) => (
+								<option key={hotel._id} value={hotel._id}>
+									{hotel.name}
+								</option>
+							))}
+						</select>
 				</label>
 				<button onClick={() => setShowForm(!showForm)}>
 					{showForm ? "Cancel" : "Add New Room"}
@@ -534,5 +537,6 @@ export default function RoomManagement() {
 				)}
 			</div>
 		</div>
+		</>
 	);
 }
