@@ -1,5 +1,5 @@
 .landing {
-	background-color: #fff6eb;
+	background-color: var(--color-linen);
 	min-height: 100vh;
 	font-family: "Inter", sans-serif;
 }

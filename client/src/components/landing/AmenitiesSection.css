@@ -1,6 +1,6 @@
 .amenities-section {
 	padding: 6rem 2rem;
-	background-color: #fff6eb;
+	background-color: var(--color-linen);
 }
 
 .amenities-section__container {
@@ -11,7 +11,7 @@
 .amenities-section__title {
 	font-family: "Playfair Display", serif;
 	font-size: 2.5rem;
-	color: #2c1607;
+	color: var(--color-text-primary);
 	margin-bottom: 1rem;
 	text-align: center;
 	font-weight: 600;
@@ -19,7 +19,7 @@
 
 .amenities-section__description {
 	text-align: center;
-	color: #5a3a24;
+	color: var(--color-text-secondary);
 	max-width: 600px;
 	margin: 0 auto 3rem;
 	opacity: 0.9;
@@ -36,7 +36,7 @@
 	padding: 1.5rem;
 	border: 1px solid rgba(44, 22, 7, 0.08);
 	border-radius: 12px;
-	background-color: #fff6eb;
+	background-color: var(--color-linen);
 	transition: all 0.2s;
 }
 
@@ -45,7 +45,7 @@
 }
 
 .amenities-section__text {
-	color: #2c1607;
+	color: var(--color-text-primary);
 	font-size: 0.95rem;
 	font-weight: 500;
 }

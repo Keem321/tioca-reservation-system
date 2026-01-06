@@ -1,5 +1,5 @@
 .footer {
-	background-color: #2c1607;
+	background-color: var(--color-dark-coffee);
 	color: rgba(255, 246, 235, 0.8);
 	padding: 3rem 2rem 2rem;
 	border-top: 1px solid rgba(255, 246, 235, 0.15);
@@ -20,7 +20,7 @@
 }
 
 .footer__heading {
-	color: #fff6eb;
+	color: var(--color-linen);
 	margin-bottom: 1rem;
 	font-size: 1.1rem;
 	font-weight: 600;

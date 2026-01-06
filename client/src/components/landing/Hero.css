@@ -8,7 +8,7 @@
 .hero__title {
 	font-family: "Playfair Display", serif;
 	font-size: 4rem;
-	color: #2c1607;
+	color: var(--color-text-primary);
 	font-weight: 600;
 	margin-bottom: 1.5rem;
 	line-height: 1.2;
@@ -17,7 +17,7 @@
 
 .hero__description {
 	font-size: 1.25rem;
-	color: #5a3a24;
+	color: var(--color-text-secondary);
 	max-width: 600px;
 	margin: 0 auto 3rem;
 	line-height: 1.6;
