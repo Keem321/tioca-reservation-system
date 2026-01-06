@@ -1,0 +1,249 @@
+/* TEMPORARY CSS - eventually side-wide css file */
+
+.room-management {
+	padding: 20px;
+	max-width: 1400px;
+	margin: 0 auto;
+}
+
+.room-management h1 {
+	margin-bottom: 20px;
+}
+
+.filters {
+	display: flex;
+	gap: 20px;
+	align-items: center;
+	margin-bottom: 20px;
+	padding: 15px;
+	background: #f5f5f5;
+	border-radius: 8px;
+}
+
+.filters label {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.filters select {
+	padding: 8px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+.filters button {
+	margin-left: auto;
+	padding: 10px 20px;
+	background: #007bff;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.filters button:hover {
+	background: #0056b3;
+}
+
+.room-form {
+	background: #fff;
+	padding: 20px;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	margin-bottom: 30px;
+}
+
+.room-form h2 {
+	margin-bottom: 20px;
+}
+
+.form-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	gap: 15px;
+	margin-bottom: 15px;
+}
+
+.room-form label {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	font-weight: 500;
+}
+
+.room-form input,
+.room-form select,
+.room-form textarea {
+	padding: 8px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 14px;
+}
+
+.form-actions {
+	display: flex;
+	gap: 10px;
+	margin-top: 20px;
+}
+
+.form-actions button {
+	padding: 10px 20px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 14px;
+}
+
+.form-actions button[type="submit"] {
+	background: #28a745;
+	color: white;
+}
+
+.form-actions button[type="submit"]:hover {
+	background: #218838;
+}
+
+.form-actions button[type="button"] {
+	background: #6c757d;
+	color: white;
+}
+
+.form-actions button[type="button"]:hover {
+	background: #5a6268;
+}
+
+.room-list {
+	background: #fff;
+	padding: 20px;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+}
+
+.room-list h2 {
+	margin-bottom: 15px;
+}
+
+.room-list table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.room-list th,
+.room-list td {
+	padding: 12px;
+	text-align: left;
+	border-bottom: 1px solid #ddd;
+}
+
+.room-list th {
+	background: #f8f9fa;
+	font-weight: 600;
+}
+
+.room-list tr:hover {
+	background: #f8f9fa;
+}
+
+.status-available {
+	color: #28a745;
+	font-weight: 500;
+}
+
+.status-occupied {
+	color: #dc3545;
+	font-weight: 500;
+}
+
+.status-maintenance {
+	color: #ffc107;
+	font-weight: 500;
+}
+
+.status-reserved {
+	color: #17a2b8;
+	font-weight: 500;
+}
+
+.actions {
+	display: flex;
+	gap: 8px;
+}
+
+.actions button {
+	padding: 6px 12px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 13px;
+}
+
+.actions button:first-child {
+	background: #007bff;
+	color: white;
+}
+
+.actions button:first-child:hover {
+	background: #0056b3;
+}
+
+.actions button.delete {
+	background: #dc3545;
+	color: white;
+}
+
+.actions button.delete:hover {
+	background: #c82333;
+}
+
+.error {
+	color: #dc3545;
+	padding: 10px;
+	background: #f8d7da;
+	border: 1px solid #f5c6cb;
+	border-radius: 4px;
+}
+
+/* Pod type cell styling */
+.pod-type-cell {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.dimensions {
+	font-size: 11px;
+	color: #666;
+	font-style: italic;
+}
+
+/* Gender zone badges */
+.zone-badge {
+	padding: 3px 8px;
+	border-radius: 3px;
+	font-size: 11px;
+	font-weight: 500;
+	display: inline-block;
+	white-space: nowrap;
+	text-transform: capitalize;
+}
+
+.zone-business {
+	background: #e0e0e0;
+	color: #424242;
+}
+
+.zone-women-only {
+	background: #ffeaa7;
+	color: #d63031;
+}
+
+.zone-men-only {
+	background: #74b9ff;
+	color: #0984e3;
+}
+
+.zone-couples {
+	background: #ffeaa7;
+	color: #e84393;
+}

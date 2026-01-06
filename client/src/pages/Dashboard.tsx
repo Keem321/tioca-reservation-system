@@ -45,20 +45,46 @@ const Dashboard: React.FC = () => {
 	}, []);
 
 	// Show loading state while fetching data
-	if (isLoading) return <div>Loading hotels...</div>;
+	if (isLoading)
+		return (
+			<div style={{ padding: "2rem", color: "var(--tioca-brown)" }}>
+				Loading hotels...
+			</div>
+		);
 	// Show error state if the request failed
-	if (error) return <div>Error loading hotels.</div>;
+	if (error)
+		return (
+			<div style={{ padding: "2rem", color: "var(--tioca-tan)" }}>
+				Error loading hotels.
+			</div>
+		);
 
 	// Render the dashboard UI
 	return (
-		<div>
+		<div style={{ maxWidth: "1200px", margin: "0 auto" }}>
 			{/* Auth section: shows login or logout depending on session */}
-			<div style={{ marginBottom: 12 }}>
+			<div
+				style={{
+					marginBottom: "2rem",
+					padding: "1rem",
+					background: "white",
+					borderRadius: "8px",
+					boxShadow: "0 2px 4px rgba(44, 22, 7, 0.1)",
+				}}
+			>
 				{loggedIn ? (
-					<span>
-						logged in{user ? ` as ${user.name || user.email}` : ""}
+					<span style={{ color: "var(--tioca-brown)" }}>
+						Logged in{user ? ` as ${user.name || user.email}` : ""}
 						<button
-							style={{ marginLeft: 8 }}
+							style={{
+								marginLeft: "1rem",
+								background: "var(--tioca-tan)",
+								color: "var(--tioca-beige)",
+								border: "none",
+								padding: "0.5rem 1rem",
+								borderRadius: "6px",
+								cursor: "pointer",
+							}}
 							onClick={async () => {
 								try {
 									await fetch("/auth/logout", {
@@ -76,19 +102,53 @@ const Dashboard: React.FC = () => {
 						</button>
 					</span>
 				) : (
-					<a href="/auth/google">Login with Google</a>
+					<a
+						href="/auth/google"
+						style={{
+							color: "var(--tioca-blue)",
+							textDecoration: "none",
+							fontWeight: "500",
+						}}
+					>
+						Login with Google
+					</a>
 				)}
 			</div>
-			<h2>Hotels</h2>
-			<ul>
+			<h2 style={{ color: "var(--tioca-brown)", marginBottom: "1rem" }}>
+				Hotels
+			</h2>
+			<ul
+				style={{
+					listStyle: "none",
+					padding: 0,
+					margin: 0,
+				}}
+			>
 				{hotels && hotels.length > 0 ? (
 					hotels.map((hotel: Hotel) => (
-						<li key={hotel._id}>
-							<strong>{hotel.name}</strong> - {hotel.address} ({hotel.category})
+						<li
+							key={hotel._id}
+							style={{
+								background: "white",
+								padding: "1.5rem",
+								marginBottom: "1rem",
+								borderRadius: "8px",
+								boxShadow: "0 2px 4px rgba(44, 22, 7, 0.1)",
+								color: "var(--tioca-brown)",
+							}}
+						>
+							<strong
+								style={{ color: "var(--tioca-brown)", fontSize: "1.1rem" }}
+							>
+								{hotel.name}
+							</strong>
+							<div style={{ marginTop: "0.5rem", color: "var(--tioca-green)" }}>
+								{hotel.address} ({hotel.category})
+							</div>
 						</li>
 					))
 				) : (
-					<li>No hotels found.</li>
+					<li style={{ color: "var(--tioca-brown)" }}>No hotels found.</li>
 				)}
 			</ul>
 		</div>

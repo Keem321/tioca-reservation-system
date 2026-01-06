@@ -1,82 +1,87 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import type { Room, RoomFormData } from "../types/room";
 
 /**
- * roomsApi - RTK Query API Slice for Room Availability and Search
+ * roomsApi - RTK Query API Slice for Rooms
  *
  * This file defines the API endpoints for room data using RTK Query.
- * Handles room availability checks, search queries, and room details.
+ * Automatically generates hooks for each endpoint and handles caching.
  *
  * - baseQuery: Defines the base URL for all requests (proxied to the backend).
  * - tagTypes: Used for cache invalidation and refetching.
- * - endpoints: Defines queries for room availability and search.
- *
- * Usage:
- *   - useSearchRoomsQuery: Search for available rooms based on dates and guests.
- *   - useGetRoomTypesQuery: Fetch all available room types.
- *
- * See: https://redux-toolkit.js.org/rtk-query/overview
+ * - endpoints: Defines queries (GET) and mutations (POST, PUT, DELETE) for rooms.
  */
 
-export interface RoomSearchParams {
-	checkIn: string;
-	checkOut: string;
-	guests: number;
-}
-
-export interface RoomType {
-	id: string;
-	name: string;
-	price: number;
-	features: string;
-	available: boolean;
-	capacity: number;
-}
-
-export interface RoomSearchResponse {
-	rooms: RoomType[];
-	available: boolean;
-}
-
 export const roomsApi = createApi({
-	// Unique key for this API slice in the Redux store
 	reducerPath: "roomsApi",
-	// Base query configuration for all endpoints
 	baseQuery: fetchBaseQuery({
 		baseUrl: "/api/rooms",
 		credentials: "include",
 	}),
-	// Tag types for cache management
 	tagTypes: ["Room"],
-	// Define endpoints (queries and mutations)
 	endpoints: (builder) => ({
-		/**
-		 * searchRooms - Search for available rooms based on check-in, check-out, and guest count
-		 *
-		 * Usage: const { data, error, isLoading } = useSearchRoomsQuery({ checkIn: '2024-01-01', checkOut: '2024-01-05', guests: 2 });
-		 */
-		searchRooms: builder.query<RoomSearchResponse, RoomSearchParams>({
-			query: (params) => ({
-				url: "/search",
-				params: {
-					checkIn: params.checkIn,
-					checkOut: params.checkOut,
-					guests: params.guests,
-				},
-			}),
+		// Get all rooms (optionally filtered by hotelId)
+		getRooms: builder.query<Room[], string | void>({
+			query: (hotelId) => (hotelId ? `?hotelId=${hotelId}` : "/"),
 			providesTags: ["Room"],
 		}),
-		/**
-		 * getRoomTypes - Fetch all available room types
-		 *
-		 * Usage: const { data, error, isLoading } = useGetRoomTypesQuery();
-		 */
-		getRoomTypes: builder.query<RoomType[], void>({
-			query: () => "/types",
+		// Get rooms by hotel ID
+		getRoomsByHotel: builder.query<Room[], string>({
+			query: (hotelId) => `/hotel/${hotelId}`,
 			providesTags: ["Room"],
+		}),
+		// Get a single room by ID
+		getRoomById: builder.query<Room, string>({
+			query: (id) => `/${id}`,
+			providesTags: (_result, _error, id) => [{ type: "Room", id }],
+		}),
+		// Create a new room
+		createRoom: builder.mutation<Room, RoomFormData>({
+			query: (room) => ({
+				url: "/",
+				method: "POST",
+				body: room,
+			}),
+			invalidatesTags: ["Room"],
+		}),
+		// Update a room
+		updateRoom: builder.mutation<
+			Room,
+			{ id: string; data: Partial<RoomFormData> }
+		>({
+			query: ({ id, data }) => ({
+				url: `/${id}`,
+				method: "PUT",
+				body: data,
+			}),
+			invalidatesTags: ["Room"],
+		}),
+		// Delete a room
+		deleteRoom: builder.mutation<void, string>({
+			query: (id) => ({
+				url: `/${id}`,
+				method: "DELETE",
+			}),
+			invalidatesTags: ["Room"],
+		}),
+		// Update room status
+		updateRoomStatus: builder.mutation<Room, { id: string; status: string }>({
+			query: ({ id, status }) => ({
+				url: `/${id}/status`,
+				method: "PATCH",
+				body: { status },
+			}),
+			invalidatesTags: ["Room"],
 		}),
 	}),
 });
 
-// Export auto-generated hooks for use in components
-export const { useSearchRoomsQuery, useGetRoomTypesQuery } = roomsApi;
-
+export const {
+	useGetRoomsQuery,
+	useGetRoomsByHotelQuery,
+	useGetRoomByIdQuery,
+	useCreateRoomMutation,
+	useUpdateRoomMutation,
+	useDeleteRoomMutation,
+	useUpdateRoomStatusMutation,
+} = roomsApi;

@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { hotelsApi } from "./features/hotelsApi";
 import { roomsApi } from "./features/roomsApi";
-import bookingReducer from "./features/bookingSlice";
+import { reservationsApi } from "./features/reservationsApi";
 import { setupListeners } from "@reduxjs/toolkit/query";
 
 /**
@@ -9,8 +9,7 @@ import { setupListeners } from "@reduxjs/toolkit/query";
  *
  * This file sets up the Redux store for the frontend app.
  *
- * - Integrates the RTK Query API slices (hotelsApi, roomsApi) as reducers.
- * - Adds the booking slice for managing booking form state.
+ * - Integrates the RTK Query API slices as reducers.
  * - Adds the RTK Query middleware for caching, invalidation, and auto-refetching.
  * - Calls setupListeners to enable refetchOnFocus/refetchOnReconnect features.
  *
@@ -18,18 +17,18 @@ import { setupListeners } from "@reduxjs/toolkit/query";
  */
 
 export const store = configureStore({
-	// Add the API reducers and booking slice
+	// Add all API reducers under their own keys
 	reducer: {
 		[hotelsApi.reducerPath]: hotelsApi.reducer,
 		[roomsApi.reducerPath]: roomsApi.reducer,
-		booking: bookingReducer,
+		[reservationsApi.reducerPath]: reservationsApi.reducer,
 	},
-	// Add the RTK Query middleware for API caching and side effects
+	// Add all RTK Query middleware for API caching and side effects
 	middleware: (getDefaultMiddleware) =>
-		getDefaultMiddleware().concat(
-			hotelsApi.middleware,
-			roomsApi.middleware
-		),
+		getDefaultMiddleware()
+			.concat(hotelsApi.middleware)
+			.concat(roomsApi.middleware)
+			.concat(reservationsApi.middleware),
 });
 
 // Enable refetchOnFocus/refetchOnReconnect behaviors for RTK Query

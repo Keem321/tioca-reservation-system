@@ -21,7 +21,7 @@ Single-property concept: a tapioca-inspired pod hotel in Japan. Emphasis on calm
 
 ## Property Specifications
 
-### Pod Types & Dimensions
+### Pod Structure & Organization
 
 Total capacity: 100 pods across 4 floors (25 pods per floor)
 
@@ -31,12 +31,30 @@ Total capacity: 100 pods across 4 floors (25 pods per floor)
 - Carry-on luggage stored outside pod unless otherwise noted
 - All dimensions in inches: Length × Width × Height
 
-**Pod lineup**
+**Pod Organization**
+
+Each pod has two key attributes:
+
+1. **Zone** (Floor Assignment) - Determines which floor the pod is located on:
+
+   - **Women-Only**: Exclusive floor for female guests with enhanced security
+   - **Men-Only**: Exclusive floor for male guests
+   - **Couples**: Floor for shared stays (pods on this floor display as "Twin" variants)
+   - **Business**: Quiet floor optimized for work travelers
+
+2. **Quality Level** - Determines the pod's amenities and pricing tier:
+   - **Classic Pearl** (Standard)
+   - **Milk Pearl** (Standard+)
+   - **Golden Pearl** (Premium)
+   - **Crystal Boba Suite** (First Class)
+   - **Matcha Pearl** (Women-Only Exclusive)
+
+**Quality Level Specifications**
 
 1. **Classic Pearl** (Standard)
 
    - Dimensions: 80" × 40" × 40"
-   - Positioned as entry-level option
+   - Entry-level option
    - Cozy sleeping capsule with essential amenities
 
 2. **Milk Pearl** (Standard+)
@@ -52,34 +70,35 @@ Total capacity: 100 pods across 4 floors (25 pods per floor)
    - Includes small side cubby for personal items
    - Ideal for longer stays or business travelers
 
-4. **Twin Pearl** (Couples)
-
-   - Dimensions: 86" × 70" × 50"
-   - Snug accommodation for two (not spacious)
-   - Located on couples floor
-
-5. **Crystal Boba Suite** (First Class)
+4. **Crystal Boba Suite** (First Class)
 
    - Dimensions: 90" × 55" × 65"
    - Allows standing room
    - Features fold-down desk
    - More like a micro hotel room experience
-   - Premium tier with enhanced privacy
+   - Enhanced privacy features
 
-6. **Matcha Pearl** (Women Only)
+5. **Matcha Pearl** (Women-Only Exclusive)
    - Dimensions: 86" × 45" × 50"
-   - Same specs as Golden Pearl
-   - Exclusive to women-only floor
-   - Enhanced security and privacy
+   - **ONLY available on Women-Only floor**
+   - Same physical specs as Golden Pearl with exclusive amenities
+   - Enhanced security and privacy features
+
+**Special Rules**
+
+- Pods on the **Couples floor** are wider to accommodate two guests (dimensions adjusted accordingly)
+- Pods on the Couples floor display with "Twin" prefix (e.g., "Twin Classic Pearl")
+- **Matcha Pearl** quality is exclusive to the Women-Only zone and cannot be assigned to any other zone
+- Each zone/floor has dedicated facilities matching the floor's designation
 
 ### Floor Organization
 
 The property features 4 distinct floors, each with 25 pods:
 
-- **Women-Only Floor**: Matcha Pearl pods with dedicated facilities
-- **Men-Only Floor**: Mix of Classic, Milk, and Golden Pearl options
-- **Couples Floor**: Twin Pearl pods for shared stays
-- **Quiet/Business Floor**: Golden Pearl and Crystal Boba Suites with workspace-friendly environment
+- **Women-Only Floor**: Pods with Classic, Milk, Golden, Crystal, or Matcha quality levels. Matcha quality is exclusive to this floor.
+- **Men-Only Floor**: Pods with Classic, Milk, Golden, or Crystal quality levels
+- **Couples Floor**: Pods with Classic, Milk, Golden, or Crystal quality levels (displayed with "Twin" prefix, wider dimensions for two guests)
+- **Business/Quiet Floor**: Pods with Classic, Milk, Golden, or Crystal quality levels, optimized for work travelers with enhanced quiet policies
 
 ### Amenities
 

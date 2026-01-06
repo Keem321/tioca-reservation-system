@@ -6,6 +6,8 @@
 import passport from "passport";
 import { Router } from "express";
 import hotelRouter from "./hotel.routes.js";
+import roomRouter from "./room.routes.js";
+import reservationRouter from "./reservation.routes.js";
 import authRouter from "./auth.js";
 
 // middleware MUST import strategies to register them with passport
@@ -14,6 +16,8 @@ import "../passport-strategies/googleStrategy.js";
 // API router (for /api/*)
 const apiRouter = Router();
 apiRouter.use("/hotels", hotelRouter);
+apiRouter.use("/rooms", roomRouter);
+apiRouter.use("/reservations", reservationRouter);
 
 // Public router (for non-API routes)
 const publicRouter = Router();
