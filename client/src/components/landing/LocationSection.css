@@ -1,0 +1,52 @@
+.location-section {
+	padding: 6rem 2rem;
+	background-color: #e8ddcf;
+}
+
+.location-section__container {
+	max-width: 800px;
+	margin: 0 auto;
+	text-align: center;
+}
+
+.location-section__title {
+	font-family: "Playfair Display", serif;
+	font-size: 2.5rem;
+	color: #2c1607;
+	margin-bottom: 1.5rem;
+	font-weight: 600;
+}
+
+.location-section__address {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	color: #5a3a24;
+	margin-bottom: 2rem;
+	font-size: 1.1rem;
+}
+
+.location-section__description {
+	color: #5a3a24;
+	line-height: 1.7;
+	opacity: 0.9;
+	margin-bottom: 2rem;
+}
+
+.location-section__button {
+	background: transparent;
+	color: #2c1607;
+	border: 1px solid rgba(44, 22, 7, 0.2);
+	border-radius: 999px;
+	padding: 0.75rem 2rem;
+	cursor: pointer;
+	font-size: 0.95rem;
+	font-weight: 500;
+	transition: all 0.2s;
+}
+
+.location-section__button:hover {
+	background-color: #fff6eb;
+}
+
