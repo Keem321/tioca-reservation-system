@@ -29,7 +29,8 @@ authRouter.get("/google/callback", (req, res, next) => {
 
 			console.log(`OAuth callback: attached user ${user.id} to session`);
 			const clientHome = process.env.CLIENT_HOME_URL || "http://localhost:5173";
-			return res.redirect(clientHome);
+			const redirectPath = req.query.redirect || "/";
+			return res.redirect(clientHome + redirectPath);
 		}
 	)(req, res, next);
 });
@@ -91,6 +92,28 @@ authRouter.post("/register", async (req, res) => {
 	} catch (err) {
 		res.status(500).json({ message: "Server error" });
 	}
+});
+
+// Local strategy login (management users)
+authRouter.post("/login", (req, res, next) => {
+	passport.authenticate("local", (err, user, info) => {
+		if (err) return next(err);
+		if (!user) {
+			return res
+				.status(401)
+				.json({ message: info?.message || "Invalid credentials" });
+		}
+		req.login(user, (loginErr) => {
+			if (loginErr) return next(loginErr);
+			const safeUser = {
+				id: user._id,
+				email: user.email,
+				name: user.name,
+				role: user.role,
+			};
+			return res.json({ message: "Logged in", user: safeUser });
+		});
+	})(req, res, next);
 });
 
 export default authRouter;

@@ -12,6 +12,7 @@ import authRouter from "./auth.js";
 
 // middleware MUST import strategies to register them with passport
 import "../passport-strategies/googleStrategy.js";
+import "../passport-strategies/localStrategy.js";
 
 // API router (for /api/*)
 const apiRouter = Router();

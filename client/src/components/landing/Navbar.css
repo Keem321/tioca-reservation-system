@@ -96,6 +96,14 @@
 	background-color: var(--color-bone);
 }
 
+.navbar__dropdown-item--danger {
+	color: var(--color-error);
+}
+
+.navbar__dropdown-item--danger:hover {
+	background-color: color-mix(in srgb, var(--color-error) 10%, transparent);
+}
+
 .navbar__book-button {
 	background: var(--color-primary);
 	color: var(--color-linen);
@@ -112,4 +120,3 @@
 .navbar__book-button:hover {
 	background: var(--color-secondary);
 }
-

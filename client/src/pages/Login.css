@@ -1,0 +1,226 @@
+.login-page {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	background: linear-gradient(
+		to bottom,
+		var(--color-linen) 0%,
+		color-mix(in srgb, var(--color-linen) 90%, var(--color-bone) 10%) 20%,
+		color-mix(in srgb, var(--color-linen) 70%, var(--color-cinnamon-wood) 30%)
+			40%,
+		color-mix(in srgb, var(--color-linen) 30%, var(--color-cinnamon-wood) 70%)
+			55%,
+		var(--color-cinnamon-wood) 65%,
+		color-mix(
+				in srgb,
+				var(--color-cinnamon-wood) 70%,
+				var(--color-deep-walnut) 30%
+			)
+			75%,
+		color-mix(
+				in srgb,
+				var(--color-cinnamon-wood) 30%,
+				var(--color-deep-walnut) 70%
+			)
+			85%,
+		var(--color-deep-walnut) 100%
+	);
+	padding: var(--spacing-xl) var(--spacing-md);
+	overflow: hidden;
+}
+
+/* Bubble container */
+.bubble-container {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	z-index: 0;
+}
+
+/* Individual bubble styles with staggered animations and color cycling */
+.bubble {
+	position: absolute;
+	bottom: -50px;
+	border-radius: 50%;
+	opacity: 0;
+}
+
+/* Color cycle: dark-coffee, cinnamon-wood, deep-walnut, milk-tea */
+.bubble--0 {
+	left: 10%;
+	width: 30px;
+	height: 30px;
+	background: color-mix(in srgb, var(--color-dark-coffee) 30%, transparent);
+	animation: floatBubble 12s ease-in-out infinite;
+	animation-delay: 0s;
+}
+
+.bubble--1 {
+	left: 25%;
+	width: 40px;
+	height: 40px;
+	background: color-mix(in srgb, var(--color-cinnamon-wood) 25%, transparent);
+	animation: floatBubble 14s ease-in-out infinite;
+	animation-delay: 1.5s;
+}
+
+.bubble--2 {
+	left: 45%;
+	width: 24px;
+	height: 24px;
+	background: color-mix(in srgb, var(--color-deep-walnut) 30%, transparent);
+	animation: floatBubble 13s ease-in-out infinite;
+	animation-delay: 0.75s;
+}
+
+.bubble--3 {
+	left: 65%;
+	width: 36px;
+	height: 36px;
+	background: color-mix(in srgb, var(--color-milk-tea) 40%, transparent);
+	animation: floatBubble 15s ease-in-out infinite;
+	animation-delay: 2s;
+}
+
+.bubble--4 {
+	left: 35%;
+	width: 44px;
+	height: 44px;
+	background: color-mix(in srgb, var(--color-dark-coffee) 30%, transparent);
+	animation: floatBubble 16s ease-in-out infinite;
+	animation-delay: 1s;
+}
+
+.bubble--5 {
+	left: 75%;
+	width: 28px;
+	height: 28px;
+	background: color-mix(in srgb, var(--color-cinnamon-wood) 25%, transparent);
+	animation: floatBubble 13.5s ease-in-out infinite;
+	animation-delay: 0.5s;
+}
+
+.bubble--6 {
+	left: 90%;
+	width: 32px;
+	height: 32px;
+	background: color-mix(in srgb, var(--color-deep-walnut) 30%, transparent);
+	animation: floatBubble 14.5s ease-in-out infinite;
+	animation-delay: 1.75s;
+}
+
+.bubble--7 {
+	left: 55%;
+	width: 38px;
+	height: 38px;
+	background: color-mix(in srgb, var(--color-milk-tea) 40%, transparent);
+	animation: floatBubble 12.5s ease-in-out infinite;
+	animation-delay: 0.25s;
+}
+
+@keyframes floatBubble {
+	0% {
+		bottom: -50px;
+		opacity: 0;
+	}
+	10% {
+		opacity: 0.7;
+	}
+	90% {
+		opacity: 0.7;
+	}
+	100% {
+		bottom: 100vh;
+		opacity: 0;
+	}
+}
+
+.login-card {
+	position: relative;
+	z-index: 1;
+	width: min(1100px, 100%);
+	background: var(--color-linen);
+	border: 1px solid var(--color-border);
+	border-radius: var(--border-radius-lg);
+	box-shadow: var(--shadow-lg);
+	padding: var(--spacing-xl);
+}
+
+.login-title {
+	margin-bottom: var(--spacing-sm);
+	font-size: 2rem;
+	color: var(--color-text-primary);
+}
+
+.login-subtitle {
+	margin-bottom: var(--spacing-lg);
+	color: var(--color-text-secondary);
+	font-size: 1rem;
+}
+
+.login-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+	gap: var(--spacing-lg);
+}
+
+.login-panel {
+	border: 1px solid var(--color-border);
+	border-radius: var(--border-radius-md);
+	padding: var(--spacing-lg);
+	background: var(--color-linen);
+	box-shadow: var(--shadow-sm);
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-md);
+}
+
+.login-panel h2 {
+	margin: 0;
+	color: var(--color-text-primary);
+}
+
+.login-panel p {
+	margin: 0;
+	color: var(--color-text-secondary);
+	line-height: 1.5;
+}
+
+.login-form {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-sm);
+}
+
+.login-form label {
+	color: var(--color-text-secondary);
+	font-weight: 600;
+}
+
+.login-button {
+	width: 100%;
+}
+
+.alert {
+	padding: var(--spacing-sm) var(--spacing-md);
+	border-radius: var(--border-radius-md);
+	border: 1px solid transparent;
+	font-size: 0.95rem;
+}
+
+.alert-error {
+	background: rgba(217, 83, 79, 0.08);
+	border-color: rgba(217, 83, 79, 0.3);
+	color: #c0392b;
+}
+
+.alert-success {
+	background: rgba(111, 138, 69, 0.08);
+	border-color: rgba(111, 138, 69, 0.3);
+	color: var(--color-success);
+}
