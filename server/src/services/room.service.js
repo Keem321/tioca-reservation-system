@@ -36,26 +36,33 @@ class RoomService {
 	 */
 	async createRoom(roomData) {
 		// Validate required fields
-		const { hotelId, roomNumber, roomType, capacity, pricePerNight } = roomData;
+		const { hotelId, quality, floor, pricePerNight } = roomData;
 
-		if (
-			!hotelId ||
-			!roomNumber ||
-			!roomType ||
-			!capacity ||
-			pricePerNight === undefined
-		) {
-			throw new Error("Missing required fields");
+		if (!hotelId || !quality || !floor || pricePerNight === undefined) {
+			throw new Error(
+				"Missing required fields (hotelId, quality, floor, pricePerNight)"
+			);
 		}
 
+		// Validate floor is a valid zone
+		const validZones = ["women-only", "men-only", "couples", "business"];
+		if (!validZones.includes(floor)) {
+			throw new Error(
+				`Invalid floor zone. Must be one of: ${validZones.join(", ")}`
+			);
+		}
+
+		// Validate price is non-negative
 		if (pricePerNight < 0) {
 			throw new Error("Price per night cannot be negative");
 		}
 
-		if (capacity < 1) {
-			throw new Error("Capacity must be at least 1");
+		// Auto-generate pod ID if not provided
+		if (!roomData.podId) {
+			roomData.podId = await RoomRepository.generateNextPodId(hotelId, floor);
 		}
 
+		// Create the room
 		return await RoomRepository.create(roomData);
 	}
 
@@ -70,6 +77,7 @@ class RoomService {
 		delete updateData._id;
 		delete updateData.createdAt;
 		delete updateData.updatedAt;
+		delete updateData.capacity; // Capacity is auto-calculated based on floor
 
 		// Validate price if being updated
 		if (
@@ -77,11 +85,6 @@ class RoomService {
 			updateData.pricePerNight < 0
 		) {
 			throw new Error("Price per night cannot be negative");
-		}
-
-		// Validate capacity if being updated
-		if (updateData.capacity !== undefined && updateData.capacity < 1) {
-			throw new Error("Capacity must be at least 1");
 		}
 
 		const room = await RoomRepository.update(id, updateData);

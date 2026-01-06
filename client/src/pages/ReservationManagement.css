@@ -1,0 +1,257 @@
+/* TEMPORARY CSS - eventually side-wide css file */
+
+.reservation-management {
+	padding: 20px;
+	max-width: 1600px;
+	margin: 0 auto;
+}
+
+.reservation-management h1 {
+	margin-bottom: 20px;
+}
+
+.filters {
+	display: flex;
+	gap: 20px;
+	align-items: center;
+	margin-bottom: 20px;
+	padding: 15px;
+	background: #f5f5f5;
+	border-radius: 8px;
+	flex-wrap: wrap;
+}
+
+.filters label {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.filters select {
+	padding: 8px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	min-width: 150px;
+}
+
+.filters button {
+	margin-left: auto;
+	padding: 10px 20px;
+	background: #007bff;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.filters button:hover {
+	background: #0056b3;
+}
+
+.reservation-form {
+	background: #fff;
+	padding: 20px;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	margin-bottom: 30px;
+}
+
+.reservation-form h2 {
+	margin-bottom: 20px;
+}
+
+.form-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	gap: 15px;
+	margin-bottom: 15px;
+}
+
+.reservation-form label {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	font-weight: 500;
+}
+
+.reservation-form input,
+.reservation-form select,
+.reservation-form textarea {
+	padding: 8px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 14px;
+}
+
+.form-actions {
+	display: flex;
+	gap: 10px;
+	margin-top: 20px;
+}
+
+.form-actions button {
+	padding: 10px 20px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 14px;
+}
+
+.form-actions button[type="submit"] {
+	background: #28a745;
+	color: white;
+}
+
+.form-actions button[type="submit"]:hover {
+	background: #218838;
+}
+
+.form-actions button[type="button"] {
+	background: #6c757d;
+	color: white;
+}
+
+.form-actions button[type="button"]:hover {
+	background: #5a6268;
+}
+
+.reservation-list {
+	background: #fff;
+	padding: 20px;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	overflow-x: auto;
+}
+
+.reservation-list h2 {
+	margin-bottom: 15px;
+}
+
+.reservation-list table {
+	width: 100%;
+	border-collapse: collapse;
+	min-width: 1200px;
+}
+
+.reservation-list th,
+.reservation-list td {
+	padding: 12px;
+	text-align: left;
+	border-bottom: 1px solid #ddd;
+}
+
+.reservation-list th {
+	background: #f8f9fa;
+	font-weight: 600;
+}
+
+.reservation-list tr:hover {
+	background: #f8f9fa;
+}
+
+.email {
+	font-size: 12px;
+	color: #666;
+	margin-top: 4px;
+}
+
+.status-badge {
+	padding: 4px 12px;
+	border-radius: 12px;
+	font-size: 12px;
+	font-weight: 500;
+	display: inline-block;
+}
+
+.status-pending {
+	background: #fff3cd;
+	color: #856404;
+}
+
+.status-confirmed {
+	background: #d1ecf1;
+	color: #0c5460;
+}
+
+.status-checked-in {
+	background: #d4edda;
+	color: #155724;
+}
+
+.status-checked-out {
+	background: #e2e3e5;
+	color: #383d41;
+}
+
+.status-cancelled {
+	background: #f8d7da;
+	color: #721c24;
+}
+
+.actions {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.actions button {
+	padding: 6px 10px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 12px;
+	white-space: nowrap;
+}
+
+.btn-edit {
+	background: #007bff;
+	color: white;
+}
+
+.btn-edit:hover {
+	background: #0056b3;
+}
+
+.btn-checkin {
+	background: #28a745;
+	color: white;
+}
+
+.btn-checkin:hover {
+	background: #218838;
+}
+
+.btn-checkout {
+	background: #17a2b8;
+	color: white;
+}
+
+.btn-checkout:hover {
+	background: #138496;
+}
+
+.btn-cancel {
+	background: #ffc107;
+	color: #212529;
+}
+
+.btn-cancel:hover {
+	background: #e0a800;
+}
+
+.btn-delete {
+	background: #dc3545;
+	color: white;
+}
+
+.btn-delete:hover {
+	background: #c82333;
+}
+
+.error {
+	color: #dc3545;
+	padding: 10px;
+	background: #f8d7da;
+	border: 1px solid #f5c6cb;
+	border-radius: 4px;
+}
