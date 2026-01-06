@@ -1,0 +1,52 @@
+.amenities-section {
+	padding: 6rem 2rem;
+	background-color: #fff6eb;
+}
+
+.amenities-section__container {
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.amenities-section__title {
+	font-family: "Playfair Display", serif;
+	font-size: 2.5rem;
+	color: #2c1607;
+	margin-bottom: 1rem;
+	text-align: center;
+	font-weight: 600;
+}
+
+.amenities-section__description {
+	text-align: center;
+	color: #5a3a24;
+	max-width: 600px;
+	margin: 0 auto 3rem;
+	opacity: 0.9;
+	font-size: 1.1rem;
+}
+
+.amenities-section__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 1.5rem;
+}
+
+.amenities-section__item {
+	padding: 1.5rem;
+	border: 1px solid rgba(44, 22, 7, 0.08);
+	border-radius: 12px;
+	background-color: #fff6eb;
+	transition: all 0.2s;
+}
+
+.amenities-section__item:hover {
+	border-color: rgba(44, 22, 7, 0.15);
+}
+
+.amenities-section__text {
+	color: #2c1607;
+	font-size: 0.95rem;
+	font-weight: 500;
+}
+

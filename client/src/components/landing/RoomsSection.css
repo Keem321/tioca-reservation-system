@@ -1,0 +1,140 @@
+.rooms-section {
+	padding: 6rem 2rem;
+	background-color: #e8ddcf;
+}
+
+.rooms-section__container {
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.rooms-section__title {
+	font-family: "Playfair Display", serif;
+	font-size: 2.5rem;
+	color: #2c1607;
+	margin-bottom: 3rem;
+	text-align: center;
+	font-weight: 600;
+}
+
+.rooms-section__loading,
+.rooms-section__error {
+	text-align: center;
+	color: #5a3a24;
+	margin-bottom: 2rem;
+}
+
+.rooms-section__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+	gap: 2rem;
+}
+
+.rooms-section__card {
+	background-color: #fff6eb;
+	border: 1px solid rgba(44, 22, 7, 0.08);
+	border-radius: 16px;
+	overflow: hidden;
+	box-shadow: 0 6px 18px rgba(44, 22, 7, 0.08);
+	transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.rooms-section__card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 12px 28px rgba(44, 22, 7, 0.12);
+}
+
+.rooms-section__card-image {
+	height: 200px;
+	background-color: #e8ddcf;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 3rem;
+	color: rgba(44, 22, 7, 0.1);
+}
+
+.rooms-section__card-content {
+	padding: 1.5rem;
+}
+
+.rooms-section__card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	margin-bottom: 0.75rem;
+}
+
+.rooms-section__card-title {
+	font-family: "Playfair Display", serif;
+	font-size: 1.5rem;
+	color: #2c1607;
+	font-weight: 600;
+}
+
+.rooms-section__card-price {
+	font-size: 1.25rem;
+	color: #a86434;
+	font-weight: 600;
+}
+
+.rooms-section__card-features {
+	color: #5a3a24;
+	opacity: 0.85;
+	margin-bottom: 1rem;
+	font-size: 0.95rem;
+	line-height: 1.5;
+}
+
+.rooms-section__card-availability {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-bottom: 1rem;
+}
+
+.rooms-section__availability-dot {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+}
+
+.rooms-section__availability-dot--available {
+	background-color: #6f8a45;
+}
+
+.rooms-section__availability-dot--limited {
+	background-color: #a86434;
+}
+
+.rooms-section__availability-text {
+	font-size: 0.875rem;
+	font-weight: 500;
+}
+
+.rooms-section__availability-text--available {
+	color: #6f8a45;
+}
+
+.rooms-section__availability-text--limited {
+	color: #a86434;
+}
+
+.rooms-section__card-button {
+	width: 100%;
+	padding: 0.75rem;
+	border: 1px solid rgba(44, 22, 7, 0.2);
+	border-radius: 999px;
+	background: transparent;
+	color: #2c1607;
+	cursor: pointer;
+	font-size: 0.95rem;
+	font-weight: 500;
+	transition: all 0.2s;
+}
+
+.rooms-section__card-button:hover {
+	background-color: #e8ddcf;
+}
+

@@ -119,7 +119,7 @@ _Shared Facilities_
 - Free high-speed Wi-Fi throughout property
 - Hot showers (gender-separated, multiple stalls per floor)
 - Powder rooms with mirrors and outlets
-- Security lockers with key card access (standard size)
+- Security lockers with key card access (standard size) (per floor)
 - Luggage storage area
 - Vending machines featuring tapioca pudding, boba drinks, and snacks
 - 24-hour security monitoring and staff

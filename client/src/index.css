@@ -1,3 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@400;500;600&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 :root {
   /* TIOCA Color Palette */
   --tioca-beige: #FFF6EB;
@@ -28,13 +36,18 @@ a:hover {
   color: var(--tioca-green);
 }
 
+html,
 body {
   margin: 0;
   padding: 0;
-  min-width: 320px;
+  width: 100%;
   min-height: 100vh;
   background-color: var(--tioca-beige);
   color: var(--tioca-brown);
+}
+
+body {
+  min-width: 320px;
 }
 
 h1 {
