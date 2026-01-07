@@ -73,14 +73,26 @@ class RoomRepository {
 	 * @param {string} hotelId - Hotel ID
 	 * @param {Date} checkIn - Check-in date
 	 * @param {Date} checkOut - Check-out date
+	 * @param {string} [floor] - Optional floor filter
+	 * @param {string} [quality] - Optional quality filter
 	 * @returns {Promise<Array>}
 	 */
-	async findAvailableRooms(hotelId, checkIn, checkOut) {
+	async findAvailableRooms(hotelId, checkIn, checkOut, floor, quality) {
 		// This will be enhanced later with reservation checking
-		return await Room.find({
+		const filter = {
 			hotelId,
 			status: { $in: ["available", "reserved"] },
-		}).sort({ pricePerNight: 1 });
+		};
+
+		if (floor) {
+			filter.floor = floor;
+		}
+
+		if (quality) {
+			filter.quality = quality;
+		}
+
+		return await Room.find(filter).sort({ pricePerNight: 1 });
 	}
 
 	/**

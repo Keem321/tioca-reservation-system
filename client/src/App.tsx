@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
+import Booking from "./pages/Booking";
 
 /**
  * App Component
@@ -16,6 +17,7 @@ function App() {
 				<Routes>
 					<Route path="/" element={<Landing />} />
 					<Route path="/dashboard" element={<Dashboard />} />
+					<Route path="/booking" element={<Booking />} />
 				</Routes>
 			</div>
 		</Router>

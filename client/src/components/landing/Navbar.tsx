@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import "./Navbar.css";
 
@@ -10,21 +11,41 @@ import "./Navbar.css";
  */
 const Navbar: React.FC = () => {
 	const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+	const location = useLocation();
+	const isBookingPage = location.pathname === "/booking";
 
 	return (
 		<nav className="navbar">
-			<div className="navbar__logo">Tapioca</div>
+			<Link to="/" className="navbar__logo">
+				Tapioca
+			</Link>
 
 			<div className="navbar__links">
-				<a href="#rooms" className="navbar__link">
-					Rooms
-				</a>
-				<a href="#amenities" className="navbar__link">
-					Amenities
-				</a>
-				<a href="#location" className="navbar__link">
-					Location
-				</a>
+				{!isBookingPage ? (
+					<>
+						<a href="#rooms" className="navbar__link">
+							Rooms
+						</a>
+						<a href="#amenities" className="navbar__link">
+							Amenities
+						</a>
+						<a href="#location" className="navbar__link">
+							Location
+						</a>
+					</>
+				) : (
+					<>
+						<Link to="/#rooms" className="navbar__link">
+							Rooms
+						</Link>
+						<Link to="/#amenities" className="navbar__link">
+							Amenities
+						</Link>
+						<Link to="/#location" className="navbar__link">
+							Location
+						</Link>
+					</>
+				)}
 
 				<div className="navbar__account">
 					<button
@@ -50,16 +71,15 @@ const Navbar: React.FC = () => {
 					)}
 				</div>
 
-				<button
-					className="navbar__book-button"
-					onClick={() => {
-						document
-							.querySelector(".hero")
-							?.scrollIntoView({ behavior: "smooth" });
-					}}
-				>
-					Book Now
-				</button>
+				{isBookingPage ? (
+					<Link to="/" className="navbar__book-button">
+						Home
+					</Link>
+				) : (
+					<Link to="/booking" className="navbar__book-button">
+						Book Now
+					</Link>
+				)}
 			</div>
 		</nav>
 	);

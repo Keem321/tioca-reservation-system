@@ -139,7 +139,7 @@ export async function updateRoomStatus(req, res) {
 export async function getAvailableRooms(req, res) {
 	try {
 		const { hotelId } = req.params;
-		const { checkIn, checkOut } = req.query;
+		const { checkIn, checkOut, floor, quality } = req.query;
 
 		if (!checkIn || !checkOut) {
 			return res
@@ -150,7 +150,9 @@ export async function getAvailableRooms(req, res) {
 		const rooms = await RoomService.getAvailableRooms(
 			hotelId,
 			checkIn,
-			checkOut
+			checkOut,
+			floor,
+			quality
 		);
 		res.json(rooms);
 	} catch (err) {

@@ -1,0 +1,117 @@
+.booking-search-form {
+	background-color: #fff6eb;
+	border: 1px solid rgba(44, 22, 7, 0.08);
+	border-radius: 16px;
+	padding: 2rem;
+	box-shadow: 0 6px 18px rgba(44, 22, 7, 0.08);
+	margin-bottom: 3rem;
+}
+
+.booking-search-form__fields {
+	display: grid;
+	gap: 1.5rem;
+	margin-bottom: 2rem;
+}
+
+.booking-search-form__field {
+	display: flex;
+	flex-direction: column;
+}
+
+.booking-search-form__label {
+	display: block;
+	font-size: 0.875rem;
+	color: #5a3a24;
+	margin-bottom: 0.5rem;
+	font-weight: 500;
+}
+
+.booking-search-form__required {
+	color: #a86434;
+}
+
+.booking-search-form__optional {
+	font-size: 0.75rem;
+	opacity: 0.7;
+}
+
+.booking-search-form__input-wrapper {
+	position: relative;
+}
+
+.booking-search-form__icon {
+	position: absolute;
+	left: 1rem;
+	top: 50%;
+	transform: translateY(-50%);
+	color: #5a3a24;
+	opacity: 0.6;
+	pointer-events: none;
+	z-index: 1;
+}
+
+.booking-search-form__input {
+	width: 100%;
+	padding: 0.875rem 1rem 0.875rem 3rem;
+	border: 1px solid rgba(44, 22, 7, 0.15);
+	border-radius: 12px;
+	background-color: #fff6eb;
+	font-size: 0.95rem;
+	color: #2c1607;
+	outline: none;
+	font-family: inherit;
+	transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.booking-search-form__input:focus {
+	border-color: #a86434;
+	box-shadow: 0 0 0 3px rgba(168, 100, 52, 0.1);
+}
+
+.booking-search-form__input:disabled {
+	background-color: #e8ddcf;
+	cursor: not-allowed;
+	opacity: 0.6;
+}
+
+.booking-search-form__select {
+	cursor: pointer;
+	appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235a3a24' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 1rem center;
+	padding-right: 2.5rem;
+}
+
+.booking-search-form__select:disabled {
+	cursor: not-allowed;
+}
+
+.booking-search-form__button {
+	width: 100%;
+	background: #a86434;
+	color: #fff6eb;
+	border: none;
+	border-radius: 12px;
+	padding: 1rem;
+	cursor: pointer;
+	font-size: 1rem;
+	font-weight: 600;
+	box-shadow: 0 4px 12px rgba(168, 100, 52, 0.2);
+	transition: all 0.2s;
+	font-family: inherit;
+}
+
+.booking-search-form__button:hover:not(:disabled) {
+	background: #8d4f2a;
+	box-shadow: 0 6px 16px rgba(168, 100, 52, 0.3);
+	transform: translateY(-1px);
+}
+
+.booking-search-form__button:disabled {
+	background: #5a3a24;
+	cursor: not-allowed;
+	opacity: 0.6;
+	transform: none;
+}
+
