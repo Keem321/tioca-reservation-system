@@ -8,6 +8,7 @@ import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
+import Booking from "./pages/Booking";
 import RoomManagement from "./pages/RoomManagement";
 import ReservationManagement from "./pages/ReservationManagement";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -38,6 +39,7 @@ function App() {
 					<Route path="/" element={<Landing />} />
 					<Route path="/dashboard" element={<Dashboard />} />
 					<Route path="/login" element={<Login />} />
+					<Route path="/booking" element={<Booking />} />
 					<Route
 						path="/profile"
 						element={

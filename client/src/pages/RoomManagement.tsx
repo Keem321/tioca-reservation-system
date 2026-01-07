@@ -87,11 +87,6 @@ export default function RoomManagement() {
 	const [filterStatus, setFilterStatus] = useState<"" | Room["status"]>("");
 
 	// Two-week window default for "Booked" tab
-	const today = useMemo(() => {
-		const d = new Date();
-		d.setHours(0, 0, 0, 0);
-		return d;
-	}, []);
 	const [startDate, setStartDate] = useState<string>(() =>
 		new Date().toISOString().slice(0, 10)
 	);
@@ -109,7 +104,10 @@ export default function RoomManagement() {
 	// Compute booked roomIds for the selected window
 	const windowStart = useMemo(() => new Date(startDate), [startDate]);
 	const windowEnd = useMemo(() => new Date(endDate), [endDate]);
-	const activeStatuses = new Set(["pending", "confirmed", "checked-in"]);
+	const activeStatuses = useMemo(
+		() => new Set(["pending", "confirmed", "checked-in"]),
+		[]
+	);
 	const bookedRoomIds = useMemo(() => {
 		return new Set(
 			reservations
@@ -125,7 +123,7 @@ export default function RoomManagement() {
 				)
 				.map((r) => (typeof r.roomId === "string" ? r.roomId : r.roomId._id))
 		);
-	}, [reservations, windowStart, windowEnd]);
+	}, [reservations, windowStart, windowEnd, activeStatuses]);
 
 	// Derived lists per tab
 	const filteredRooms = useMemo(() => {
@@ -143,12 +141,10 @@ export default function RoomManagement() {
 	}, [filteredRooms, bookedRoomIds]);
 
 	// Per-floor summary for the overview grid
-	const floorKeys: PodFloor[] = [
-		"women-only",
-		"men-only",
-		"couples",
-		"business",
-	];
+	const floorKeys = useMemo<PodFloor[]>(
+		() => ["women-only", "men-only", "couples", "business"],
+		[]
+	);
 	const floorSummary = useMemo(() => {
 		const base = Object.fromEntries(
 			floorKeys.map((f) => [
@@ -178,7 +174,7 @@ export default function RoomManagement() {
 			}
 		}
 		return base;
-	}, [rooms, bookedRoomIds]);
+	}, [rooms, bookedRoomIds, floorKeys]);
 
 	// Mutations
 	const [createRoom, { isLoading: isCreating }] = useCreateRoomMutation();
@@ -537,7 +533,7 @@ export default function RoomManagement() {
 						Floor
 						<select
 							value={filterFloor}
-							onChange={(e) => setFilterFloor(e.target.value as any)}
+							onChange={(e) => setFilterFloor(e.target.value as "" | PodFloor)}
 						>
 							<option value="">All</option>
 							<option value="women-only">Women-Only</option>
@@ -550,7 +546,9 @@ export default function RoomManagement() {
 						Status
 						<select
 							value={filterStatus}
-							onChange={(e) => setFilterStatus(e.target.value as any)}
+							onChange={(e) =>
+								setFilterStatus(e.target.value as "" | Room["status"])
+							}
 						>
 							<option value="">All</option>
 							<option value="available">Available</option>
