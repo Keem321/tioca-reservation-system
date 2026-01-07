@@ -1,0 +1,30 @@
+.search-results {
+	margin-top: 2rem;
+}
+
+.search-results__title {
+	font-family: "Playfair Display", serif;
+	font-size: 2rem;
+	color: #2c1607;
+	margin-bottom: 1.5rem;
+	font-weight: 600;
+}
+
+.search-results__grid {
+	display: grid;
+	gap: 1.5rem;
+}
+
+.search-results--empty {
+	text-align: center;
+	padding: 3rem;
+	background-color: #fff6eb;
+	border-radius: 16px;
+	border: 1px solid rgba(44, 22, 7, 0.08);
+}
+
+.search-results__empty-message {
+	color: #5a3a24;
+	font-size: 1.1rem;
+}
+
