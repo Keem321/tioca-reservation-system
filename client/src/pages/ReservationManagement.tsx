@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Navbar from "../components/landing/Navbar";
 import {
 	useGetReservationsQuery,
 	useGetReservationsByHotelQuery,
@@ -228,328 +229,333 @@ export default function ReservationManagement() {
 	};
 
 	return (
-		<div className="reservation-management">
-			<h1>Reservation Management</h1>
+		<>
+			<Navbar />
+			<div className="reservation-management">
+				<h1>Reservation Management</h1>
 
-			{/* Filters */}
-			<div className="filters">
-				<label>
-					Filter by Hotel:
-					<select
-						value={selectedHotelId}
-						onChange={(e) => setSelectedHotelId(e.target.value)}
-					>
-						<option value="">All Hotels</option>
-					{hotels.map((hotel: Hotel) => (
-							<option key={hotel._id} value={hotel._id}>
-								{hotel.name}
-							</option>
-						))}
-					</select>
-				</label>
-				<label>
-					Filter by Status:
-					<select
-						value={statusFilter}
-						onChange={(e) => setStatusFilter(e.target.value)}
-					>
-						<option value="">All Statuses</option>
-						<option value="pending">Pending</option>
-						<option value="confirmed">Confirmed</option>
-						<option value="checked-in">Checked In</option>
-						<option value="checked-out">Checked Out</option>
-						<option value="cancelled">Cancelled</option>
-					</select>
-				</label>
-				<button onClick={() => setShowForm(!showForm)}>
-					{showForm ? "Cancel" : "Add New Reservation"}
-				</button>
-			</div>
-
-			{/* Form */}
-			{showForm && (
-				<div className="reservation-form">
-					<h2>
-						{editingReservation ? "Edit Reservation" : "Create New Reservation"}
-					</h2>
-					<form onSubmit={handleSubmit}>
-						<div className="form-grid">
-							<label>
-								Hotel:
-								<select
-									name="hotelId"
-									value={formData.hotelId}
-									onChange={handleInputChange}
-									required
-								>
-									<option value="">Select Hotel</option>
-								{hotels.map((hotel: Hotel) => (
-										<option key={hotel._id} value={hotel._id}>
-											{hotel.name}
-										</option>
-									))}
-								</select>
-							</label>
-
-							<label>
-								Room:
-								<select
-									name="roomId"
-									value={formData.roomId}
-									onChange={handleInputChange}
-									required
-									disabled={!formData.hotelId}
-								>
-									<option value="">Select Room</option>
-								{getAvailableRooms().map((room: Room) => (
-									<option key={room._id} value={room._id}>
-										Pod {room.podId} - {room.quality} ({room.floor}) ($
-											{room.pricePerNight}/night)
-										</option>
-									))}
-								</select>
-							</label>
-
-							<label>
-								Guest Name:
-								<input
-									type="text"
-									name="guestName"
-									value={formData.guestName}
-									onChange={handleInputChange}
-									required
-								/>
-							</label>
-
-							<label>
-								Guest Email:
-								<input
-									type="email"
-									name="guestEmail"
-									value={formData.guestEmail}
-									onChange={handleInputChange}
-									required
-								/>
-							</label>
-
-							<label>
-								Guest Phone:
-								<input
-									type="tel"
-									name="guestPhone"
-									value={formData.guestPhone}
-									onChange={handleInputChange}
-								/>
-							</label>
-
-							<label>
-								Check-In Date:
-								<input
-									type="date"
-									name="checkInDate"
-									value={formData.checkInDate}
-									onChange={handleInputChange}
-									required
-								/>
-							</label>
-
-							<label>
-								Check-Out Date:
-								<input
-									type="date"
-									name="checkOutDate"
-									value={formData.checkOutDate}
-									onChange={handleInputChange}
-									required
-								/>
-							</label>
-
-							<label>
-								Number of Guests:
-								<input
-									type="number"
-									name="numberOfGuests"
-									value={formData.numberOfGuests}
-									onChange={handleInputChange}
-									min="1"
-									required
-								/>
-							</label>
-
-							<label>
-								Total Price ($):
-								<input
-									type="number"
-									name="totalPrice"
-									value={formData.totalPrice}
-									onChange={handleInputChange}
-									min="0"
-									step="0.01"
-									required
-								/>
-							</label>
-
-							<label>
-								Status:
-								<select
-									name="status"
-									value={formData.status}
-									onChange={handleInputChange}
-								>
-									<option value="pending">Pending</option>
-									<option value="confirmed">Confirmed</option>
-									<option value="checked-in">Checked In</option>
-									<option value="checked-out">Checked Out</option>
-									<option value="cancelled">Cancelled</option>
-								</select>
-							</label>
-
-							<label>
-								Payment Status:
-								<select
-									name="paymentStatus"
-									value={formData.paymentStatus}
-									onChange={handleInputChange}
-								>
-									<option value="unpaid">Unpaid</option>
-									<option value="partial">Partial</option>
-									<option value="paid">Paid</option>
-									<option value="refunded">Refunded</option>
-								</select>
-							</label>
-						</div>
-
-						<label>
-							Special Requests:
-							<textarea
-								name="specialRequests"
-								value={formData.specialRequests}
-								onChange={handleInputChange}
-								rows={3}
-							/>
-						</label>
-
-						<div className="form-actions">
-							<button type="submit" disabled={isCreating || isUpdating}>
-								{isCreating || isUpdating
-									? "Saving..."
-									: editingReservation
-									? "Update Reservation"
-									: "Create Reservation"}
-							</button>
-							<button type="button" onClick={resetForm}>
-								Cancel
-							</button>
-						</div>
-					</form>
-				</div>
-			)}
-
-			{/* Reservation List */}
-			<div className="reservation-list">
-				<h2>Reservations</h2>
-				{isLoading && <p>Loading reservations...</p>}
-				{error && <p className="error">Error loading reservations</p>}
-
-				{!isLoading && reservations.length === 0 && (
-					<p>No reservations found. Create one to get started!</p>
-				)}
-
-				{reservations.length > 0 && (
-					<table>
-						<thead>
-							<tr>
-								<th>Guest</th>
-								<th>Hotel</th>
-								<th>Room</th>
-								<th>Check-In</th>
-								<th>Check-Out</th>
-								<th>Guests</th>
-								<th>Total</th>
-								<th>Status</th>
-								<th>Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							{reservations.map((reservation: Reservation) => (
-								<tr key={reservation._id}>
-									<td>
-										<div>{reservation.guestName}</div>
-										<div className="email">{reservation.guestEmail}</div>
-									</td>
-									<td>
-										{typeof reservation.hotelId === "string"
-											? reservation.hotelId
-											: reservation.hotelId?.name || "N/A"}
-									</td>
-									<td>
-										{typeof reservation.roomId === "string"
-											? reservation.roomId
-											: reservation.roomId?.podId
-											? `Pod ${reservation.roomId.podId} (${reservation.roomId.quality})`
-											: "N/A"}
-									</td>
-									<td>
-										{new Date(reservation.checkInDate).toLocaleDateString()}
-									</td>
-									<td>
-										{new Date(reservation.checkOutDate).toLocaleDateString()}
-									</td>
-									<td>{reservation.numberOfGuests}</td>
-									<td>${reservation.totalPrice}</td>
-									<td>
-										<span
-											className={`status-badge status-${reservation.status}`}
-										>
-											{reservation.status}
-										</span>
-									</td>
-									<td className="actions">
-										<button
-											onClick={() => handleEdit(reservation)}
-											className="btn-edit"
-										>
-											Edit
-										</button>
-										{reservation.status === "confirmed" && (
-											<button
-												onClick={() => handleCheckIn(reservation._id)}
-												className="btn-checkin"
-											>
-												Check In
-											</button>
-										)}
-										{reservation.status === "checked-in" && (
-											<button
-												onClick={() => handleCheckOut(reservation._id)}
-												className="btn-checkout"
-											>
-												Check Out
-											</button>
-										)}
-										{!["cancelled", "checked-out"].includes(
-											reservation.status
-										) && (
-											<button
-												onClick={() => handleCancel(reservation._id)}
-												className="btn-cancel"
-											>
-												Cancel
-											</button>
-										)}
-										<button
-											onClick={() => handleDelete(reservation._id)}
-											className="btn-delete"
-										>
-											Delete
-										</button>
-									</td>
-								</tr>
+				{/* Filters */}
+				<div className="filters">
+					<label>
+						Filter by Hotel:
+						<select
+							value={selectedHotelId}
+							onChange={(e) => setSelectedHotelId(e.target.value)}
+						>
+							<option value="">All Hotels</option>
+							{hotels.map((hotel: Hotel) => (
+								<option key={hotel._id} value={hotel._id}>
+									{hotel.name}
+								</option>
 							))}
-						</tbody>
-					</table>
+						</select>
+					</label>
+					<label>
+						Filter by Status:
+						<select
+							value={statusFilter}
+							onChange={(e) => setStatusFilter(e.target.value)}
+						>
+							<option value="">All Statuses</option>
+							<option value="pending">Pending</option>
+							<option value="confirmed">Confirmed</option>
+							<option value="checked-in">Checked In</option>
+							<option value="checked-out">Checked Out</option>
+							<option value="cancelled">Cancelled</option>
+						</select>
+					</label>
+					<button onClick={() => setShowForm(!showForm)}>
+						{showForm ? "Cancel" : "Add New Reservation"}
+					</button>
+				</div>
+
+				{/* Form */}
+				{showForm && (
+					<div className="reservation-form">
+						<h2>
+							{editingReservation
+								? "Edit Reservation"
+								: "Create New Reservation"}
+						</h2>
+						<form onSubmit={handleSubmit}>
+							<div className="form-grid">
+								<label>
+									Hotel:
+									<select
+										name="hotelId"
+										value={formData.hotelId}
+										onChange={handleInputChange}
+										required
+									>
+										<option value="">Select Hotel</option>
+										{hotels.map((hotel: Hotel) => (
+											<option key={hotel._id} value={hotel._id}>
+												{hotel.name}
+											</option>
+										))}
+									</select>
+								</label>
+
+								<label>
+									Room:
+									<select
+										name="roomId"
+										value={formData.roomId}
+										onChange={handleInputChange}
+										required
+										disabled={!formData.hotelId}
+									>
+										<option value="">Select Room</option>
+										{getAvailableRooms().map((room: Room) => (
+											<option key={room._id} value={room._id}>
+												Pod {room.podId} - {room.quality} ({room.floor}) ($
+												{room.pricePerNight}/night)
+											</option>
+										))}
+									</select>
+								</label>
+
+								<label>
+									Guest Name:
+									<input
+										type="text"
+										name="guestName"
+										value={formData.guestName}
+										onChange={handleInputChange}
+										required
+									/>
+								</label>
+
+								<label>
+									Guest Email:
+									<input
+										type="email"
+										name="guestEmail"
+										value={formData.guestEmail}
+										onChange={handleInputChange}
+										required
+									/>
+								</label>
+
+								<label>
+									Guest Phone:
+									<input
+										type="tel"
+										name="guestPhone"
+										value={formData.guestPhone}
+										onChange={handleInputChange}
+									/>
+								</label>
+
+								<label>
+									Check-In Date:
+									<input
+										type="date"
+										name="checkInDate"
+										value={formData.checkInDate}
+										onChange={handleInputChange}
+										required
+									/>
+								</label>
+
+								<label>
+									Check-Out Date:
+									<input
+										type="date"
+										name="checkOutDate"
+										value={formData.checkOutDate}
+										onChange={handleInputChange}
+										required
+									/>
+								</label>
+
+								<label>
+									Number of Guests:
+									<input
+										type="number"
+										name="numberOfGuests"
+										value={formData.numberOfGuests}
+										onChange={handleInputChange}
+										min="1"
+										required
+									/>
+								</label>
+
+								<label>
+									Total Price ($):
+									<input
+										type="number"
+										name="totalPrice"
+										value={formData.totalPrice}
+										onChange={handleInputChange}
+										min="0"
+										step="0.01"
+										required
+									/>
+								</label>
+
+								<label>
+									Status:
+									<select
+										name="status"
+										value={formData.status}
+										onChange={handleInputChange}
+									>
+										<option value="pending">Pending</option>
+										<option value="confirmed">Confirmed</option>
+										<option value="checked-in">Checked In</option>
+										<option value="checked-out">Checked Out</option>
+										<option value="cancelled">Cancelled</option>
+									</select>
+								</label>
+
+								<label>
+									Payment Status:
+									<select
+										name="paymentStatus"
+										value={formData.paymentStatus}
+										onChange={handleInputChange}
+									>
+										<option value="unpaid">Unpaid</option>
+										<option value="partial">Partial</option>
+										<option value="paid">Paid</option>
+										<option value="refunded">Refunded</option>
+									</select>
+								</label>
+							</div>
+
+							<label>
+								Special Requests:
+								<textarea
+									name="specialRequests"
+									value={formData.specialRequests}
+									onChange={handleInputChange}
+									rows={3}
+								/>
+							</label>
+
+							<div className="form-actions">
+								<button type="submit" disabled={isCreating || isUpdating}>
+									{isCreating || isUpdating
+										? "Saving..."
+										: editingReservation
+										? "Update Reservation"
+										: "Create Reservation"}
+								</button>
+								<button type="button" onClick={resetForm}>
+									Cancel
+								</button>
+							</div>
+						</form>
+					</div>
 				)}
-			</div>
-		</div>
+
+				{/* Reservation List */}
+				<div className="reservation-list">
+					<h2>Reservations</h2>
+					{isLoading && <p>Loading reservations...</p>}
+					{error && <p className="error">Error loading reservations</p>}
+
+					{!isLoading && reservations.length === 0 && (
+						<p>No reservations found. Create one to get started!</p>
+					)}
+
+					{reservations.length > 0 && (
+						<table>
+							<thead>
+								<tr>
+									<th>Guest</th>
+									<th>Hotel</th>
+									<th>Room</th>
+									<th>Check-In</th>
+									<th>Check-Out</th>
+									<th>Guests</th>
+									<th>Total</th>
+									<th>Status</th>
+									<th>Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								{reservations.map((reservation: Reservation) => (
+									<tr key={reservation._id}>
+										<td>
+											<div>{reservation.guestName}</div>
+											<div className="email">{reservation.guestEmail}</div>
+										</td>
+										<td>
+											{typeof reservation.hotelId === "string"
+												? reservation.hotelId
+												: reservation.hotelId?.name || "N/A"}
+										</td>
+										<td>
+											{typeof reservation.roomId === "string"
+												? reservation.roomId
+												: reservation.roomId?.podId
+												? `Pod ${reservation.roomId.podId} (${reservation.roomId.quality})`
+												: "N/A"}
+										</td>
+										<td>
+											{new Date(reservation.checkInDate).toLocaleDateString()}
+										</td>
+										<td>
+											{new Date(reservation.checkOutDate).toLocaleDateString()}
+										</td>
+										<td>{reservation.numberOfGuests}</td>
+										<td>${reservation.totalPrice}</td>
+										<td>
+											<span
+												className={`status-badge status-${reservation.status}`}
+											>
+												{reservation.status}
+											</span>
+										</td>
+										<td className="actions">
+											<button
+												onClick={() => handleEdit(reservation)}
+												className="btn-edit"
+											>
+												Edit
+											</button>
+											{reservation.status === "confirmed" && (
+												<button
+													onClick={() => handleCheckIn(reservation._id)}
+													className="btn-checkin"
+												>
+													Check In
+												</button>
+											)}
+											{reservation.status === "checked-in" && (
+												<button
+													onClick={() => handleCheckOut(reservation._id)}
+													className="btn-checkout"
+												>
+													Check Out
+												</button>
+											)}
+											{!["cancelled", "checked-out"].includes(
+												reservation.status
+											) && (
+												<button
+													onClick={() => handleCancel(reservation._id)}
+													className="btn-cancel"
+												>
+													Cancel
+												</button>
+											)}
+											<button
+												onClick={() => handleDelete(reservation._id)}
+												className="btn-delete"
+											>
+												Delete
+											</button>
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					)}
+				</div>
+			</div>{" "}
+		</>
 	);
 }

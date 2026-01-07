@@ -1,0 +1,101 @@
+import {
+	createSlice,
+	createAsyncThunk,
+	type PayloadAction,
+} from "@reduxjs/toolkit";
+
+export interface User {
+	id: string;
+	email: string;
+	name?: string;
+	role?: string;
+}
+
+export interface AuthState {
+	user: User | null;
+	isLoading: boolean;
+	hasChecked: boolean;
+	error: string | null;
+}
+
+const initialState: AuthState = {
+	user: null,
+	isLoading: true,
+	hasChecked: false,
+	error: null,
+};
+
+/**
+ * Async thunk to check if user is logged in
+ * Queries the server to get current auth status
+ */
+export const checkAuth = createAsyncThunk("auth/checkAuth", async () => {
+	const res = await fetch("/auth/loggedin", { credentials: "include" });
+	if (!res.ok) throw new Error("Not authenticated");
+	const data = await res.json();
+	return data.user;
+});
+
+/**
+ * Async thunk to logout user
+ * Calls the server logout endpoint and clears session
+ */
+export const logout = createAsyncThunk("auth/logout", async () => {
+	await fetch("/auth/logout", {
+		method: "POST",
+		credentials: "include",
+	});
+});
+
+const authSlice = createSlice({
+	name: "auth",
+	initialState,
+	reducers: {
+		/**
+		 * Set user directly when login completes
+		 * Used after successful local or OAuth login
+		 */
+		setUser(state, action: PayloadAction<User>) {
+			state.user = action.payload;
+			state.hasChecked = true;
+			state.isLoading = false;
+			state.error = null;
+		},
+		/**
+		 * Clear error messages
+		 */
+		clearError(state) {
+			state.error = null;
+		},
+	},
+	extraReducers: (builder) => {
+		builder
+			// Check auth
+			.addCase(checkAuth.pending, (state) => {
+				state.isLoading = true;
+				state.error = null;
+			})
+			.addCase(checkAuth.fulfilled, (state, action) => {
+				state.isLoading = false;
+				state.user = action.payload || null;
+				state.hasChecked = true;
+			})
+			.addCase(checkAuth.rejected, (state) => {
+				state.isLoading = false;
+				state.hasChecked = true;
+				state.user = null;
+			})
+
+			// Logout
+			.addCase(logout.fulfilled, (state) => {
+				state.user = null;
+				state.error = null;
+			})
+			.addCase(logout.rejected, (state) => {
+				state.error = "Failed to logout";
+			});
+	},
+});
+
+export const { setUser, clearError } = authSlice.actions;
+export default authSlice.reducer;
