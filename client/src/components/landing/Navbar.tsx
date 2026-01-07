@@ -108,12 +108,23 @@ const Navbar: React.FC = () => {
 					{accountMenuOpen && (
 						<div className="navbar__dropdown">
 							{isLoggedIn ? (
-								<button
-									onClick={handleSignOut}
-									className="navbar__dropdown-item navbar__dropdown-item--danger"
-								>
-									Sign Out
-								</button>
+								<>
+									<button
+										onClick={() => {
+											navigate("/profile");
+											setAccountMenuOpen(false);
+										}}
+										className="navbar__dropdown-item"
+									>
+										My Profile
+									</button>
+									<button
+										onClick={handleSignOut}
+										className="navbar__dropdown-item navbar__dropdown-item--danger"
+									>
+										Sign Out
+									</button>
+								</>
 							) : (
 								<button
 									onClick={() => {
