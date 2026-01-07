@@ -2,7 +2,6 @@ import { useState } from "react";
 import Navbar from "../components/landing/Navbar";
 import {
 	useGetReservationsQuery,
-	useGetReservationsByHotelQuery,
 	useCreateReservationMutation,
 	useUpdateReservationMutation,
 	useDeleteReservationMutation,
@@ -10,10 +9,8 @@ import {
 	useCheckInMutation,
 	useCheckOutMutation,
 } from "../features/reservationsApi";
-import { useGetHotelsQuery } from "../features/hotelsApi";
 import { useGetRoomsQuery } from "../features/roomsApi";
 import type { ReservationFormData, Reservation } from "../types/reservation";
-import type { Hotel } from "../types/hotel";
 import type { Room } from "../types/room";
 import "./ReservationManagement.css";
 
@@ -21,7 +18,7 @@ import "./ReservationManagement.css";
  * ReservationManagement - Manager page for CRUD operations on reservations
  *
  * Features:
- * - View all reservations or filter by hotel
+ * - View all reservations
  * - Create new reservations
  * - Update existing reservations
  * - Cancel reservations
@@ -30,14 +27,12 @@ import "./ReservationManagement.css";
  */
 
 export default function ReservationManagement() {
-	const [selectedHotelId, setSelectedHotelId] = useState<string>("");
 	const [statusFilter, setStatusFilter] = useState<string>("");
 	const [showForm, setShowForm] = useState(false);
 	const [editingReservation, setEditingReservation] = useState<string | null>(
 		null
 	);
 	const [formData, setFormData] = useState<ReservationFormData>({
-		hotelId: "",
 		roomId: "",
 		userId: "000000000000000000000000", // Placeholder - in real app, would come from auth
 		guestName: "",
@@ -53,34 +48,19 @@ export default function ReservationManagement() {
 	});
 
 	// Fetch data
-	const { data: hotels = [] } = useGetHotelsQuery(undefined);
 	const { data: rooms = [] } = useGetRoomsQuery(undefined);
 
-	// Fetch reservations based on filters
 	const {
 		data: allReservations = [],
-		isLoading: isLoadingAll,
-		error: errorAll,
-	} = useGetReservationsQuery(undefined, {
-		skip: !!selectedHotelId,
-	});
-	const {
-		data: hotelReservations = [],
-		isLoading: isLoadingHotel,
-		error: errorHotel,
-	} = useGetReservationsByHotelQuery(
-		{
-			hotelId: selectedHotelId,
-			status: statusFilter || undefined,
-		},
-		{
-			skip: !selectedHotelId,
-		}
-	);
+		isLoading,
+		error,
+	} = useGetReservationsQuery();
 
-	const reservations = selectedHotelId ? hotelReservations : allReservations;
-	const isLoading = selectedHotelId ? isLoadingHotel : isLoadingAll;
-	const error = selectedHotelId ? errorHotel : errorAll;
+	const reservations = statusFilter
+		? (allReservations as Reservation[]).filter(
+				(r) => r.status === statusFilter
+		  )
+		: (allReservations as Reservation[]) || [];
 
 	// Mutations
 	const [createReservation, { isLoading: isCreating }] =
@@ -130,10 +110,6 @@ export default function ReservationManagement() {
 	const handleEdit = (reservation: Reservation) => {
 		setEditingReservation(reservation._id);
 		setFormData({
-			hotelId:
-				typeof reservation.hotelId === "string"
-					? reservation.hotelId
-					: reservation.hotelId._id,
 			roomId:
 				typeof reservation.roomId === "string"
 					? reservation.roomId
@@ -201,7 +177,6 @@ export default function ReservationManagement() {
 
 	const resetForm = () => {
 		setFormData({
-			hotelId: "",
 			roomId: "",
 			userId: "000000000000000000000000",
 			guestName: "",
@@ -219,14 +194,7 @@ export default function ReservationManagement() {
 		setShowForm(false);
 	};
 
-	const getAvailableRooms = () => {
-		if (!formData.hotelId) return [];
-		return rooms.filter((room: { hotelId: string | { _id: string } }) => {
-			const roomHotelId =
-				typeof room.hotelId === "string" ? room.hotelId : room.hotelId._id;
-			return roomHotelId === formData.hotelId;
-		});
-	};
+	const getAvailableRooms = () => rooms as Room[];
 
 	return (
 		<>
@@ -236,20 +204,6 @@ export default function ReservationManagement() {
 
 				{/* Filters */}
 				<div className="filters">
-					<label>
-						Filter by Hotel:
-						<select
-							value={selectedHotelId}
-							onChange={(e) => setSelectedHotelId(e.target.value)}
-						>
-							<option value="">All Hotels</option>
-							{hotels.map((hotel: Hotel) => (
-								<option key={hotel._id} value={hotel._id}>
-									{hotel.name}
-								</option>
-							))}
-						</select>
-					</label>
 					<label>
 						Filter by Status:
 						<select
@@ -280,30 +234,12 @@ export default function ReservationManagement() {
 						<form onSubmit={handleSubmit}>
 							<div className="form-grid">
 								<label>
-									Hotel:
-									<select
-										name="hotelId"
-										value={formData.hotelId}
-										onChange={handleInputChange}
-										required
-									>
-										<option value="">Select Hotel</option>
-										{hotels.map((hotel: Hotel) => (
-											<option key={hotel._id} value={hotel._id}>
-												{hotel.name}
-											</option>
-										))}
-									</select>
-								</label>
-
-								<label>
 									Room:
 									<select
 										name="roomId"
 										value={formData.roomId}
 										onChange={handleInputChange}
 										required
-										disabled={!formData.hotelId}
 									>
 										<option value="">Select Room</option>
 										{getAvailableRooms().map((room: Room) => (
@@ -465,7 +401,7 @@ export default function ReservationManagement() {
 							<thead>
 								<tr>
 									<th>Guest</th>
-									<th>Hotel</th>
+
 									<th>Room</th>
 									<th>Check-In</th>
 									<th>Check-Out</th>
@@ -482,11 +418,7 @@ export default function ReservationManagement() {
 											<div>{reservation.guestName}</div>
 											<div className="email">{reservation.guestEmail}</div>
 										</td>
-										<td>
-											{typeof reservation.hotelId === "string"
-												? reservation.hotelId
-												: reservation.hotelId?.name || "N/A"}
-										</td>
+
 										<td>
 											{typeof reservation.roomId === "string"
 												? reservation.roomId

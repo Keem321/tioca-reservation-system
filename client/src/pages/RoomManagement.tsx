@@ -2,15 +2,12 @@ import { useState } from "react";
 import Navbar from "../components/landing/Navbar";
 import {
 	useGetRoomsQuery,
-	useGetRoomsByHotelQuery,
 	useCreateRoomMutation,
 	useUpdateRoomMutation,
 	useDeleteRoomMutation,
 	useUpdateRoomStatusMutation,
 } from "../features/roomsApi";
-import { useGetHotelsQuery } from "../features/hotelsApi";
 import type { Room, RoomFormData, PodQuality, PodFloor } from "../types/room";
-import type { Hotel } from "../types/hotel";
 import "./RoomManagement.css";
 
 /**
@@ -53,7 +50,7 @@ const QUALITY_DIMENSIONS: Record<
  * RoomManagement - Manager page for CRUD operations on pods
  *
  * Features:
- * - View all pods or filter by hotel
+ * - View all pods
  * - Create new pods
  * - Update existing pods
  * - Delete pods
@@ -61,11 +58,9 @@ const QUALITY_DIMENSIONS: Record<
  */
 
 export default function RoomManagement() {
-	const [selectedHotelId, setSelectedHotelId] = useState<string>("");
 	const [showForm, setShowForm] = useState(false);
 	const [editingRoom, setEditingRoom] = useState<string | null>(null);
 	const [formData, setFormData] = useState<RoomFormData>({
-		hotelId: "",
 		podId: "", // Will be auto-generated on submit
 		quality: "classic",
 		floor: "men-only", // Floor is now the zone
@@ -76,28 +71,8 @@ export default function RoomManagement() {
 		dimensions: QUALITY_DIMENSIONS.classic,
 	});
 
-	// Fetch hotels for the dropdown
-	const { data: hotels = [] } = useGetHotelsQuery(undefined);
-
-	// Fetch rooms - use skip option instead of conditional hook calls
-	const {
-		data: allRooms = [],
-		isLoading: isLoadingAll,
-		error: errorAll,
-	} = useGetRoomsQuery(undefined, {
-		skip: !!selectedHotelId,
-	});
-	const {
-		data: hotelRooms = [],
-		isLoading: isLoadingHotel,
-		error: errorHotel,
-	} = useGetRoomsByHotelQuery(selectedHotelId, {
-		skip: !selectedHotelId,
-	});
-
-	const rooms = selectedHotelId ? hotelRooms : allRooms;
-	const isLoading = selectedHotelId ? isLoadingHotel : isLoadingAll;
-	const error = selectedHotelId ? errorHotel : errorAll;
+	// Fetch rooms
+	const { data: rooms = [], isLoading, error } = useGetRoomsQuery(undefined);
 
 	// Mutations
 	const [createRoom, { isLoading: isCreating }] = useCreateRoomMutation();
@@ -157,8 +132,6 @@ export default function RoomManagement() {
 	const handleEdit = (room: Room) => {
 		setEditingRoom(room._id);
 		setFormData({
-			hotelId:
-				typeof room.hotelId === "string" ? room.hotelId : room.hotelId._id,
 			podId: room.podId,
 			quality: room.quality,
 			floor: room.floor,
@@ -195,7 +168,6 @@ export default function RoomManagement() {
 
 	const resetForm = () => {
 		setFormData({
-			hotelId: "",
 			podId: "",
 			quality: "classic",
 			floor: "men-only",
@@ -214,329 +186,292 @@ export default function RoomManagement() {
 			<Navbar />
 			<div className="room-management">
 				<h1>Room Management</h1>
-
-				{/* Filter by Hotel */}
 				<div className="filters">
-					<label>
-						Filter by Hotel:
-						<select
-							value={selectedHotelId}
-							onChange={(e) => setSelectedHotelId(e.target.value)}
-						>
-							<option value="">All Hotels</option>
-							{hotels.map((hotel: Hotel) => (
-								<option key={hotel._id} value={hotel._id}>
-									{hotel.name}
-								</option>
-							))}
-						</select>
-				</label>
-				<button onClick={() => setShowForm(!showForm)}>
-					{showForm ? "Cancel" : "Add New Room"}
-				</button>
-			</div>
-
-			{/* Form */}
-			{showForm && (
-				<div className="room-form">
-					<h2>{editingRoom ? "Edit Pod" : "Create New Pod"}</h2>
-					<form onSubmit={handleSubmit}>
-						<div className="form-grid">
-							<label>
-								Hotel:
-								<select
-									name="hotelId"
-									value={formData.hotelId}
-									onChange={handleInputChange}
-									required
-								>
-									<option value="">Select Hotel</option>
-									{hotels.map((hotel: Hotel) => (
-										<option key={hotel._id} value={hotel._id}>
-											{hotel.name}
-										</option>
-									))}
-								</select>
-							</label>
-
-							<label>
-								Floor (Zone):
-								<select
-									name="floor"
-									value={formData.floor}
-									onChange={handleInputChange}
-									required
-								>
-									<option value="women-only">Women-Only Floor</option>
-									<option value="men-only">Men-Only Floor</option>
-									<option value="couples">Couples Floor</option>
-									<option value="business">Business/Quiet Floor</option>
-								</select>
-							</label>
-
-							<label>
-								Pod ID:
-								<input
-									type="text"
-									value={formData.podId || "(auto-generated)"}
-									disabled
-									readOnly
-									style={{
-										backgroundColor: "#f0f0f0",
-										color: "#666",
-										cursor: "not-allowed",
-									}}
-								/>
-								<small
-									style={{
-										display: "block",
-										marginTop: "0.25rem",
-										color: "#666",
-									}}
-								>
-									Auto-generated as FloorNum + 2-digit sequence (e.g., 301)
-								</small>
-							</label>
-
-							<label>
-								Pod Quality Level:
-								<select
-									name="quality"
-									value={formData.quality}
-									onChange={handleInputChange}
-									required
-								>
-									<option value="classic">Classic Pearl (Standard)</option>
-									<option value="milk">Milk Pearl (Standard+)</option>
-									<option value="golden">Golden Pearl (Premium)</option>
-									<option value="crystal">
-										Crystal Boba Suite (First Class)
-									</option>
-									<option value="matcha">
-										Matcha Pearl (Women-Only Exclusive)
-									</option>
-								</select>
-							</label>
-
-							<label>
-								Capacity (Auto):
-								<input
-									type="text"
-									value={formData.floor === "couples" ? "2 guests" : "1 guest"}
-									disabled
-									readOnly
-									style={{
-										backgroundColor: "#f0f0f0",
-										color: "#666",
-										cursor: "not-allowed",
-									}}
-								/>
-								<small
-									style={{
-										display: "block",
-										marginTop: "0.25rem",
-										color: "#666",
-									}}
-								>
-									Auto-determined by floor: couples floors = 2, others = 1
-								</small>
-							</label>
-
-							<label>
-								Price Per Night ($):
-								<input
-									type="number"
-									name="pricePerNight"
-									value={formData.pricePerNight}
-									onChange={handleInputChange}
-									min="0"
-									step="0.01"
-									required
-								/>
-							</label>
-
-							<label>
-								Length (inches):
-								<input
-									type="number"
-									name="dimensions.length"
-									value={formData.dimensions?.length || 80}
-									onChange={handleInputChange}
-									min="0"
-								/>
-								<small
-									style={{
-										display: "block",
-										marginTop: "0.25rem",
-										color: "#666",
-									}}
-								>
-									Auto-set by quality level (edit to customize)
-								</small>
-							</label>
-
-							<label>
-								Width (inches):
-								<input
-									type="number"
-									name="dimensions.width"
-									value={formData.dimensions?.width || 40}
-									onChange={handleInputChange}
-									min="0"
-								/>
-								<small
-									style={{
-										display: "block",
-										marginTop: "0.25rem",
-										color: "#666",
-									}}
-								>
-									Auto-set by quality level (edit to customize)
-								</small>
-							</label>
-
-							<label>
-								Height (inches):
-								<input
-									type="number"
-									name="dimensions.height"
-									value={formData.dimensions?.height || 40}
-									onChange={handleInputChange}
-									min="0"
-								/>
-								<small
-									style={{
-										display: "block",
-										marginTop: "0.25rem",
-										color: "#666",
-									}}
-								>
-									Auto-set by quality level (edit to customize)
-								</small>
-							</label>
-
-							<label>
-								Status:
-								<select
-									name="status"
-									value={formData.status}
-									onChange={handleInputChange}
-								>
-									<option value="available">Available</option>
-									<option value="occupied">Occupied</option>
-									<option value="maintenance">Maintenance</option>
-									<option value="reserved">Reserved</option>
-								</select>
-							</label>
-						</div>
-
-						<label>
-							Description:
-							<textarea
-								name="description"
-								value={formData.description}
-								onChange={handleInputChange}
-								rows={3}
-							/>
-						</label>
-
-						<div className="form-actions">
-							<button type="submit" disabled={isCreating || isUpdating}>
-								{isCreating || isUpdating
-									? "Saving..."
-									: editingRoom
-									? "Update Pod"
-									: "Create Pod"}
-							</button>
-							<button type="button" onClick={resetForm}>
-								Cancel
-							</button>
-						</div>
-					</form>
+					<button onClick={() => setShowForm(!showForm)}>
+						{showForm ? "Cancel" : "Add New Room"}
+					</button>
 				</div>
-			)}
 
-			{/* Pod List */}
-			<div className="room-list">
-				<h2>Pods</h2>
-				{isLoading && <p>Loading pods...</p>}
-				{error && <p className="error">Error loading pods</p>}
+				{/* Form */}
+				{showForm && (
+					<div className="room-form">
+						<h2>{editingRoom ? "Edit Pod" : "Create New Pod"}</h2>
+						<form onSubmit={handleSubmit}>
+							<div className="form-grid">
+								<label>
+									Floor (Zone):
+									<select
+										name="floor"
+										value={formData.floor}
+										onChange={handleInputChange}
+										required
+									>
+										<option value="women-only">Women-Only Floor</option>
+										<option value="men-only">Men-Only Floor</option>
+										<option value="couples">Couples Floor</option>
+										<option value="business">Business/Quiet Floor</option>
+									</select>
+								</label>
 
-				{!isLoading && rooms.length === 0 && (
-					<p>No pods found. Create one to get started!</p>
+								<label>
+									Pod ID:
+									<input
+										type="text"
+										value={formData.podId || "(auto-generated)"}
+										disabled
+										readOnly
+										style={{
+											backgroundColor: "#f0f0f0",
+											color: "#666",
+											cursor: "not-allowed",
+										}}
+									/>
+									<small
+										style={{
+											display: "block",
+											marginTop: "0.25rem",
+											color: "#666",
+										}}
+									>
+										Auto-generated as FloorNum + 2-digit sequence (e.g., 301)
+									</small>
+								</label>
+
+								<label>
+									Pod Quality Level:
+									<select
+										name="quality"
+										value={formData.quality}
+										onChange={handleInputChange}
+										required
+									>
+										<option value="classic">Classic Pearl (Standard)</option>
+										<option value="milk">Milk Pearl (Standard+)</option>
+										<option value="golden">Golden Pearl (Premium)</option>
+										<option value="crystal">
+											Crystal Boba Suite (First Class)
+										</option>
+										<option value="matcha">
+											Matcha Pearl (Women-Only Exclusive)
+										</option>
+									</select>
+								</label>
+
+								<label>
+									Capacity (Auto):
+									<input
+										type="text"
+										value={
+											formData.floor === "couples" ? "2 guests" : "1 guest"
+										}
+										disabled
+										readOnly
+										style={{
+											backgroundColor: "#f0f0f0",
+											color: "#666",
+											cursor: "not-allowed",
+										}}
+									/>
+									<small
+										style={{
+											display: "block",
+											marginTop: "0.25rem",
+											color: "#666",
+										}}
+									>
+										Auto-determined by floor: couples floors = 2, others = 1
+									</small>
+								</label>
+
+								<label>
+									Price Per Night ($):
+									<input
+										type="number"
+										name="pricePerNight"
+										value={formData.pricePerNight}
+										onChange={handleInputChange}
+										min="0"
+										step="0.01"
+										required
+									/>
+								</label>
+
+								<label>
+									Length (inches):
+									<input
+										type="number"
+										name="dimensions.length"
+										value={formData.dimensions?.length || 80}
+										onChange={handleInputChange}
+										min="0"
+									/>
+									<small
+										style={{
+											display: "block",
+											marginTop: "0.25rem",
+											color: "#666",
+										}}
+									>
+										Auto-set by quality level (edit to customize)
+									</small>
+								</label>
+
+								<label>
+									Width (inches):
+									<input
+										type="number"
+										name="dimensions.width"
+										value={formData.dimensions?.width || 40}
+										onChange={handleInputChange}
+										min="0"
+									/>
+									<small
+										style={{
+											display: "block",
+											marginTop: "0.25rem",
+											color: "#666",
+										}}
+									>
+										Auto-set by quality level (edit to customize)
+									</small>
+								</label>
+
+								<label>
+									Height (inches):
+									<input
+										type="number"
+										name="dimensions.height"
+										value={formData.dimensions?.height || 40}
+										onChange={handleInputChange}
+										min="0"
+									/>
+									<small
+										style={{
+											display: "block",
+											marginTop: "0.25rem",
+											color: "#666",
+										}}
+									>
+										Auto-set by quality level (edit to customize)
+									</small>
+								</label>
+
+								<label>
+									Status:
+									<select
+										name="status"
+										value={formData.status}
+										onChange={handleInputChange}
+									>
+										<option value="available">Available</option>
+										<option value="occupied">Occupied</option>
+										<option value="maintenance">Maintenance</option>
+										<option value="reserved">Reserved</option>
+									</select>
+								</label>
+							</div>
+
+							<label>
+								Description:
+								<textarea
+									name="description"
+									value={formData.description}
+									onChange={handleInputChange}
+									rows={3}
+								/>
+							</label>
+
+							<div className="form-actions">
+								<button type="submit" disabled={isCreating || isUpdating}>
+									{isCreating || isUpdating
+										? "Saving..."
+										: editingRoom
+										? "Update Pod"
+										: "Create Pod"}
+								</button>
+								<button type="button" onClick={resetForm}>
+									Cancel
+								</button>
+							</div>
+						</form>
+					</div>
 				)}
 
-				{rooms.length > 0 && (
-					<table>
-						<thead>
-							<tr>
-								<th>Hotel</th>
-								<th>Pod ID</th>
-								<th>Pod Name</th>
-								<th>Floor (Zone)</th>
-								<th>Capacity</th>
-								<th>Price/Night</th>
-								<th>Status</th>
-								<th>Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							{rooms.map((room: Room) => (
-								<tr key={room._id}>
-									<td>
-										{typeof room.hotelId === "string"
-											? room.hotelId
-											: room.hotelId?.name || "N/A"}
-									</td>
-									<td>{room.podId}</td>
-									<td>
-										<div className="pod-type-cell">
-											{getPodDisplayName(room.quality, room.floor)}
-											{room.dimensions && (
-												<span className="dimensions">
-													{room.dimensions.length}"×{room.dimensions.width}"×
-													{room.dimensions.height}"
-												</span>
-											)}
-										</div>
-									</td>
-									<td>
-										<span className={`zone-badge zone-${room.floor}`}>
-											{room.floor}
-										</span>
-									</td>
-									<td>{room.capacity}</td>
-									<td>${room.pricePerNight}</td>
-									<td>
-										<select
-											value={room.status}
-											onChange={(e) =>
-												handleStatusChange(room._id, e.target.value)
-											}
-											className={`status-${room.status}`}
-										>
-											<option value="available">Available</option>
-											<option value="occupied">Occupied</option>
-											<option value="maintenance">Maintenance</option>
-											<option value="reserved">Reserved</option>
-										</select>
-									</td>
-									<td className="actions">
-										<button onClick={() => handleEdit(room)}>Edit</button>
-										<button
-											onClick={() => handleDelete(room._id)}
-											className="delete"
-										>
-											Delete
-										</button>
-									</td>
+				{/* Pod List */}
+				<div className="room-list">
+					<h2>Pods</h2>
+					{isLoading && <p>Loading pods...</p>}
+					{error && <p className="error">Error loading pods</p>}
+
+					{!isLoading && rooms.length === 0 && (
+						<p>No pods found. Create one to get started!</p>
+					)}
+
+					{rooms.length > 0 && (
+						<table>
+							<thead>
+								<tr>
+									<th>Pod ID</th>
+									<th>Pod Name</th>
+									<th>Floor (Zone)</th>
+									<th>Capacity</th>
+									<th>Price/Night</th>
+									<th>Status</th>
+									<th>Actions</th>
 								</tr>
-							))}
-						</tbody>
-					</table>
-				)}
+							</thead>
+							<tbody>
+								{rooms.map((room: Room) => (
+									<tr key={room._id}>
+										<td>{room.podId}</td>
+										<td>
+											<div className="pod-type-cell">
+												{getPodDisplayName(room.quality, room.floor)}
+												{room.dimensions && (
+													<span className="dimensions">
+														{room.dimensions.length}"×{room.dimensions.width}"×
+														{room.dimensions.height}"
+													</span>
+												)}
+											</div>
+										</td>
+										<td>
+											<span className={`zone-badge zone-${room.floor}`}>
+												{room.floor}
+											</span>
+										</td>
+										<td>{room.capacity}</td>
+										<td>${room.pricePerNight}</td>
+										<td>
+											<select
+												value={room.status}
+												onChange={(e) =>
+													handleStatusChange(room._id, e.target.value)
+												}
+												className={`status-${room.status}`}
+											>
+												<option value="available">Available</option>
+												<option value="occupied">Occupied</option>
+												<option value="maintenance">Maintenance</option>
+												<option value="reserved">Reserved</option>
+											</select>
+										</td>
+										<td className="actions">
+											<button onClick={() => handleEdit(room)}>Edit</button>
+											<button
+												onClick={() => handleDelete(room._id)}
+												className="delete"
+											>
+												Delete
+											</button>
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					)}
+				</div>
 			</div>
-		</div>
 		</>
 	);
 }

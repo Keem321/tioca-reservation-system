@@ -2,7 +2,6 @@ import { Router } from "express";
 const roomRouter = Router();
 import {
 	getRooms,
-	getRoomsByHotel,
 	getRoomById,
 	createRoom,
 	updateRoom,
@@ -11,14 +10,11 @@ import {
 	getAvailableRooms,
 } from "../controllers/room.controller.js";
 
-// Get all rooms (with optional hotel filter)
+// Get all rooms
 roomRouter.get("/", getRooms);
 
-// Get available rooms for a hotel and date range
-roomRouter.get("/hotel/:hotelId/available", getAvailableRooms);
-
-// Get rooms by hotel ID
-roomRouter.get("/hotel/:hotelId", getRoomsByHotel);
+// Get available rooms for a date range
+roomRouter.get("/available", getAvailableRooms);
 
 // Get a single room by ID
 roomRouter.get("/:id", getRoomById);

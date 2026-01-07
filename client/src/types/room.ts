@@ -34,7 +34,6 @@ export interface PodDimensions {
  */
 export interface Room {
 	_id: string;
-	hotelId: string | { _id: string; name: string; address: string };
 	podId: string; // User-friendly identifier: e.g., "301" for couples floor, Pod 1
 	quality: PodQuality; // Quality level (classic, milk, golden, crystal, matcha)
 	floor: PodFloor; // Floor zone (women-only, men-only, couples, business)
@@ -53,7 +52,6 @@ export interface Room {
  * Room/Pod form data for creating/updating pods
  */
 export interface RoomFormData {
-	hotelId: string;
 	podId?: string; // Optional - will be auto-generated if not provided
 	quality: PodQuality;
 	floor: PodFloor; // Floor zone (determines which floor the pod is on)

@@ -2,7 +2,6 @@ import { Router } from "express";
 const reservationRouter = Router();
 import {
 	getReservations,
-	getReservationsByHotel,
 	getReservationsByUser,
 	getReservationById,
 	createReservation,
@@ -16,17 +15,14 @@ import {
 	updateReservationStatus,
 } from "../controllers/reservation.controller.js";
 
-// Get all reservations (with optional hotel filter)
+// Get all reservations
 reservationRouter.get("/", getReservations);
 
-// Get upcoming check-ins for a hotel
-reservationRouter.get("/hotel/:hotelId/upcoming-checkins", getUpcomingCheckIns);
+// Get upcoming check-ins
+reservationRouter.get("/upcoming-checkins", getUpcomingCheckIns);
 
-// Get current check-outs for a hotel
-reservationRouter.get("/hotel/:hotelId/current-checkouts", getCurrentCheckOuts);
-
-// Get reservations by hotel ID
-reservationRouter.get("/hotel/:hotelId", getReservationsByHotel);
+// Get current check-outs
+reservationRouter.get("/current-checkouts", getCurrentCheckOuts);
 
 // Get reservations by user ID
 reservationRouter.get("/user/:userId", getReservationsByUser);

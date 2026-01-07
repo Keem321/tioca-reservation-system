@@ -1,32 +1,15 @@
 import RoomService from "../services/room.service.js";
 
 /**
- * Get all rooms (optionally filtered by hotel)
- * @route GET /api/rooms?hotelId=xxx
+ * Get all rooms
+ * @route GET /api/rooms
  * @param {import('express').Request} req - Express request object
  * @param {import('express').Response} res - Express response object
  * @returns {void}
  */
 export async function getRooms(req, res) {
 	try {
-		const { hotelId } = req.query;
-		const rooms = await RoomService.getAllRooms(hotelId);
-		res.json(rooms);
-	} catch (err) {
-		res.status(500).json({ error: err.message });
-	}
-}
-
-/**
- * Get rooms by hotel ID
- * @route GET /api/rooms/hotel/:hotelId
- * @param {import('express').Request} req - Express request object
- * @param {import('express').Response} res - Express response object
- * @returns {void}
- */
-export async function getRoomsByHotel(req, res) {
-	try {
-		const rooms = await RoomService.getRoomsByHotelId(req.params.hotelId);
+		const rooms = await RoomService.getAllRooms();
 		res.json(rooms);
 	} catch (err) {
 		res.status(500).json({ error: err.message });
@@ -131,14 +114,13 @@ export async function updateRoomStatus(req, res) {
 
 /**
  * Get available rooms for date range
- * @route GET /api/rooms/hotel/:hotelId/available?checkIn=xxx&checkOut=xxx
+ * @route GET /api/rooms/available?checkIn=xxx&checkOut=xxx
  * @param {import('express').Request} req - Express request object
  * @param {import('express').Response} res - Express response object
  * @returns {void}
  */
 export async function getAvailableRooms(req, res) {
 	try {
-		const { hotelId } = req.params;
 		const { checkIn, checkOut } = req.query;
 
 		if (!checkIn || !checkOut) {
@@ -147,11 +129,7 @@ export async function getAvailableRooms(req, res) {
 				.json({ error: "Check-in and check-out dates are required" });
 		}
 
-		const rooms = await RoomService.getAvailableRooms(
-			hotelId,
-			checkIn,
-			checkOut
-		);
+		const rooms = await RoomService.getAvailableRooms(checkIn, checkOut);
 		res.json(rooms);
 	} catch (err) {
 		res.status(400).json({ error: err.message });
