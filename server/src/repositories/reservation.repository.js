@@ -8,7 +8,7 @@ class ReservationRepository {
 	 */
 	async findAll(filter = {}) {
 		return await Reservation.find(filter)
-			.populate("roomId", "roomNumber roomType pricePerNight")
+			.populate("roomId", "podId quality floor pricePerNight")
 			.populate("userId", "name email")
 			.sort({ createdAt: -1 });
 	}
@@ -31,7 +31,7 @@ class ReservationRepository {
 	 */
 	async findByUserId(userId) {
 		return await Reservation.find({ userId })
-			.populate("roomId", "roomNumber roomType")
+			.populate("roomId", "podId quality floor")
 			.sort({ checkInDate: -1 });
 	}
 
@@ -42,7 +42,7 @@ class ReservationRepository {
 	 */
 	async findById(id) {
 		return await Reservation.findById(id)
-			.populate("roomId", "roomNumber roomType pricePerNight amenities")
+			.populate("roomId", "podId quality floor pricePerNight amenities")
 			.populate("userId", "name email");
 	}
 
@@ -67,7 +67,7 @@ class ReservationRepository {
 			new: true,
 			runValidators: true,
 		})
-			.populate("roomId", "roomNumber roomType")
+			.populate("roomId", "podId quality floor")
 			.populate("userId", "name email");
 	}
 
@@ -142,7 +142,7 @@ class ReservationRepository {
 			checkInDate: { $gte: today, $lte: futureDate },
 			status: { $in: ["confirmed", "pending"] },
 		})
-			.populate("roomId", "roomNumber roomType")
+			.populate("roomId", "podId quality floor")
 			.populate("userId", "name email")
 			.sort({ checkInDate: 1 });
 	}
@@ -161,7 +161,7 @@ class ReservationRepository {
 			checkOutDate: { $gte: today, $lt: tomorrow },
 			status: "checked-in",
 		})
-			.populate("roomId", "roomNumber roomType")
+			.populate("roomId", "podId quality floor")
 			.populate("userId", "name email")
 			.sort({ checkOutDate: 1 });
 	}

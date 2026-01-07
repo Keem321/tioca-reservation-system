@@ -3,7 +3,6 @@ import { Schema, model } from "mongoose";
 const roomSchema = new Schema(
 	{
 		podId: { type: String, required: true }, // User-friendly identifier: e.g., "301" for Floor 3, Pod 1
-		roomNumber: { type: String }, // Legacy field (deprecated, use podId instead)
 		quality: {
 			type: String,
 			enum: [
