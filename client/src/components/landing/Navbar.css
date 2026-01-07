@@ -148,6 +148,8 @@
 	font-weight: 600;
 	transition: all 0.2s;
 	box-shadow: var(--shadow-sm);
+	text-decoration: none;
+	display: inline-block;
 }
 
 .navbar__book-button:hover {

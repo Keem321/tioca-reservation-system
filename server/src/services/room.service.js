@@ -122,6 +122,8 @@ class RoomService {
 	 * Get available rooms for a date range
 	 * @param {Date} checkIn - Check-in date
 	 * @param {Date} checkOut - Check-out date
+	 * @param {string} [floor] - Optional floor filter
+	 * @param {string} [quality] - Optional quality filter
 	 * @returns {Promise<Array>}
 	 */
 	async getAvailableRooms(checkIn, checkOut) {

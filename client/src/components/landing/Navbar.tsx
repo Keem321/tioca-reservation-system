@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,6 +16,8 @@ import "./Navbar.css";
  */
 const Navbar: React.FC = () => {
 	const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+	const location = useLocation();
+	const isBookingPage = location.pathname === "/booking";
 	const [managerMenuOpen, setManagerMenuOpen] = useState(false);
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
@@ -40,15 +43,31 @@ const Navbar: React.FC = () => {
 			</button>
 
 			<div className="navbar__links">
-				<a href="#rooms" className="navbar__link">
-					Rooms
-				</a>
-				<a href="#amenities" className="navbar__link">
-					Amenities
-				</a>
-				<a href="#location" className="navbar__link">
-					Location
-				</a>
+				{!isBookingPage ? (
+					<>
+						<a href="#rooms" className="navbar__link">
+							Rooms
+						</a>
+						<a href="#amenities" className="navbar__link">
+							Amenities
+						</a>
+						<a href="#location" className="navbar__link">
+							Location
+						</a>
+					</>
+				) : (
+					<>
+						<Link to="/#rooms" className="navbar__link">
+							Rooms
+						</Link>
+						<Link to="/#amenities" className="navbar__link">
+							Amenities
+						</Link>
+						<Link to="/#location" className="navbar__link">
+							Location
+						</Link>
+					</>
+				)}
 
 				{/* Manager dropdown - only show for logged-in managers */}
 				{isManager && (
@@ -149,16 +168,15 @@ const Navbar: React.FC = () => {
 					)}
 				</div>
 
-				<button
-					className="navbar__book-button"
-					onClick={() => {
-						document
-							.querySelector(".hero")
-							?.scrollIntoView({ behavior: "smooth" });
-					}}
-				>
-					Book Now
-				</button>
+				{isBookingPage ? (
+					<Link to="/" className="navbar__book-button">
+						Home
+					</Link>
+				) : (
+					<Link to="/booking" className="navbar__book-button">
+						Book Now
+					</Link>
+				)}
 			</div>
 		</nav>
 	);
