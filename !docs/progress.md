@@ -13,13 +13,12 @@
 - Role-Based Access Control
   - Status: **Implemented**. Role model on User; middleware (`requireRole`, `requireAuth`) protects routes; RoleGuard component for UI; ProtectedRoute wrapped with `requiredRole="manager"` for manager pages.
 - User Profiles
-
-  - Status: **Not implemented**. No profile endpoints or UI; no saved bookings/payment prefs.
+  - Status: **Implemented**. Profile endpoints (`/api/user/profile`, change password, active reservations) and a Profile page with edit form and a list of upcoming reservations.
 
 - Room Management
 
-  - Add/Edit/Delete Rooms: **Partial** (Node). CRUD endpoints and manager UI exist; single-hotel; podId unique. Amenities/pricing editable. No multi-hotel.
-  - Availability: **Partial**. Availability endpoint exists but does not check overlapping reservations yet (uses status only).
+  - Add/Edit/Delete Rooms: **Implemented (basic)**. CRUD endpoints and initial manager UI exist; single-hotel; `podId` unique. Amenities/pricing editable. A new management view adds search/filtering and by-floor overview.
+  - Availability: **Partial**. Date-range availability endpoint exists; overlap prevention enforced in reservation service; management view surfaces booked rooms in the next two weeks and by-floor availability over a selected date range.
   - Capacity limits: **Implemented for reservations**. Service enforces room capacity on create/update.
 
 - Reservation Management
