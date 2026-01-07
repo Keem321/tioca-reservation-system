@@ -26,6 +26,9 @@ const googleStrategy = new GoogleStrategy(
 				providerId: profile.id,
 			});
 			if (user) {
+				if (!user.role) {
+					user.role = "user";
+				}
 				user.lastLogin = new Date();
 				await user.save();
 				return done(null, user);
@@ -35,6 +38,9 @@ const googleStrategy = new GoogleStrategy(
 			if (email) {
 				user = await User.findOne({ email });
 				if (user) {
+					if (!user.role) {
+						user.role = "user";
+					}
 					// Attach provider info to the existing account and update lastLogin
 					user.provider = "google";
 					user.providerId = profile.id;
@@ -50,6 +56,7 @@ const googleStrategy = new GoogleStrategy(
 				providerId: profile.id,
 				email,
 				name: profile.displayName,
+				role: "user",
 				lastLogin: new Date(),
 			});
 			try {

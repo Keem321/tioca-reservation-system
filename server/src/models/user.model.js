@@ -6,9 +6,20 @@ const userSchema = new mongoose.Schema({
 	name: { type: String },
 	email: { type: String, required: true, unique: true },
 	password: { type: String }, // Only for local users
-	avatar: { type: String },
+	role: {
+		type: String,
+		enum: ["user", "manager", "admin"],
+		default: "user",
+	},
 	createdAt: { type: Date, default: Date.now },
 	lastLogin: { type: Date },
+});
+
+// Normalize missing roles on legacy users so auth responses always include a role
+userSchema.pre("save", function assignDefaultRole() {
+	if (!this.role) {
+		this.role = "user";
+	}
 });
 
 const User = mongoose.model("User", userSchema);

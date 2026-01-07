@@ -1,5 +1,6 @@
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
+import passport from "passport";
 import User from "../models/user.model.js";
 
 const localStrategy = new LocalStrategy(
@@ -23,5 +24,7 @@ const localStrategy = new LocalStrategy(
 		}
 	}
 );
+
+passport.use(localStrategy);
 
 export default localStrategy;

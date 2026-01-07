@@ -16,18 +16,9 @@ export const reservationsApi = createApi({
 	}),
 	tagTypes: ["Reservation"],
 	endpoints: (builder) => ({
-		// Get all reservations (optionally filtered by hotelId)
-		getReservations: builder.query<Reservation[], string | void>({
-			query: (hotelId) => (hotelId ? `?hotelId=${hotelId}` : "/"),
-			providesTags: ["Reservation"],
-		}),
-		// Get reservations by hotel ID
-		getReservationsByHotel: builder.query<
-			Reservation[],
-			{ hotelId: string; status?: string }
-		>({
-			query: ({ hotelId, status }) =>
-				status ? `/hotel/${hotelId}?status=${status}` : `/hotel/${hotelId}`,
+		// Get all reservations
+		getReservations: builder.query<Reservation[], void>({
+			query: () => "/",
 			providesTags: ["Reservation"],
 		}),
 		// Get reservations by user ID
@@ -112,15 +103,14 @@ export const reservationsApi = createApi({
 		// Get upcoming check-ins
 		getUpcomingCheckIns: builder.query<
 			Reservation[],
-			{ hotelId: string; days?: number }
+			{ days?: number }
 		>({
-			query: ({ hotelId, days = 7 }) =>
-				`/hotel/${hotelId}/upcoming-checkins?days=${days}`,
+			query: ({ days = 7 }) => `/upcoming-checkins?days=${days}`,
 			providesTags: ["Reservation"],
 		}),
 		// Get current check-outs
-		getCurrentCheckOuts: builder.query<Reservation[], string>({
-			query: (hotelId) => `/hotel/${hotelId}/current-checkouts`,
+		getCurrentCheckOuts: builder.query<Reservation[], string | void>({
+			query: () => `/current-checkouts`,
 			providesTags: ["Reservation"],
 		}),
 	}),
@@ -128,7 +118,6 @@ export const reservationsApi = createApi({
 
 export const {
 	useGetReservationsQuery,
-	useGetReservationsByHotelQuery,
 	useGetReservationsByUserQuery,
 	useGetReservationByIdQuery,
 	useCreateReservationMutation,

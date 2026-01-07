@@ -10,6 +10,28 @@
 	margin-bottom: 20px;
 }
 
+.rm-tabs {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	margin-bottom: 16px;
+}
+.rm-tabs .spacer {
+	flex: 1;
+}
+.rm-tabs button {
+	padding: 8px 14px;
+	border: 1px solid #ddd;
+	background: #fff;
+	border-radius: 6px;
+	cursor: pointer;
+}
+.rm-tabs button.active {
+	background: #007bff;
+	border-color: #007bff;
+	color: #fff;
+}
+
 .filters {
 	display: flex;
 	gap: 20px;
@@ -44,6 +66,18 @@
 
 .filters button:hover {
 	background: #0056b3;
+}
+
+.filters .date-range {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+}
+.filters input[type="text"],
+.filters input[type="date"] {
+	padding: 8px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
 }
 
 .room-form {
@@ -246,4 +280,39 @@
 .zone-couples {
 	background: #ffeaa7;
 	color: #e84393;
+}
+
+/* Floor overview */
+.floor-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 16px;
+}
+.floor-card {
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	padding: 16px;
+}
+.floor-card h3 {
+	margin: 0 0 10px;
+	text-transform: capitalize;
+}
+.floor-card .metrics {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 6px;
+	margin-bottom: 10px;
+	font-size: 14px;
+}
+.floor-card .bar {
+	height: 8px;
+	background: #eee;
+	border-radius: 999px;
+	overflow: hidden;
+	margin-bottom: 6px;
+}
+.floor-card .bar > div {
+	height: 100%;
+	background: #007bff;
 }

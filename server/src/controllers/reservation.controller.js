@@ -1,37 +1,15 @@
 import ReservationService from "../services/reservation.service.js";
 
 /**
- * Get all reservations (optionally filtered by hotel)
- * @route GET /api/reservations?hotelId=xxx
+ * Get all reservations
+ * @route GET /api/reservations
  * @param {import('express').Request} req - Express request object
  * @param {import('express').Response} res - Express response object
  * @returns {void}
  */
 export async function getReservations(req, res) {
 	try {
-		const { hotelId } = req.query;
-		const reservations = await ReservationService.getAllReservations(hotelId);
-		res.json(reservations);
-	} catch (err) {
-		res.status(500).json({ error: err.message });
-	}
-}
-
-/**
- * Get reservations by hotel ID
- * @route GET /api/reservations/hotel/:hotelId
- * @param {import('express').Request} req - Express request object
- * @param {import('express').Response} res - Express response object
- * @returns {void}
- */
-export async function getReservationsByHotel(req, res) {
-	try {
-		const { status } = req.query;
-		const filters = status ? { status } : {};
-		const reservations = await ReservationService.getReservationsByHotelId(
-			req.params.hotelId,
-			filters
-		);
+		const reservations = await ReservationService.getAllReservations();
 		res.json(reservations);
 	} catch (err) {
 		res.status(500).json({ error: err.message });
@@ -196,20 +174,16 @@ export async function checkOut(req, res) {
 }
 
 /**
- * Get upcoming check-ins for a hotel
- * @route GET /api/reservations/hotel/:hotelId/upcoming-checkins?days=7
+ * Get upcoming check-ins
+ * @route GET /api/reservations/upcoming-checkins?days=7
  * @param {import('express').Request} req - Express request object
  * @param {import('express').Response} res - Express response object
  * @returns {void}
  */
 export async function getUpcomingCheckIns(req, res) {
 	try {
-		const { hotelId } = req.params;
 		const days = parseInt(req.query.days) || 7;
-		const reservations = await ReservationService.getUpcomingCheckIns(
-			hotelId,
-			days
-		);
+		const reservations = await ReservationService.getUpcomingCheckIns(days);
 		res.json(reservations);
 	} catch (err) {
 		res.status(500).json({ error: err.message });
@@ -217,17 +191,15 @@ export async function getUpcomingCheckIns(req, res) {
 }
 
 /**
- * Get current check-outs for a hotel
- * @route GET /api/reservations/hotel/:hotelId/current-checkouts
+ * Get current check-outs
+ * @route GET /api/reservations/current-checkouts
  * @param {import('express').Request} req - Express request object
  * @param {import('express').Response} res - Express response object
  * @returns {void}
  */
 export async function getCurrentCheckOuts(req, res) {
 	try {
-		const reservations = await ReservationService.getCurrentCheckOuts(
-			req.params.hotelId
-		);
+		const reservations = await ReservationService.getCurrentCheckOuts();
 		res.json(reservations);
 	} catch (err) {
 		res.status(500).json({ error: err.message });

@@ -2,9 +2,7 @@ import { Schema, model } from "mongoose";
 
 const roomSchema = new Schema(
 	{
-		hotelId: { type: Schema.Types.ObjectId, ref: "Hotel", required: true },
 		podId: { type: String, required: true }, // User-friendly identifier: e.g., "301" for Floor 3, Pod 1
-		roomNumber: { type: String }, // Legacy field (deprecated, use podId instead)
 		quality: {
 			type: String,
 			enum: [
@@ -39,8 +37,8 @@ const roomSchema = new Schema(
 	{ timestamps: true }
 );
 
-// Compound index to ensure unique pod IDs per hotel
-roomSchema.index({ hotelId: 1, podId: 1 }, { unique: true });
+// podId must be globally unique
+roomSchema.index({ podId: 1 }, { unique: true });
 
 // Virtual getter for capacity: 2 for couples floor, 1 for all others
 roomSchema.virtual("capacity").get(function () {

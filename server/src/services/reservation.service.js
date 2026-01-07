@@ -3,23 +3,12 @@ import RoomRepository from "../repositories/room.repository.js";
 
 class ReservationService {
 	/**
-	 * Get all reservations with optional hotel filter
-	 * @param {string} hotelId - Optional hotel ID filter
+	 * Get all reservations with optional filters
+	 * @param {Object} filters - Optional filters (status, date range, etc.)
 	 * @returns {Promise<Array>}
 	 */
-	async getAllReservations(hotelId = null) {
-		const filter = hotelId ? { hotelId } : {};
-		return await ReservationRepository.findAll(filter);
-	}
-
-	/**
-	 * Get reservations by hotel ID
-	 * @param {string} hotelId - Hotel ID
-	 * @param {Object} filters - Additional filters (status, date range, etc.)
-	 * @returns {Promise<Array>}
-	 */
-	async getReservationsByHotelId(hotelId, filters = {}) {
-		return await ReservationRepository.findByHotelId(hotelId, filters);
+	async getAllReservations(filters = {}) {
+		return await ReservationRepository.findAll(filters);
 	}
 
 	/**
@@ -47,7 +36,6 @@ class ReservationService {
 	 */
 	async createReservation(reservationData) {
 		const {
-			hotelId,
 			roomId,
 			userId,
 			guestName,
@@ -60,7 +48,6 @@ class ReservationService {
 
 		// Validate required fields
 		if (
-			!hotelId ||
 			!roomId ||
 			!userId ||
 			!guestName ||
@@ -296,22 +283,20 @@ class ReservationService {
 	}
 
 	/**
-	 * Get upcoming check-ins for a hotel
-	 * @param {string} hotelId - Hotel ID
+	 * Get upcoming check-ins
 	 * @param {number} days - Number of days to look ahead
 	 * @returns {Promise<Array>}
 	 */
-	async getUpcomingCheckIns(hotelId, days = 7) {
-		return await ReservationRepository.findUpcomingCheckIns(hotelId, days);
+	async getUpcomingCheckIns(days = 7) {
+		return await ReservationRepository.findUpcomingCheckIns(days);
 	}
 
 	/**
-	 * Get current check-outs for a hotel
-	 * @param {string} hotelId - Hotel ID
+	 * Get current check-outs
 	 * @returns {Promise<Array>}
 	 */
-	async getCurrentCheckOuts(hotelId) {
-		return await ReservationRepository.findCurrentCheckOuts(hotelId);
+	async getCurrentCheckOuts() {
+		return await ReservationRepository.findCurrentCheckOuts();
 	}
 
 	/**

@@ -23,5 +23,3 @@ dist-ssr
 *.sln
 *.sw?
 
-# mongoDB test data import file
-*.mongodb.js

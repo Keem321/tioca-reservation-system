@@ -2,22 +2,12 @@ import RoomRepository from "../repositories/room.repository.js";
 
 class RoomService {
 	/**
-	 * Get all rooms with optional hotel filter
-	 * @param {string} hotelId - Optional hotel ID filter
+	 * Get all rooms
+	 * @param {Object} filter - Optional filter criteria
 	 * @returns {Promise<Array>}
 	 */
-	async getAllRooms(hotelId = null) {
-		const filter = hotelId ? { hotelId } : {};
+	async getAllRooms(filter = {}) {
 		return await RoomRepository.findAll(filter);
-	}
-
-	/**
-	 * Get rooms by hotel ID
-	 * @param {string} hotelId - Hotel ID
-	 * @returns {Promise<Array>}
-	 */
-	async getRoomsByHotelId(hotelId) {
-		return await RoomRepository.findByHotelId(hotelId);
 	}
 
 	/**
@@ -36,11 +26,11 @@ class RoomService {
 	 */
 	async createRoom(roomData) {
 		// Validate required fields
-		const { hotelId, quality, floor, pricePerNight } = roomData;
+		const { quality, floor, pricePerNight } = roomData;
 
-		if (!hotelId || !quality || !floor || pricePerNight === undefined) {
+		if (!quality || !floor || pricePerNight === undefined) {
 			throw new Error(
-				"Missing required fields (hotelId, quality, floor, pricePerNight)"
+				"Missing required fields (quality, floor, pricePerNight)"
 			);
 		}
 
@@ -59,7 +49,7 @@ class RoomService {
 
 		// Auto-generate pod ID if not provided
 		if (!roomData.podId) {
-			roomData.podId = await RoomRepository.generateNextPodId(hotelId, floor);
+			roomData.podId = await RoomRepository.generateNextPodId(floor);
 		}
 
 		// Create the room
@@ -130,14 +120,13 @@ class RoomService {
 
 	/**
 	 * Get available rooms for a date range
-	 * @param {string} hotelId - Hotel ID
 	 * @param {Date} checkIn - Check-in date
 	 * @param {Date} checkOut - Check-out date
 	 * @param {string} [floor] - Optional floor filter
 	 * @param {string} [quality] - Optional quality filter
 	 * @returns {Promise<Array>}
 	 */
-	async getAvailableRooms(hotelId, checkIn, checkOut, floor, quality) {
+	async getAvailableRooms(checkIn, checkOut) {
 		if (!checkIn || !checkOut) {
 			throw new Error("Check-in and check-out dates are required");
 		}
@@ -146,13 +135,7 @@ class RoomService {
 			throw new Error("Check-out date must be after check-in date");
 		}
 
-		return await RoomRepository.findAvailableRooms(
-			hotelId,
-			checkIn,
-			checkOut,
-			floor,
-			quality
-		);
+		return await RoomRepository.findAvailableRooms(checkIn, checkOut);
 	}
 }
 

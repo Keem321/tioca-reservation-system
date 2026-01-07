@@ -2,7 +2,6 @@ import { Schema, model } from "mongoose";
 
 const reservationSchema = new Schema(
 	{
-		hotelId: { type: Schema.Types.ObjectId, ref: "Hotel", required: true },
 		roomId: { type: Schema.Types.ObjectId, ref: "Room", required: true },
 		userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
 		guestName: { type: String, required: true },
@@ -30,7 +29,6 @@ const reservationSchema = new Schema(
 );
 
 // Indexes for efficient querying
-reservationSchema.index({ hotelId: 1, status: 1 });
 reservationSchema.index({ roomId: 1, checkInDate: 1, checkOutDate: 1 });
 reservationSchema.index({ userId: 1 });
 

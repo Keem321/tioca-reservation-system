@@ -8,23 +8,9 @@ class ReservationRepository {
 	 */
 	async findAll(filter = {}) {
 		return await Reservation.find(filter)
-			.populate("hotelId", "name address")
-			.populate("roomId", "roomNumber roomType pricePerNight")
+			.populate("roomId", "podId quality floor pricePerNight")
 			.populate("userId", "name email")
 			.sort({ createdAt: -1 });
-	}
-
-	/**
-	 * Get reservations by hotel ID
-	 * @param {string} hotelId - Hotel ID
-	 * @param {Object} additionalFilter - Additional filter criteria
-	 * @returns {Promise<Array>}
-	 */
-	async findByHotelId(hotelId, additionalFilter = {}) {
-		return await Reservation.find({ hotelId, ...additionalFilter })
-			.populate("roomId", "roomNumber roomType pricePerNight")
-			.populate("userId", "name email")
-			.sort({ checkInDate: -1 });
 	}
 
 	/**
@@ -45,8 +31,7 @@ class ReservationRepository {
 	 */
 	async findByUserId(userId) {
 		return await Reservation.find({ userId })
-			.populate("hotelId", "name address")
-			.populate("roomId", "roomNumber roomType")
+			.populate("roomId", "podId quality floor")
 			.sort({ checkInDate: -1 });
 	}
 
@@ -57,8 +42,7 @@ class ReservationRepository {
 	 */
 	async findById(id) {
 		return await Reservation.findById(id)
-			.populate("hotelId", "name address phone")
-			.populate("roomId", "roomNumber roomType pricePerNight amenities")
+			.populate("roomId", "podId quality floor pricePerNight amenities")
 			.populate("userId", "name email");
 	}
 
@@ -83,8 +67,7 @@ class ReservationRepository {
 			new: true,
 			runValidators: true,
 		})
-			.populate("hotelId", "name address")
-			.populate("roomId", "roomNumber roomType")
+			.populate("roomId", "podId quality floor")
 			.populate("userId", "name email");
 	}
 
@@ -145,44 +128,40 @@ class ReservationRepository {
 	}
 
 	/**
-	 * Get upcoming check-ins for a hotel
-	 * @param {string} hotelId - Hotel ID
+	 * Get upcoming check-ins
 	 * @param {number} days - Number of days to look ahead
 	 * @returns {Promise<Array>}
 	 */
-	async findUpcomingCheckIns(hotelId, days = 7) {
+	async findUpcomingCheckIns(days = 7) {
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
 		const futureDate = new Date(today);
 		futureDate.setDate(futureDate.getDate() + days);
 
 		return await Reservation.find({
-			hotelId,
 			checkInDate: { $gte: today, $lte: futureDate },
 			status: { $in: ["confirmed", "pending"] },
 		})
-			.populate("roomId", "roomNumber roomType")
+			.populate("roomId", "podId quality floor")
 			.populate("userId", "name email")
 			.sort({ checkInDate: 1 });
 	}
 
 	/**
-	 * Get current check-outs for a hotel
-	 * @param {string} hotelId - Hotel ID
+	 * Get current check-outs
 	 * @returns {Promise<Array>}
 	 */
-	async findCurrentCheckOuts(hotelId) {
+	async findCurrentCheckOuts() {
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
 		const tomorrow = new Date(today);
 		tomorrow.setDate(tomorrow.getDate() + 1);
 
 		return await Reservation.find({
-			hotelId,
 			checkOutDate: { $gte: today, $lt: tomorrow },
 			status: "checked-in",
 		})
-			.populate("roomId", "roomNumber roomType")
+			.populate("roomId", "podId quality floor")
 			.populate("userId", "name email")
 			.sort({ checkOutDate: 1 });
 	}

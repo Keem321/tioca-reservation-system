@@ -20,14 +20,9 @@ export const roomsApi = createApi({
 	}),
 	tagTypes: ["Room"],
 	endpoints: (builder) => ({
-		// Get all rooms (optionally filtered by hotelId)
-		getRooms: builder.query<Room[], string | void>({
-			query: (hotelId) => (hotelId ? `?hotelId=${hotelId}` : "/"),
-			providesTags: ["Room"],
-		}),
-		// Get rooms by hotel ID
-		getRoomsByHotel: builder.query<Room[], string>({
-			query: (hotelId) => `/hotel/${hotelId}`,
+		// Get all rooms
+		getRooms: builder.query<Room[], void>({
+			query: () => "/",
 			providesTags: ["Room"],
 		}),
 		// Get a single room by ID
@@ -100,7 +95,6 @@ export const roomsApi = createApi({
 
 export const {
 	useGetRoomsQuery,
-	useGetRoomsByHotelQuery,
 	useGetRoomByIdQuery,
 	useCreateRoomMutation,
 	useUpdateRoomMutation,

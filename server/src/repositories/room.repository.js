@@ -2,29 +2,12 @@ import Room from "../models/room.model.js";
 
 class RoomRepository {
 	/**
-	 * Get all rooms with optional filtering by hotel
+	 * Get all rooms
 	 * @param {Object} filter - Filter criteria
 	 * @returns {Promise<Array>}
 	 */
 	async findAll(filter = {}) {
-		return await Room.find(filter)
-			.populate("hotelId", "name address")
-			.sort({ createdAt: -1 });
-	}
-
-	/**
-	 * Get rooms by hotel ID
-	 * @param {string} hotelId - Hotel ID
-	 * @returns {Promise<Array>}
-	 */
-	async findByHotelId(hotelId) {
-		const floorOrder = {
-			"women-only": 0,
-			"men-only": 1,
-			couples: 2,
-			business: 3,
-		};
-		return await Room.find({ hotelId }).sort({ floor: 1, podId: 1 });
+		return await Room.find(filter).sort({ createdAt: -1 });
 	}
 
 	/**
@@ -33,7 +16,7 @@ class RoomRepository {
 	 * @returns {Promise<Object|null>}
 	 */
 	async findById(id) {
-		return await Room.findById(id).populate("hotelId", "name address");
+		return await Room.findById(id);
 	}
 
 	/**
@@ -70,17 +53,15 @@ class RoomRepository {
 
 	/**
 	 * Get available rooms for a date range
-	 * @param {string} hotelId - Hotel ID
 	 * @param {Date} checkIn - Check-in date
 	 * @param {Date} checkOut - Check-out date
 	 * @param {string} [floor] - Optional floor filter
 	 * @param {string} [quality] - Optional quality filter
 	 * @returns {Promise<Array>}
 	 */
-	async findAvailableRooms(hotelId, checkIn, checkOut, floor, quality) {
+	async findAvailableRooms(checkIn, checkOut) {
 		// This will be enhanced later with reservation checking
-		const filter = {
-			hotelId,
+		return await Room.find({
 			status: { $in: ["available", "reserved"] },
 		};
 
@@ -99,11 +80,10 @@ class RoomRepository {
 	 * Generate next pod ID for a floor/zone (format: FloorNumber + 2-digit sequence)
 	 * Maps zones to floor numbers: women-only=1, men-only=2, couples=3, business=4
 	 * E.g., "301" for couples floor, Pod 1
-	 * @param {string} hotelId - Hotel ID
 	 * @param {string} floorZone - Floor zone (women-only, men-only, couples, business)
 	 * @returns {Promise<string>}
 	 */
-	async generateNextPodId(hotelId, floorZone) {
+	async generateNextPodId(floorZone) {
 		// Map zone strings to numeric floors
 		const zoneToFloor = {
 			"women-only": 1,
@@ -122,7 +102,6 @@ class RoomRepository {
 		const regex = new RegExp(`^${floorPrefix}\\d{2}$`);
 
 		const lastPod = await Room.findOne({
-			hotelId,
 			podId: { $regex: regex },
 		}).sort({ podId: -1 });
 
