@@ -59,11 +59,9 @@ class RoomRepository {
 	 * @param {string} [quality] - Optional quality filter
 	 * @returns {Promise<Array>}
 	 */
-	async findAvailableRooms(checkIn, checkOut) {
-		// This will be enhanced later with reservation checking
-		return await Room.find({
-			status: { $in: ["available", "reserved"] },
-		};
+	async findAvailableRooms(checkIn, checkOut, floor, quality) {
+		// Basic filter: exclude maintenance. Reservation overlap checks can be added later.
+		const filter = { status: { $ne: "maintenance" } };
 
 		if (floor) {
 			filter.floor = floor;
