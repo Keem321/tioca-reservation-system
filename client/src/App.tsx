@@ -9,7 +9,6 @@ import Dashboard from "./pages/Dashboard";
 import Booking from "./pages/Booking";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
-import Booking from "./pages/Booking";
 import RoomManagement from "./pages/RoomManagement";
 import ReservationManagement from "./pages/ReservationManagement";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -41,7 +40,6 @@ function App() {
 					<Route path="/dashboard" element={<Dashboard />} />
 					<Route path="/booking" element={<Booking />} />
 					<Route path="/login" element={<Login />} />
-					<Route path="/booking" element={<Booking />} />
 					<Route
 						path="/profile"
 						element={
