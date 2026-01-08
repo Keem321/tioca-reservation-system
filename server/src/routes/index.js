@@ -8,6 +8,7 @@ import { Router } from "express";
 import roomRouter from "./room.routes.js";
 import reservationRouter from "./reservation.routes.js";
 import userRouter from "./user.routes.js";
+import paymentRouter from "./payment.routes.js";
 import authRouter from "./auth.js";
 
 // middleware MUST import strategies to register them with passport
@@ -19,6 +20,7 @@ const apiRouter = Router();
 apiRouter.use("/rooms", roomRouter);
 apiRouter.use("/reservations", reservationRouter);
 apiRouter.use("/user", userRouter);
+apiRouter.use("/payments", paymentRouter);
 
 // Public router (for non-API routes)
 const publicRouter = Router();

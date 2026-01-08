@@ -1,5 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setSelectedRoom } from "../../features/bookingSlice";
 import type { Room } from "../../types/room";
 import "./PodCard.css";
 
@@ -18,6 +20,7 @@ interface PodCardProps {
 
 const PodCard: React.FC<PodCardProps> = ({ pod, nights, checkIn, checkOut }) => {
 	const navigate = useNavigate();
+	const dispatch = useDispatch();
 
 	const getQualityLabel = (quality: string) => {
 		const labels: Record<string, string> = {
@@ -64,27 +67,18 @@ const PodCard: React.FC<PodCardProps> = ({ pod, nights, checkIn, checkOut }) => 
 		pod.floor === "couples" ? `Twin ${getQualityLabel(pod.quality)}` : getQualityLabel(pod.quality);
 
 	const handleBookNow = () => {
-		// TODO: Navigate to booking confirmation page or show booking modal
-		// For now, store booking data in sessionStorage and show alert
-		const bookingData = {
-			roomId: pod._id,
-			hotelId: typeof pod.hotelId === "string" ? pod.hotelId : pod.hotelId._id,
-			checkIn,
-			checkOut,
-			nights,
-			totalPrice,
-			pricePerNight: pod.pricePerNight,
-			roomDetails: {
-				podId: pod.podId,
-				quality: pod.quality,
-				floor: pod.floor,
+		// Store selected room in Redux for booking confirmation
+		dispatch(setSelectedRoom(pod));
+		// Navigate to booking confirmation page
+		navigate("/booking/confirm", {
+			state: {
+				room: pod,
+				checkIn,
+				checkOut,
+				nights,
+				totalPrice,
 			},
-		};
-		sessionStorage.setItem("pendingBooking", JSON.stringify(bookingData));
-		alert(
-			`Selected: ${displayLabel}\n${nights} night(s) - $${totalPrice}\n\nGuest information form coming soon!`
-		);
-		// Future: navigate("/booking/confirm", { state: bookingData });
+		});
 	};
 
 	return (

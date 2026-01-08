@@ -9,6 +9,10 @@ import Dashboard from "./pages/Dashboard";
 import Booking from "./pages/Booking";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
+import Booking from "./pages/Booking";
+import BookingConfirmation from "./pages/BookingConfirmation";
+import Payment from "./pages/Payment";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import RoomManagement from "./pages/RoomManagement";
 import ReservationManagement from "./pages/ReservationManagement";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -40,6 +44,31 @@ function App() {
 					<Route path="/dashboard" element={<Dashboard />} />
 					<Route path="/booking" element={<Booking />} />
 					<Route path="/login" element={<Login />} />
+					<Route path="/booking" element={<Booking />} />
+					<Route
+						path="/booking/confirm"
+						element={
+							<ProtectedRoute>
+								<BookingConfirmation />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/payment"
+						element={
+							<ProtectedRoute>
+								<Payment />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/payment/success"
+						element={
+							<ProtectedRoute>
+								<PaymentSuccess />
+							</ProtectedRoute>
+						}
+					/>
 					<Route
 						path="/profile"
 						element={

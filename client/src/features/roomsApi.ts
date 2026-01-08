@@ -72,21 +72,20 @@ export const roomsApi = createApi({
 		searchAvailableRooms: builder.query<
 			Room[],
 			{
-				hotelId: string;
 				checkIn: string;
 				checkOut: string;
 				floor?: string;
 				quality?: string;
 			}
 		>({
-			query: ({ hotelId, checkIn, checkOut, floor, quality }) => {
+			query: ({ checkIn, checkOut, floor, quality }) => {
 				const params = new URLSearchParams({
 					checkIn,
 					checkOut,
 				});
 				if (floor) params.append("floor", floor);
 				if (quality) params.append("quality", quality);
-				return `/hotel/${hotelId}/available?${params.toString()}`;
+				return `/available?${params.toString()}`;
 			},
 			providesTags: ["Room"],
 		}),

@@ -119,14 +119,14 @@ class RoomService {
 	}
 
 	/**
-	 * Get available rooms for a date range
-	 * @param {Date} checkIn - Check-in date
-	 * @param {Date} checkOut - Check-out date
+	 * Get available rooms for a date range with optional filters
+	 * @param {string} checkIn - Check-in date
+	 * @param {string} checkOut - Check-out date
 	 * @param {string} [floor] - Optional floor filter
 	 * @param {string} [quality] - Optional quality filter
 	 * @returns {Promise<Array>}
 	 */
-	async getAvailableRooms(checkIn, checkOut) {
+	async getAvailableRooms(checkIn, checkOut, floor, quality) {
 		if (!checkIn || !checkOut) {
 			throw new Error("Check-in and check-out dates are required");
 		}
@@ -135,7 +135,7 @@ class RoomService {
 			throw new Error("Check-out date must be after check-in date");
 		}
 
-		return await RoomRepository.findAvailableRooms(checkIn, checkOut);
+		return await RoomRepository.findAvailableRooms(checkIn, checkOut, floor, quality);
 	}
 }
 
