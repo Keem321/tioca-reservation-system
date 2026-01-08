@@ -26,8 +26,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 		return (
 			<div className="search-results search-results--empty">
 				<p className="search-results__empty-message">
-					No pods available for your selected dates. Please try different dates
-					or quality levels.
+					No pods available for your selected dates. Please try different dates or
+					floor selections.
 				</p>
 			</div>
 		);

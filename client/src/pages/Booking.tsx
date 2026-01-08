@@ -15,7 +15,7 @@ import "./Booking.css";
  */
 
 const Booking: React.FC = () => {
-	const { checkIn, checkOut, zone, quality } = useSelector(
+	const { checkIn, checkOut, zone } = useSelector(
 		(state: RootState) => state.booking
 	);
 	const [shouldSearch, setShouldSearch] = useState(false);
@@ -30,7 +30,6 @@ const Booking: React.FC = () => {
 			checkIn: checkIn || "",
 			checkOut: checkOut || "",
 			floor: zone || undefined,
-			quality: quality || undefined,
 		},
 		{
 			skip: !shouldSearch || !checkIn || !checkOut || !zone,
@@ -46,7 +45,7 @@ const Booking: React.FC = () => {
 	// Reset search when form values change
 	useEffect(() => {
 		setShouldSearch(false);
-	}, [checkIn, checkOut, zone, quality]);
+	}, [checkIn, checkOut, zone]);
 
 	const getNights = () => {
 		if (!checkIn || !checkOut) return 0;

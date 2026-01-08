@@ -1,9 +1,9 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Calendar, Building, Sparkles } from "lucide-react";
-import { setCheckIn, setCheckOut, setZone, setQuality } from "../../features/bookingSlice";
+import { Calendar, Building } from "lucide-react";
+import { setCheckIn, setCheckOut, setZone } from "../../features/bookingSlice";
 import type { RootState } from "../../store";
-import type { PodFloor, PodQuality } from "../../types/room";
+import type { PodFloor } from "../../types/room";
 import "./BookingSearchForm.css";
 
 /**
@@ -20,20 +20,6 @@ const zones: Array<{ value: PodFloor; label: string; icon: string }> = [
 	{ value: "business", label: "Business/Quiet Floor", icon: "💼" },
 ];
 
-const qualities: Array<{
-	value: PodQuality;
-	label: string;
-	price: number;
-	desc: string;
-	womenOnly?: boolean;
-}> = [
-	{ value: "classic", label: "Classic Pearl", price: 65, desc: "Essential comfort" },
-	{ value: "milk", label: "Milk Pearl", price: 75, desc: "Enhanced space" },
-	{ value: "golden", label: "Golden Pearl", price: 95, desc: "Premium experience" },
-	{ value: "crystal", label: "Crystal Boba Suite", price: 155, desc: "First-class luxury" },
-	{ value: "matcha", label: "Matcha Pearl", price: 95, desc: "Women-only exclusive", womenOnly: true },
-];
-
 interface BookingSearchFormProps {
 	onSearch: () => void;
 	isSearching: boolean;
@@ -44,25 +30,15 @@ const BookingSearchForm: React.FC<BookingSearchFormProps> = ({
 	isSearching,
 }) => {
 	const dispatch = useDispatch();
-	const { checkIn, checkOut, zone, quality } = useSelector(
+	const { checkIn, checkOut, zone } = useSelector(
 		(state: RootState) => state.booking
 	);
 
 	const isValid = checkIn && checkOut && checkIn < checkOut && zone;
 
-	const getAvailableQualities = () => {
-		if (!zone) return qualities;
-		if (zone === "women-only") return qualities;
-		return qualities.filter((q) => !q.womenOnly);
-	};
-
 	const handleZoneChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		const newZone = e.target.value as PodFloor;
 		dispatch(setZone(newZone));
-		// Reset quality if zone changes and quality is not compatible
-		if (newZone !== "women-only" && quality === "matcha") {
-			dispatch(setQuality(""));
-		}
 	};
 
 	return (
@@ -127,35 +103,6 @@ const BookingSearchForm: React.FC<BookingSearchFormProps> = ({
 							{zones.map((z) => (
 								<option key={z.value} value={z.value}>
 									{z.icon} {z.label}
-								</option>
-							))}
-						</select>
-					</div>
-				</div>
-
-				{/* Quality Selection (Optional) */}
-				<div className="booking-search-form__field">
-					<label className="booking-search-form__label">
-						Quality Level{" "}
-						<span className="booking-search-form__optional">(Optional)</span>
-					</label>
-					<div className="booking-search-form__input-wrapper">
-						<Sparkles
-							size={18}
-							className="booking-search-form__icon"
-						/>
-						<select
-							value={quality}
-							onChange={(e) =>
-								dispatch(setQuality(e.target.value as PodQuality))
-							}
-							disabled={!zone}
-							className="booking-search-form__input booking-search-form__select"
-						>
-							<option value="">All quality levels</option>
-							{getAvailableQualities().map((q) => (
-								<option key={q.value} value={q.value}>
-									{q.label} - ${q.price}/night - {q.desc}
 								</option>
 							))}
 						</select>

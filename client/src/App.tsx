@@ -9,7 +9,6 @@ import Dashboard from "./pages/Dashboard";
 import Booking from "./pages/Booking";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
-import Booking from "./pages/Booking";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import Payment from "./pages/Payment";
 import PaymentSuccess from "./pages/PaymentSuccess";
