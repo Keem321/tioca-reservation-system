@@ -6,6 +6,10 @@
 - Frontend: React + TypeScript + RTK Query (Vite).
 - Deployment: Procfile present; no Spring stack components.
 
+## TODO
+
+- change pricing to be by base costs (by quality) + per-amenity costs. Currently, pricing is a flat number per room. Business floor and couples floor have higher base costs (implemented as an amenity cost).
+
 ## Requirement Coverage
 
 - Authentication & Authorization
@@ -13,6 +17,7 @@
 - Role-Based Access Control
   - Status: **Implemented**. Role model on User; middleware (`requireRole`, `requireAuth`) protects routes; RoleGuard component for UI; ProtectedRoute wrapped with `requiredRole="manager"` for manager pages.
 - User Profiles
+
   - Status: **Implemented**. Profile endpoints (`/api/user/profile`, change password, active reservations) and a Profile page with edit form and a list of upcoming reservations.
 
 - Room Management
