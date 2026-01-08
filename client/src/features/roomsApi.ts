@@ -68,6 +68,27 @@ export const roomsApi = createApi({
 			}),
 			invalidatesTags: ["Room"],
 		}),
+		// Search available rooms with filters
+		searchAvailableRooms: builder.query<
+			Room[],
+			{
+				checkIn: string;
+				checkOut: string;
+				floor?: string;
+				quality?: string;
+			}
+		>({
+			query: ({ checkIn, checkOut, floor, quality }) => {
+				const params = new URLSearchParams({
+					checkIn,
+					checkOut,
+				});
+				if (floor) params.append("floor", floor);
+				if (quality) params.append("quality", quality);
+				return `/available?${params.toString()}`;
+			},
+			providesTags: ["Room"],
+		}),
 	}),
 });
 
@@ -78,4 +99,5 @@ export const {
 	useUpdateRoomMutation,
 	useDeleteRoomMutation,
 	useUpdateRoomStatusMutation,
+	useSearchAvailableRoomsQuery,
 } = roomsApi;

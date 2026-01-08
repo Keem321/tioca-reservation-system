@@ -1,0 +1,464 @@
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { loadStripe } from "@stripe/stripe-js";
+import type { StripeElementsOptions } from "@stripe/stripe-js";
+import {
+	Elements,
+	CardElement,
+	useStripe,
+	useElements,
+} from "@stripe/react-stripe-js";
+import { useDispatch, useSelector } from "react-redux";
+import {
+	useCreatePaymentIntentMutation,
+	useConfirmPaymentMutation,
+} from "../features/paymentsApi";
+import { resetBooking } from "../features/bookingSlice";
+import type { RootState } from "../store";
+import type { Reservation } from "../types/reservation";
+import Navbar from "../components/landing/Navbar";
+import "./Payment.css";
+
+// Initialize Stripe with publishable key
+// Get from environment variable (must be set in client/.env or client/.env.development)
+const STRIPE_PUBLISHABLE_KEY =
+	import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
+
+// Only load Stripe if we have a valid key
+const stripePromise = STRIPE_PUBLISHABLE_KEY
+	? loadStripe(STRIPE_PUBLISHABLE_KEY)
+	: null;
+
+/**
+ * Payment Form Component
+ * Handles the actual payment form with Stripe Elements
+ */
+const PaymentForm: React.FC<{ reservation: Reservation }> = ({ reservation }) => {
+	const stripe = useStripe();
+	const elements = useElements();
+	const navigate = useNavigate();
+	const dispatch = useDispatch();
+
+	const [isProcessing, setIsProcessing] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [stripeLoadError, setStripeLoadError] = useState<string | null>(null);
+	const [paymentIntentData, setPaymentIntentData] = useState<{
+		clientSecret: string;
+		paymentIntentId: string;
+	} | null>(null);
+	const [createPaymentIntent, { isLoading: isCreatingIntent }] =
+		useCreatePaymentIntentMutation();
+	const [confirmPayment, { isLoading: isConfirming }] =
+		useConfirmPaymentMutation();
+
+	// Check if Stripe loaded successfully
+	useEffect(() => {
+		if (!stripe && stripePromise) {
+			// Check if it's still loading or if there was an error
+			const checkStripe = async () => {
+				try {
+					const stripeInstance = await stripePromise;
+					if (!stripeInstance) {
+						setStripeLoadError(
+							"Stripe failed to initialize. This may be due to an ad blocker blocking Stripe requests. Please disable ad blockers for this site and refresh the page."
+						);
+					}
+				} catch (err) {
+					setStripeLoadError(
+						"Stripe failed to load. This may be due to an ad blocker blocking Stripe requests. Please disable ad blockers for this site and refresh the page."
+					);
+				}
+			};
+			// Give Stripe a moment to load before checking
+			const timeout = setTimeout(() => {
+				if (!stripe) {
+					checkStripe();
+				}
+			}, 2000);
+			return () => clearTimeout(timeout);
+		}
+	}, [stripe]);
+
+	// Calculate total amount in cents
+	const amountInCents = Math.round(reservation.totalPrice * 100);
+
+	// Create payment intent when component mounts
+	useEffect(() => {
+		const createIntent = async () => {
+			try {
+				const result = await createPaymentIntent({
+					reservationId: reservation._id,
+					amount: amountInCents,
+					currency: "usd",
+				}).unwrap();
+				setPaymentIntentData(result);
+			} catch (err) {
+				const error = err as { data?: { error?: string } };
+				setError(
+					error?.data?.error || "Failed to initialize payment. Please try again."
+				);
+			}
+		};
+
+		if (reservation._id && !paymentIntentData) {
+			createIntent();
+		}
+	}, [reservation._id, amountInCents, createPaymentIntent, paymentIntentData]);
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		e.stopPropagation(); // Prevent any form bubbling
+
+		if (!stripe || !elements) {
+			setError("Payment form is not ready. Please wait for Stripe to load.");
+			return;
+		}
+
+		setIsProcessing(true);
+		setError(null);
+
+		const cardElement = elements.getElement(CardElement);
+
+		if (!cardElement) {
+			setError("Card element not found");
+			setIsProcessing(false);
+			return;
+		}
+
+		if (!paymentIntentData) {
+			setError("Payment not initialized. Please refresh the page.");
+			setIsProcessing(false);
+			return;
+		}
+
+		try {
+			// Confirm payment with Stripe
+			const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
+				paymentIntentData.clientSecret,
+				{
+					payment_method: {
+						card: cardElement,
+					},
+				}
+			);
+
+			if (stripeError) {
+				setError(stripeError.message || "Payment failed");
+				setIsProcessing(false);
+				return;
+			}
+
+			if (paymentIntent?.status === "succeeded") {
+				// Confirm payment on backend
+				const confirmResult = await confirmPayment({
+					reservationId: reservation._id,
+					paymentIntentId: paymentIntentData.paymentIntentId,
+				}).unwrap();
+
+				if (confirmResult.success) {
+					// Navigate first, then reset booking state after navigation completes
+					navigate("/payment/success", {
+						state: { reservation: confirmResult.reservation },
+						replace: true, // Replace current history entry to prevent back button issues
+					});
+					// Reset booking state after a brief delay to ensure navigation completes
+					setTimeout(() => {
+						dispatch(resetBooking());
+					}, 100);
+				} else {
+					setError(confirmResult.message || "Payment confirmation failed");
+					setIsProcessing(false);
+				}
+			} else {
+				setError("Payment was not completed");
+				setIsProcessing(false);
+			}
+		} catch (err) {
+			const error = err as { data?: { error?: string }; message?: string };
+			const errorMessage = error?.data?.error || error?.message || "";
+			
+			// Check if it's a network/blocked error
+			if (
+				errorMessage.includes("Failed to fetch") ||
+				errorMessage.includes("ERR_BLOCKED_BY_CLIENT") ||
+				errorMessage.includes("network") ||
+				errorMessage.includes("blocked")
+			) {
+				setError(
+					"Payment processing failed due to network issues. This is often caused by ad blockers blocking Stripe. Please disable ad blockers for this site and try again."
+				);
+			} else {
+				setError(
+					errorMessage || "An error occurred during payment processing. Please try again."
+				);
+			}
+			setIsProcessing(false);
+		}
+	};
+
+	const cardElementOptions = {
+		style: {
+			base: {
+				fontSize: "16px",
+				color: "#424770",
+				"::placeholder": {
+					color: "#aab7c4",
+				},
+			},
+			invalid: {
+				color: "#9e2146",
+			},
+		},
+	};
+
+	// Show error if Stripe failed to load
+	if (stripeLoadError) {
+		return (
+			<div className="payment-form">
+				<div className="payment-form__error">
+					<h3>Stripe Loading Error</h3>
+					<p>{stripeLoadError}</p>
+					<p>
+						Common causes:
+						<ul>
+							<li>Ad blockers blocking Stripe.js requests</li>
+							<li>Browser extensions interfering with Stripe</li>
+							<li>Network connectivity issues</li>
+						</ul>
+					</p>
+					<button
+						onClick={() => window.location.reload()}
+						className="payment-form__submit-button"
+					>
+						Refresh Page
+					</button>
+				</div>
+			</div>
+		);
+	}
+
+	// Show loading state while Stripe initializes
+	if (!stripe || !elements) {
+		return (
+			<div className="payment-form">
+				<div className="payment-form__loading">
+					<p>Loading payment form...</p>
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<form onSubmit={handleSubmit} className="payment-form">
+			<div className="payment-form__section">
+				<label className="payment-form__label">Card Details</label>
+				<div className="payment-form__card-element">
+					<CardElement options={cardElementOptions} />
+				</div>
+			</div>
+
+			{error && (
+				<div className="payment-form__error">
+					<h3>Payment Error</h3>
+					<p>{error}</p>
+					{error.includes("ad blocker") && (
+						<div style={{ marginTop: "1rem", padding: "1rem", background: "rgba(168, 100, 52, 0.1)", borderRadius: "8px" }}>
+							<strong>Quick Fix:</strong>
+							<ol style={{ marginTop: "0.5rem", paddingLeft: "1.5rem" }}>
+								<li>Disable your ad blocker for localhost</li>
+								<li>Or whitelist <code>*.stripe.com</code> and <code>*.stripejs.com</code></li>
+								<li>Refresh the page and try again</li>
+							</ol>
+						</div>
+					)}
+				</div>
+			)}
+
+			<button
+				type="submit"
+				disabled={
+					!stripe ||
+					!paymentIntentData ||
+					isProcessing ||
+					isCreatingIntent ||
+					isConfirming
+				}
+				className="payment-form__submit-button"
+			>
+				{isProcessing || isCreatingIntent || isConfirming
+					? "Processing..."
+					: `Pay $${reservation.totalPrice.toFixed(2)}`}
+			</button>
+		</form>
+	);
+};
+
+/**
+ * Payment Page Component
+ * Main payment page that wraps the payment form with Stripe Elements provider
+ */
+const Payment: React.FC = () => {
+	const location = useLocation();
+	const navigate = useNavigate();
+	const { pendingReservation } = useSelector((state: RootState) => state.booking);
+
+	// Get reservation from location state or Redux store
+	const reservation: Reservation | null =
+		location.state?.reservation || pendingReservation;
+
+	// Redirect if no reservation
+	useEffect(() => {
+		if (!reservation) {
+			navigate("/booking");
+		}
+	}, [reservation, navigate]);
+
+	// Check if Stripe is configured
+	if (!STRIPE_PUBLISHABLE_KEY) {
+		return (
+			<>
+				<Navbar />
+				<div className="payment-page">
+					<div className="payment-page__container">
+						<div className="payment-page__error">
+							<h2>Stripe Not Configured</h2>
+							<p>
+								Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your{" "}
+								<code>client/.env</code> or <code>client/.env.development</code>{" "}
+								file.
+							</p>
+							<p>
+								Example: <code>VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...</code>
+							</p>
+						</div>
+					</div>
+				</div>
+			</>
+		);
+	}
+
+	// Note: stripePromise is a Promise, so we can't check it directly here
+	// The Elements component will handle loading errors
+
+	if (!reservation) {
+		return (
+			<>
+				<Navbar />
+				<div className="payment-page">
+					<div className="payment-page__error">
+						No reservation found. Please start a new booking.
+					</div>
+				</div>
+			</>
+		);
+	}
+
+	// Calculate number of nights
+	const checkIn = new Date(reservation.checkInDate);
+	const checkOut = new Date(reservation.checkOutDate);
+	const nights = Math.ceil(
+		(checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)
+	);
+
+	const elementsOptions: StripeElementsOptions = {
+		mode: "payment",
+		amount: Math.round(reservation.totalPrice * 100),
+		currency: "usd",
+	};
+
+	return (
+		<>
+			<Navbar />
+			<div className="payment-page">
+				<div className="payment-page__container">
+					<div className="payment-page__header">
+						<h1>Complete Your Payment</h1>
+						<p className="payment-page__subtitle">
+							Review your reservation details and complete payment
+						</p>
+					</div>
+
+					{/* Ad Blocker Warning */}
+					<div className="payment-page__adblock-warning" style={{
+						background: "rgba(168, 100, 52, 0.15)",
+						border: "2px solid var(--color-primary)",
+						borderRadius: "12px",
+						padding: "1rem 1.5rem",
+						marginBottom: "2rem",
+						textAlign: "center"
+					}}>
+						<strong style={{ color: "var(--color-text-primary)" }}>
+							⚠️ Important: Ad blockers may prevent payment processing
+						</strong>
+						<p style={{ marginTop: "0.5rem", fontSize: "0.9rem", color: "var(--color-text-secondary)" }}>
+							If you see errors when submitting, please disable your ad blocker for this site or whitelist <code>*.stripe.com</code>
+						</p>
+					</div>
+
+					<div className="payment-page__content">
+						{/* Reservation Summary */}
+						<div className="payment-page__summary">
+							<h2>Reservation Summary</h2>
+							<div className="summary-item">
+								<span className="summary-label">Room:</span>
+								<span className="summary-value">
+									{typeof reservation.roomId === "object"
+										? `Pod ${reservation.roomId.podId} - ${reservation.roomId.quality}`
+										: "Room"}
+								</span>
+							</div>
+							<div className="summary-item">
+								<span className="summary-label">Check-in:</span>
+								<span className="summary-value">
+									{new Date(reservation.checkInDate).toLocaleDateString()}
+								</span>
+							</div>
+							<div className="summary-item">
+								<span className="summary-label">Check-out:</span>
+								<span className="summary-value">
+									{new Date(reservation.checkOutDate).toLocaleDateString()}
+								</span>
+							</div>
+							<div className="summary-item">
+								<span className="summary-label">Guests:</span>
+								<span className="summary-value">
+									{reservation.numberOfGuests}
+								</span>
+							</div>
+							<div className="summary-item">
+								<span className="summary-label">Nights:</span>
+								<span className="summary-value">{nights}</span>
+							</div>
+							<div className="summary-item summary-item--total">
+								<span className="summary-label">Total:</span>
+								<span className="summary-value">
+									${reservation.totalPrice.toFixed(2)}
+								</span>
+							</div>
+						</div>
+
+						{/* Payment Form */}
+						<div className="payment-page__form-container">
+							{stripePromise ? (
+								<Elements stripe={stripePromise} options={elementsOptions}>
+									<PaymentForm reservation={reservation} />
+								</Elements>
+							) : (
+								<div className="payment-form__error">
+									<h3>Stripe Not Configured</h3>
+									<p>
+										Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your
+										environment variables.
+									</p>
+								</div>
+							)}
+						</div>
+					</div>
+				</div>
+			</div>
+		</>
+	);
+};
+
+export default Payment;
+
