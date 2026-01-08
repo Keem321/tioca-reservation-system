@@ -105,6 +105,15 @@ const Navbar: React.FC = () => {
 								>
 									Reservation Management
 								</button>
+								<button
+									onClick={() => {
+										navigate("/manage/payments");
+										setManagerMenuOpen(false);
+									}}
+									className="navbar__dropdown-item"
+								>
+									Payments Management
+								</button>
 							</div>
 						)}
 					</div>
