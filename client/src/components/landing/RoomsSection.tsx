@@ -1,162 +1,190 @@
 import React from "react";
-import { useGetRoomsQuery } from "../../features/roomsApi";
-import type { Room, PodQuality } from "../../types/room";
+import { useNavigate } from "react-router-dom";
 import "./RoomsSection.css";
 
 /**
- * Display data interface for room cards
+ * Capsule type showcase interface
  */
-interface RoomDisplay {
+interface CapsuleType {
 	id: string;
 	name: string;
-	price: number;
-	features: string;
-	available: boolean;
-	capacity: number;
+	priceRange: string;
+	description: string;
+	features: string[];
+	image: string;
+	capacity: string;
+	tag?: string; // Optional tag like "Women Only" or "First Class"
 }
 
 /**
- * Map pod quality to display name
+ * Static capsule type showcase data
+ * This is for advertising/showcasing the types - NOT live room inventory
  */
-const getQualityDisplayName = (quality: PodQuality): string => {
-	const qualityMap: Record<PodQuality, string> = {
-		classic: "Classic Pearl",
-		milk: "Milk Pearl",
-		golden: "Golden Pearl",
-		crystal: "Crystal Boba",
-		matcha: "Matcha Pearl",
-	};
-	return qualityMap[quality];
-};
-
-/**
- * Convert API Room to display format
- */
-const mapRoomToDisplay = (room: Room): RoomDisplay => ({
-	id: room._id,
-	name: getQualityDisplayName(room.quality),
-	price: room.pricePerNight,
-	features: room.description || "Comfortable capsule accommodation",
-	available: room.status === "available",
-	capacity: room.capacity,
-});
+const CAPSULE_TYPES: CapsuleType[] = [
+	{
+		id: "classic",
+		name: "Classic Pearl",
+		priceRange: "from $65/night",
+		description: "Essential comfort for the efficient traveler",
+		features: [
+			"80\"L × 40\"W × 40\"H",
+			"Private single capsule",
+			"Essential amenities",
+			"Perfect for short stays"
+		],
+		image: "/images/capsules/classic-pearl.jpg",
+		capacity: "1 guest",
+	},
+	{
+		id: "milk",
+		name: "Milk Pearl",
+		priceRange: "from $75/night",
+		description: "Enhanced space with premium comfort",
+		features: [
+			"84\"L × 42\"W × 45\"H",
+			"Extra workspace surface",
+			"Premium bedding",
+			"Enhanced privacy"
+		],
+		image: "/images/capsules/milk-pearl.jpg",
+		capacity: "1 guest",
+	},
+	{
+		id: "golden",
+		name: "Golden Pearl",
+		priceRange: "from $95/night",
+		description: "Spacious premium capsule experience",
+		features: [
+			"86\"L × 45\"W × 50\"H",
+			"Upright seating space",
+			"Private storage",
+			"Premium amenities"
+		],
+		image: "/images/capsules/golden-pearl.jpg",
+		capacity: "1 guest",
+	},
+	{
+		id: "matcha",
+		name: "Matcha Pearl",
+		priceRange: "from $95/night",
+		description: "Exclusive women-only premium capsule",
+		features: [
+			"86\"L × 45\"W × 50\"H",
+			"Women-only floor",
+			"Enhanced privacy features",
+			"Spacious layout"
+		],
+		image: "/images/capsules/matcha-pearl.jpg",
+		capacity: "1 guest",
+		tag: "Women Only",
+	},
+	{
+		id: "twin",
+		name: "Twin Pearl",
+		priceRange: "from $110/night",
+		description: "Shared comfort for couples & companions",
+		features: [
+			"Wide double layout",
+			"Couples floor",
+			"Designed for two",
+			"Shared amenities"
+		],
+		image: "/images/capsules/twin-pearl.jpg",
+		capacity: "2 guests",
+		tag: "Couples",
+	},
+	{
+		id: "crystal",
+		name: "Crystal Boba Suite",
+		priceRange: "from $155/night",
+		description: "First-class private suite experience",
+		features: [
+			"90\"L × 55\"W × 65\"H",
+			"Standing room height",
+			"Private work desk",
+			"Premium everything"
+		],
+		image: "/images/capsules/crystal-boba.jpg",
+		capacity: "1-2 guests",
+		tag: "First Class",
+	},
+];
 
 /**
  * RoomsSection Component
  *
- * Displays available room types with pricing and features.
- * Uses RTK Query to fetch room data from the API.
+ * Displays capsule type showcase for advertising purposes.
+ * This is NOT live room inventory - it's a static showcase of capsule types.
  */
 const RoomsSection: React.FC = () => {
-	const { data: rooms, isLoading, error } = useGetRoomsQuery(void 0);
+	const navigate = useNavigate();
 
-	// Fallback data if API is not ready
-	const fallbackRooms: RoomDisplay[] = [
-		{
-			id: "1",
-			name: "Classic Pearl",
-			price: 65,
-			features: "Private single capsule with essential amenities for short, efficient stays",
-			available: true,
-			capacity: 1,
-		},
-		{
-			id: "2",
-			name: "Milk Pearl",
-			price: 75,
-			features: "Enhanced single capsule with extra space, workspace surface, and premium bedding",
-			available: true,
-			capacity: 2,
-		},
-		{
-			id: "3",
-			name: "Golden Pearl",
-			price: 95,
-			features: "Spacious premium capsule allowing upright seating and additional private storage",
-			available: false,
-			capacity: 2,
-		},
-		{
-			id: "4",
-			name: "Matcha Pearl",
-			price: 65,
-			features: "Women-only premium capsule with spacious layout and enhanced privacy features",
-			available: false,
-			capacity: 2,
-		},
-		{
-			id: "5",
-			name: "Twin Pearl",
-			price: 110,
-			features: "Wide shared capsule designed comfortably for two adults traveling together",
-			available: false,
-			capacity: 2,
-		},
-		{
-			id: "6",
-			name: "Crystal Boba",
-			price: 155,
-			features: "First-class private suite with standing room, desk, and premium amenities",
-			available: false,
-			capacity: 2,
-		},
-	];
-
-	const displayRooms: RoomDisplay[] = 
-		rooms && rooms.length > 0 
-			? rooms.map(mapRoomToDisplay) 
-			: fallbackRooms;
+	const handleBookNow = () => {
+		navigate("/booking");
+	};
 
 	return (
 		<section id="rooms" className="rooms-section">
 			<div className="rooms-section__container">
 				<h2 className="rooms-section__title">Our Capsules</h2>
-
-				{isLoading && <div className="rooms-section__loading">Loading rooms...</div>}
-				{error && (
-					<div className="rooms-section__error">
-						Error loading rooms. Showing sample data.
-					</div>
-				)}
+				<p className="rooms-section__subtitle">
+					Choose from our range of thoughtfully designed capsule accommodations
+				</p>
 
 				<div className="rooms-section__grid">
-					{displayRooms.map((room) => (
-						<div key={room.id} className="rooms-section__card">
-							<div className="rooms-section__card-image">
-								{room.name[0]}
+					{CAPSULE_TYPES.map((capsule) => (
+						<div key={capsule.id} className="rooms-section__card">
+							<div className="rooms-section__card-image-wrapper">
+								<img
+									src={capsule.image}
+									alt={capsule.name}
+									className="rooms-section__card-image"
+									onError={(e) => {
+										// Fallback if image doesn't exist
+										e.currentTarget.style.display = 'none';
+										const parent = e.currentTarget.parentElement;
+										if (parent) {
+											parent.classList.add('rooms-section__card-image-wrapper--placeholder');
+											parent.innerHTML = `<div class="rooms-section__card-image-placeholder">${capsule.name[0]}</div>`;
+										}
+									}}
+								/>
+								{capsule.tag && (
+									<span className="rooms-section__card-tag">
+										{capsule.tag}
+									</span>
+								)}
 							</div>
 							<div className="rooms-section__card-content">
 								<div className="rooms-section__card-header">
 									<h3 className="rooms-section__card-title">
-										{room.name}
+										{capsule.name}
 									</h3>
 									<span className="rooms-section__card-price">
-										${room.price}
+										{capsule.priceRange}
 									</span>
 								</div>
-								<p className="rooms-section__card-features">
-									{room.features}
+								<p className="rooms-section__card-description">
+									{capsule.description}
 								</p>
-								<div className="rooms-section__card-availability">
-									<span
-										className={`rooms-section__availability-dot ${
-											room.available
-												? "rooms-section__availability-dot--available"
-												: "rooms-section__availability-dot--limited"
-										}`}
-									></span>
-									<span
-										className={`rooms-section__availability-text ${
-											room.available
-												? "rooms-section__availability-text--available"
-												: "rooms-section__availability-text--limited"
-										}`}
-									>
-										{room.available ? "Available" : "Limited"}
+								<ul className="rooms-section__card-features">
+									{capsule.features.map((feature, index) => (
+										<li key={index} className="rooms-section__card-feature">
+											{feature}
+										</li>
+									))}
+								</ul>
+								<div className="rooms-section__card-capacity">
+									<span className="rooms-section__capacity-icon">👤</span>
+									<span className="rooms-section__capacity-text">
+										{capsule.capacity}
 									</span>
 								</div>
-								<button className="rooms-section__card-button">
-									View Details
+								<button 
+									className="rooms-section__card-button"
+									onClick={handleBookNow}
+								>
+									Book Now
 								</button>
 							</div>
 						</div>
