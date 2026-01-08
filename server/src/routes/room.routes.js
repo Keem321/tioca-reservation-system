@@ -8,6 +8,7 @@ import {
 	deleteRoom,
 	updateRoomStatus,
 	getAvailableRooms,
+	getRecommendedRooms,
 } from "../controllers/room.controller.js";
 import { requireRole, requireAuth } from "../middleware/roleAuth.js";
 
@@ -16,6 +17,9 @@ roomRouter.get("/", getRooms);
 
 // Get available rooms for a date range (public)
 roomRouter.get("/available", getAvailableRooms);
+
+// Get recommended rooms (public)
+roomRouter.get("/recommended", getRecommendedRooms);
 
 // Get a single room by ID (public)
 roomRouter.get("/:id", getRoomById);
@@ -27,7 +31,12 @@ roomRouter.post("/", requireAuth, requireRole("manager"), createRoom);
 roomRouter.put("/:id", requireAuth, requireRole("manager"), updateRoom);
 
 // Update room status (manager only)
-roomRouter.patch("/:id/status", requireAuth, requireRole("manager"), updateRoomStatus);
+roomRouter.patch(
+	"/:id/status",
+	requireAuth,
+	requireRole("manager"),
+	updateRoomStatus
+);
 
 // Delete a room (manager only)
 roomRouter.delete("/:id", requireAuth, requireRole("manager"), deleteRoom);

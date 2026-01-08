@@ -89,6 +89,27 @@ export const roomsApi = createApi({
 			},
 			providesTags: ["Room"],
 		}),
+		// Get recommended rooms with partial availability
+		getRecommendedRooms: builder.query<
+			Room[],
+			{
+				checkIn: string;
+				checkOut: string;
+				floor?: string;
+				quality?: string;
+			}
+		>({
+			query: ({ checkIn, checkOut, floor, quality }) => {
+				const params = new URLSearchParams({
+					checkIn,
+					checkOut,
+				});
+				if (floor) params.append("floor", floor);
+				if (quality) params.append("quality", quality);
+				return `/recommended?${params.toString()}`;
+			},
+			providesTags: ["Room"],
+		}),
 	}),
 });
 
@@ -100,4 +121,5 @@ export const {
 	useDeleteRoomMutation,
 	useUpdateRoomStatusMutation,
 	useSearchAvailableRoomsQuery,
+	useGetRecommendedRoomsQuery,
 } = roomsApi;

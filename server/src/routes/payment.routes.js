@@ -7,18 +7,18 @@ import {
 } from "../controllers/payment.controller.js";
 import { requireAuth, requireRole } from "../middleware/roleAuth.js";
 
-// Create payment intent (authenticated users)
-paymentRouter.post(
-	"/create-intent",
-	requireAuth,
-	createPaymentIntent
-);
+// Create payment intent (public - no auth required)
+paymentRouter.post("/create-intent", createPaymentIntent);
 
-// Confirm payment (authenticated users)
-paymentRouter.post("/confirm", requireAuth, confirmPayment);
+// Confirm payment (public - no auth required)
+paymentRouter.post("/confirm", confirmPayment);
 
 // Process refund (managers only)
-paymentRouter.post("/refund", requireAuth, requireRole("manager"), processRefund);
+paymentRouter.post(
+	"/refund",
+	requireAuth,
+	requireRole("manager"),
+	processRefund
+);
 
 export default paymentRouter;
-

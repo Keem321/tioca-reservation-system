@@ -12,8 +12,8 @@
 
 .search-results__grid {
 	display: grid;
-	gap: 1.5rem;
-	grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+	gap: 1.25rem;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
 .search-results--empty {
@@ -28,4 +28,3 @@
 	color: #5a3a24;
 	font-size: 1.1rem;
 }
-

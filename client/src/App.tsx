@@ -43,31 +43,9 @@ function App() {
 					<Route path="/dashboard" element={<Dashboard />} />
 					<Route path="/booking" element={<Booking />} />
 					<Route path="/login" element={<Login />} />
-					<Route path="/booking" element={<Booking />} />
-					<Route
-						path="/booking/confirm"
-						element={
-							<ProtectedRoute>
-								<BookingConfirmation />
-							</ProtectedRoute>
-						}
-					/>
-					<Route
-						path="/payment"
-						element={
-							<ProtectedRoute>
-								<Payment />
-							</ProtectedRoute>
-						}
-					/>
-					<Route
-						path="/payment/success"
-						element={
-							<ProtectedRoute>
-								<PaymentSuccess />
-							</ProtectedRoute>
-						}
-					/>
+					<Route path="/booking/confirm" element={<BookingConfirmation />} />
+					<Route path="/payment" element={<Payment />} />
+					<Route path="/payment/success" element={<PaymentSuccess />} />
 					<Route
 						path="/profile"
 						element={

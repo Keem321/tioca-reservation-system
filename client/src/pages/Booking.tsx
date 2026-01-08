@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useSearchAvailableRoomsQuery } from "../features/roomsApi";
+import {
+	useSearchAvailableRoomsQuery,
+	useGetRecommendedRoomsQuery,
+} from "../features/roomsApi";
 import type { RootState } from "../store";
 import BookingSearchForm from "../components/booking/BookingSearchForm";
 import SearchResults from "../components/booking/SearchResults";
 import Navbar from "../components/landing/Navbar";
+import PodCard from "../components/booking/PodCard";
 import "./Booking.css";
 
 /**
@@ -26,6 +30,18 @@ const Booking: React.FC = () => {
 		isLoading: isSearching,
 		error: searchError,
 	} = useSearchAvailableRoomsQuery(
+		{
+			checkIn: checkIn || "",
+			checkOut: checkOut || "",
+			floor: zone || undefined,
+		},
+		{
+			skip: !shouldSearch || !checkIn || !checkOut || !zone,
+		}
+	);
+
+	// Get recommended rooms
+	const { data: recommendedResults = [] } = useGetRecommendedRoomsQuery(
 		{
 			checkIn: checkIn || "",
 			checkOut: checkOut || "",
@@ -65,10 +81,7 @@ const Booking: React.FC = () => {
 					</p>
 				</div>
 
-				<BookingSearchForm
-					onSearch={handleSearch}
-					isSearching={isSearching}
-				/>
+				<BookingSearchForm onSearch={handleSearch} isSearching={isSearching} />
 
 				{searchError && (
 					<div className="booking-page__error">
@@ -77,12 +90,44 @@ const Booking: React.FC = () => {
 				)}
 
 				{shouldSearch && !isSearching && (
-					<SearchResults
-						results={searchResults}
-						nights={getNights()}
-						checkIn={checkIn}
-						checkOut={checkOut}
-					/>
+					<>
+						<SearchResults
+							results={searchResults}
+							nights={getNights()}
+							checkIn={checkIn}
+							checkOut={checkOut}
+						/>
+
+						{recommendedResults.length > 0 && (
+							<div className="booking-page__recommendations">
+								<h2 className="booking-page__recommendations-title">
+									Recommended Options
+								</h2>
+								<p className="booking-page__recommendations-subtitle">
+									These rooms are partially available or on alternative floors
+								</p>
+								<div className="search-results__grid">
+									{recommendedResults.map((room: any) => (
+										<div key={room._id} className="recommended-pod">
+											<PodCard
+												pod={room}
+												nights={getNights()}
+												checkIn={checkIn}
+												checkOut={checkOut}
+											/>
+											{room.availabilityInfo && (
+												<div className="recommended-pod__badge">
+													{room.availabilityInfo.isAlternativeFloor
+														? `Available on ${room.floor} floor`
+														: `${room.availabilityInfo.availablePercent}% of dates available`}
+												</div>
+											)}
+										</div>
+									))}
+								</div>
+							</div>
+						)}
+					</>
 				)}
 			</div>
 		</div>
@@ -90,4 +135,3 @@ const Booking: React.FC = () => {
 };
 
 export default Booking;
-

@@ -18,7 +18,12 @@ interface PodCardProps {
 	checkOut: string;
 }
 
-const PodCard: React.FC<PodCardProps> = ({ pod, nights, checkIn, checkOut }) => {
+const PodCard: React.FC<PodCardProps> = ({
+	pod,
+	nights,
+	checkIn,
+	checkOut,
+}) => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
@@ -64,7 +69,9 @@ const PodCard: React.FC<PodCardProps> = ({ pod, nights, checkIn, checkOut }) => 
 
 	const totalPrice = pod.pricePerNight * nights;
 	const displayLabel =
-		pod.floor === "couples" ? `Twin ${getQualityLabel(pod.quality)}` : getQualityLabel(pod.quality);
+		pod.floor === "couples"
+			? `Twin ${getQualityLabel(pod.quality)}`
+			: getQualityLabel(pod.quality);
 
 	const handleBookNow = () => {
 		// Store selected room in Redux for booking confirmation
@@ -83,40 +90,26 @@ const PodCard: React.FC<PodCardProps> = ({ pod, nights, checkIn, checkOut }) => 
 
 	return (
 		<div className="pod-card">
-			{/* Image Placeholder */}
-			<div className="pod-card__image">
-				{displayLabel[0]}
-			</div>
-
-			{/* Content */}
-			<div className="pod-card__content">
-				<h3 className="pod-card__title">{displayLabel}</h3>
-				<p className="pod-card__description">
-					{getQualityDescription(pod.quality)} • {getDimensions(pod.quality, pod.floor)}
-				</p>
-				<div className="pod-card__availability">
-					<span className="pod-card__availability-dot"></span>
-					<span className="pod-card__availability-text">
-						{pod.status === "available" ? "Available" : "Limited availability"}
-					</span>
+			<div className="pod-card__left">
+				<div className="pod-card__image">{displayLabel[0]}</div>
+				<div className="pod-card__content">
+					<h3 className="pod-card__title">{displayLabel}</h3>
+					<p className="pod-card__room-number">Room {pod.podId}</p>
+					<p className="pod-card__description">
+						{getQualityDescription(pod.quality)} •{" "}
+						{getDimensions(pod.quality, pod.floor)}
+					</p>
 				</div>
 			</div>
-
-			{/* Price & CTA */}
 			<div className="pod-card__pricing">
 				<div className="pod-card__price-info">
 					<div className="pod-card__price">${pod.pricePerNight}</div>
 					<div className="pod-card__price-label">per night</div>
 					{nights > 1 && (
-						<div className="pod-card__total-price">
-							${totalPrice} total
-						</div>
+						<div className="pod-card__total-price">${totalPrice} total</div>
 					)}
 				</div>
-				<button
-					onClick={handleBookNow}
-					className="pod-card__button"
-				>
+				<button onClick={handleBookNow} className="pod-card__button">
 					Book Now
 				</button>
 			</div>
@@ -125,4 +118,3 @@ const PodCard: React.FC<PodCardProps> = ({ pod, nights, checkIn, checkOut }) => 
 };
 
 export default PodCard;
-

@@ -135,7 +135,37 @@ class RoomService {
 			throw new Error("Check-out date must be after check-in date");
 		}
 
-		return await RoomRepository.findAvailableRooms(checkIn, checkOut, floor, quality);
+		return await RoomRepository.findAvailableRooms(
+			checkIn,
+			checkOut,
+			floor,
+			quality
+		);
+	}
+
+	/**
+	 * Get recommended rooms with partial availability
+	 * @param {string} checkIn - Check-in date
+	 * @param {string} checkOut - Check-out date
+	 * @param {string} [floor] - Optional floor filter
+	 * @param {string} [quality] - Optional quality filter
+	 * @returns {Promise<Array>}
+	 */
+	async getRecommendedRooms(checkIn, checkOut, floor, quality) {
+		if (!checkIn || !checkOut) {
+			throw new Error("Check-in and check-out dates are required");
+		}
+
+		if (new Date(checkIn) >= new Date(checkOut)) {
+			throw new Error("Check-out date must be after check-in date");
+		}
+
+		return await RoomRepository.findRecommendedRooms(
+			checkIn,
+			checkOut,
+			floor,
+			quality
+		);
 	}
 }
 

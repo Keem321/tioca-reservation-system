@@ -140,3 +140,32 @@ export async function getAvailableRooms(req, res) {
 		res.status(400).json({ error: err.message });
 	}
 }
+
+/**
+ * Get recommended rooms with partial availability
+ * @route GET /api/rooms/recommended?checkIn=xxx&checkOut=xxx
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @returns {void}
+ */
+export async function getRecommendedRooms(req, res) {
+	try {
+		const { checkIn, checkOut, floor, quality } = req.query;
+
+		if (!checkIn || !checkOut) {
+			return res
+				.status(400)
+				.json({ error: "Check-in and check-out dates are required" });
+		}
+
+		const rooms = await RoomService.getRecommendedRooms(
+			checkIn,
+			checkOut,
+			floor,
+			quality
+		);
+		res.json(rooms);
+	} catch (err) {
+		res.status(400).json({ error: err.message });
+	}
+}
