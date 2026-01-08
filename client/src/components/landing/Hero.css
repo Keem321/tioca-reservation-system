@@ -3,28 +3,59 @@
 	text-align: center;
 	max-width: 1200px;
 	margin: 0 auto;
+	
+	/* Background image styles */
+	background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/images/hero-background.jpg');
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-attachment: fixed; /* Optional: creates parallax effect */
+	
+	/* Make it full width */
+	max-width: 100%;
+	min-height: 600px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 }
 
 .hero__title {
 	font-family: "Playfair Display", serif;
 	font-size: 4rem;
-	color: var(--color-text-primary);
+	color: #ffffff; /* White text for visibility on background */
 	font-weight: 600;
 	margin-bottom: 1.5rem;
 	line-height: 1.2;
 	letter-spacing: -0.02em;
+	text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Adds shadow for better readability */
 }
 
 .hero__description {
 	font-size: 1.25rem;
-	color: var(--color-text-secondary);
+	color: #ffffff; /* White text for visibility */
 	max-width: 600px;
 	margin: 0 auto 3rem;
 	line-height: 1.6;
-	opacity: 0.9;
+	opacity: 0.95;
+	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Adds shadow for better readability */
+}
+
+/* Content wrapper for better control */
+.hero__content {
+	max-width: 1200px;
+	width: 100%;
+	margin: 0 auto;
+	padding: 0 2rem;
 }
 
 @media (max-width: 768px) {
+	.hero {
+		min-height: 500px;
+		padding: 4rem 1rem;
+		background-attachment: scroll; /* Better performance on mobile */
+	}
+
 	.hero__title {
 		font-size: 2.5rem;
 	}

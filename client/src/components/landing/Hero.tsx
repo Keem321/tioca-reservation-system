@@ -10,13 +10,15 @@ import "./Hero.css";
 const Hero: React.FC = () => {
 	return (
 		<section className="hero">
-			<h1 className="hero__title">Rest Redefined</h1>
-			<p className="hero__description">
-				Experience the perfect balance of privacy, comfort, and modern design
-				in the heart of the city
-			</p>
+			<div className="hero__content">
+				<h1 className="hero__title">Rest Redefined</h1>
+				<p className="hero__description">
+					Experience the perfect balance of privacy, comfort, and modern design
+					in the heart of the city
+				</p>
 
-			<BookingForm />
+				<BookingForm />
+			</div>
 		</section>
 	);
 };
