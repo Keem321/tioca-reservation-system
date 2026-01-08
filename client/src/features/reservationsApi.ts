@@ -21,6 +21,13 @@ export const reservationsApi = createApi({
 			query: () => "/",
 			providesTags: ["Reservation"],
 		}),
+		// Get available time slots for a room on a date
+		getAvailableSlots: builder.query<
+			{ slots: string[] },
+			{ roomId: string; date: string }
+		>({
+			query: ({ roomId, date }) => `/${roomId}/slots?date=${date}`,
+		}),
 		// Get reservations by user ID
 		getReservationsByUser: builder.query<Reservation[], string>({
 			query: (userId) => `/user/${userId}`,
@@ -101,10 +108,7 @@ export const reservationsApi = createApi({
 			invalidatesTags: ["Reservation"],
 		}),
 		// Get upcoming check-ins
-		getUpcomingCheckIns: builder.query<
-			Reservation[],
-			{ days?: number }
-		>({
+		getUpcomingCheckIns: builder.query<Reservation[], { days?: number }>({
 			query: ({ days = 7 }) => `/upcoming-checkins?days=${days}`,
 			providesTags: ["Reservation"],
 		}),
@@ -129,4 +133,5 @@ export const {
 	useUpdateReservationStatusMutation,
 	useGetUpcomingCheckInsQuery,
 	useGetCurrentCheckOutsQuery,
+	useGetAvailableSlotsQuery,
 } = reservationsApi;

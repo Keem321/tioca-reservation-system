@@ -231,3 +231,18 @@ export async function updateReservationStatus(req, res) {
 		res.status(400).json({ error: err.message });
 	}
 }
+
+/**
+ * Get available time slots for a room on a date
+ * @route GET /api/reservations/:roomId/slots?date=YYYY-MM-DD
+ */
+export async function getAvailableSlots(req, res) {
+	try {
+		const { roomId } = req.params;
+		const { date } = req.query;
+		const slots = await ReservationService.getAvailableTimeSlots(roomId, date);
+		res.json({ slots });
+	} catch (err) {
+		res.status(400).json({ error: err.message });
+	}
+}

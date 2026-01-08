@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import {
 	useSearchAvailableRoomsQuery,
 	useGetRecommendedRoomsQuery,
 } from "../features/roomsApi";
 import type { RootState } from "../store";
+import type { Room } from "../types/room";
 import BookingSearchForm from "../components/booking/BookingSearchForm";
 import SearchResults from "../components/booking/SearchResults";
 import Navbar from "../components/landing/Navbar";
@@ -24,6 +25,13 @@ const Booking: React.FC = () => {
 	);
 	const [shouldSearch, setShouldSearch] = useState(false);
 
+	type RecommendedRoom = Room & {
+		availabilityInfo?: {
+			availablePercent: number;
+			isAlternativeFloor: boolean;
+		};
+	};
+
 	// Search for available rooms
 	const {
 		data: searchResults = [],
@@ -41,7 +49,7 @@ const Booking: React.FC = () => {
 	);
 
 	// Get recommended rooms
-	const { data: recommendedResults = [] } = useGetRecommendedRoomsQuery(
+	const { data: recommendedResults } = useGetRecommendedRoomsQuery(
 		{
 			checkIn: checkIn || "",
 			checkOut: checkOut || "",
@@ -52,16 +60,17 @@ const Booking: React.FC = () => {
 		}
 	);
 
+	const recommendedRooms: RecommendedRoom[] = recommendedResults ?? [];
+
 	const handleSearch = () => {
 		if (checkIn && checkOut && checkIn < checkOut && zone) {
 			setShouldSearch(true);
 		}
 	};
 
-	// Reset search when form values change
-	useEffect(() => {
+	const handleFormChange = () => {
 		setShouldSearch(false);
-	}, [checkIn, checkOut, zone]);
+	};
 
 	const getNights = () => {
 		if (!checkIn || !checkOut) return 0;
@@ -81,7 +90,11 @@ const Booking: React.FC = () => {
 					</p>
 				</div>
 
-				<BookingSearchForm onSearch={handleSearch} isSearching={isSearching} />
+				<BookingSearchForm
+					onSearch={handleSearch}
+					isSearching={isSearching}
+					onValuesChange={handleFormChange}
+				/>
 
 				{searchError && (
 					<div className="booking-page__error">
@@ -98,7 +111,7 @@ const Booking: React.FC = () => {
 							checkOut={checkOut}
 						/>
 
-						{recommendedResults.length > 0 && (
+						{recommendedRooms.length > 0 && (
 							<div className="booking-page__recommendations">
 								<h2 className="booking-page__recommendations-title">
 									Recommended Options
@@ -107,7 +120,7 @@ const Booking: React.FC = () => {
 									These rooms are partially available or on alternative floors
 								</p>
 								<div className="search-results__grid">
-									{recommendedResults.map((room: any) => (
+									{recommendedRooms.map((room) => (
 										<div key={room._id} className="recommended-pod">
 											<PodCard
 												pod={room}

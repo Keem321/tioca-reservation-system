@@ -165,6 +165,24 @@ class ReservationRepository {
 			.populate("userId", "name email")
 			.sort({ checkOutDate: 1 });
 	}
+
+	/**
+	 * Find reservations for a room occurring on a given date (check-in or check-out)
+	 * @param {string} roomId
+	 * @param {Date} dayStart
+	 * @param {Date} dayEnd
+	 * @returns {Promise<Array>}
+	 */
+	async findForRoomOnDate(roomId, dayStart, dayEnd) {
+		return await Reservation.find({
+			roomId,
+			status: { $nin: ["cancelled"] },
+			$or: [
+				{ checkInDate: { $gte: dayStart, $lte: dayEnd } },
+				{ checkOutDate: { $gte: dayStart, $lte: dayEnd } },
+			],
+		}).select("checkInDate checkOutDate");
+	}
 }
 
 export default new ReservationRepository();

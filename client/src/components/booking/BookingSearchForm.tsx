@@ -23,22 +23,37 @@ const zones: Array<{ value: PodFloor; label: string; icon: string }> = [
 interface BookingSearchFormProps {
 	onSearch: () => void;
 	isSearching: boolean;
+	onValuesChange?: () => void;
 }
 
 const BookingSearchForm: React.FC<BookingSearchFormProps> = ({
 	onSearch,
 	isSearching,
+	onValuesChange,
 }) => {
 	const dispatch = useDispatch();
 	const { checkIn, checkOut, zone } = useSelector(
 		(state: RootState) => state.booking
 	);
+	const today = React.useMemo(() => new Date().toISOString().split("T")[0], []);
 
 	const isValid = checkIn && checkOut && checkIn < checkOut && zone;
+
+	const handleCheckInChange = (value: string) => {
+		const sanitized = value && value < today ? today : value;
+		dispatch(setCheckIn(sanitized));
+		onValuesChange?.();
+	};
+
+	const handleCheckOutChange = (value: string) => {
+		dispatch(setCheckOut(value));
+		onValuesChange?.();
+	};
 
 	const handleZoneChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		const newZone = e.target.value as PodFloor;
 		dispatch(setZone(newZone));
+		onValuesChange?.();
 	};
 
 	return (
@@ -50,15 +65,12 @@ const BookingSearchForm: React.FC<BookingSearchFormProps> = ({
 						Check In <span className="booking-search-form__required">*</span>
 					</label>
 					<div className="booking-search-form__input-wrapper">
-						<Calendar
-							size={18}
-							className="booking-search-form__icon"
-						/>
+						<Calendar size={18} className="booking-search-form__icon" />
 						<input
 							type="date"
 							value={checkIn}
-							onChange={(e) => dispatch(setCheckIn(e.target.value))}
-							min={new Date().toISOString().split("T")[0]}
+							onChange={(e) => handleCheckInChange(e.target.value)}
+							min={today}
 							className="booking-search-form__input"
 						/>
 					</div>
@@ -70,15 +82,12 @@ const BookingSearchForm: React.FC<BookingSearchFormProps> = ({
 						Check Out <span className="booking-search-form__required">*</span>
 					</label>
 					<div className="booking-search-form__input-wrapper">
-						<Calendar
-							size={18}
-							className="booking-search-form__icon"
-						/>
+						<Calendar size={18} className="booking-search-form__icon" />
 						<input
 							type="date"
 							value={checkOut}
-							onChange={(e) => dispatch(setCheckOut(e.target.value))}
-							min={checkIn || new Date().toISOString().split("T")[0]}
+							onChange={(e) => handleCheckOutChange(e.target.value)}
+							min={checkIn || today}
 							className="booking-search-form__input"
 						/>
 					</div>
@@ -90,10 +99,7 @@ const BookingSearchForm: React.FC<BookingSearchFormProps> = ({
 						Floor Type <span className="booking-search-form__required">*</span>
 					</label>
 					<div className="booking-search-form__input-wrapper">
-						<Building
-							size={18}
-							className="booking-search-form__icon"
-						/>
+						<Building size={18} className="booking-search-form__icon" />
 						<select
 							value={zone}
 							onChange={handleZoneChange}
@@ -122,4 +128,3 @@ const BookingSearchForm: React.FC<BookingSearchFormProps> = ({
 };
 
 export default BookingSearchForm;
-

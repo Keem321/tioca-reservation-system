@@ -46,10 +46,9 @@ class ReservationService {
 			totalPrice,
 		} = reservationData;
 
-		// Validate required fields
+		// Validate required fields (userId is optional for guest bookings)
 		if (
 			!roomId ||
-			!userId ||
 			!guestName ||
 			!guestEmail ||
 			!checkInDate ||
@@ -60,14 +59,24 @@ class ReservationService {
 			throw new Error("Missing required fields");
 		}
 
-		// Validate dates
+		// Validate dates (include time) and same-day buffer
 		const checkIn = new Date(checkInDate);
 		const checkOut = new Date(checkOutDate);
 		const now = new Date();
-		now.setHours(0, 0, 0, 0);
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
 
 		if (checkIn < now) {
 			throw new Error("Check-in date cannot be in the past");
+		}
+
+		// If check-in is today, enforce 2-hour prep buffer
+		const isToday = checkIn.toDateString() === today.toDateString();
+		if (isToday) {
+			const minArrival = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+			if (checkIn < minArrival) {
+				throw new Error("Check-in time must be at least 2 hours from now");
+			}
 		}
 
 		if (checkOut <= checkIn) {
@@ -100,6 +109,9 @@ class ReservationService {
 
 		// Create reservation
 		const reservation = await ReservationRepository.create(reservationData);
+
+		// Populate room details before returning
+		await reservation.populate("roomId", "podId quality floor pricePerNight");
 
 		// Update room status to reserved
 		await RoomRepository.updateStatus(roomId, "reserved");
@@ -297,6 +309,67 @@ class ReservationService {
 	 */
 	async getCurrentCheckOuts() {
 		return await ReservationRepository.findCurrentCheckOuts();
+	}
+
+	/**
+	 * Get available 30-minute time slots for a room on a given date
+	 * Excludes slots where another check-in or check-out occurs and applies a 2-hour buffer if date is today.
+	 * @param {string} roomId
+	 * @param {string} dateString - YYYY-MM-DD
+	 * @returns {Promise<Array<string>>}
+	 */
+	async getAvailableTimeSlots(roomId, dateString) {
+		if (!roomId || !dateString) {
+			throw new Error("roomId and date are required");
+		}
+
+		const dayStart = new Date(`${dateString}T00:00:00`);
+		const dayEnd = new Date(`${dateString}T23:59:59.999`);
+
+		const reservations = await ReservationRepository.findForRoomOnDate(
+			roomId,
+			dayStart,
+			dayEnd
+		);
+
+		const occupied = new Set();
+		const toTimeString = (d) => d.toISOString().slice(11, 16);
+		reservations.forEach((r) => {
+			if (r.checkInDate) occupied.add(toTimeString(new Date(r.checkInDate)));
+			if (r.checkOutDate) occupied.add(toTimeString(new Date(r.checkOutDate)));
+		});
+
+		// If date is today, enforce 2-hour buffer from now
+		const now = new Date();
+		const isToday = dayStart.toDateString() === now.toDateString();
+		const minArrival = isToday
+			? new Date(now.getTime() + 2 * 60 * 60 * 1000)
+			: null;
+
+		const slots = [];
+		for (let h = 0; h < 24; h++) {
+			for (let m of [0, 30]) {
+				const slot = new Date(dayStart);
+				slot.setHours(h, m, 0, 0);
+
+				// For today, compare times directly: current slot time vs current time + 2 hours
+				if (isToday && minArrival) {
+					const slotTime = h * 60 + m; // minutes since midnight for this slot
+					const minArrivalMinutes =
+						minArrival.getHours() * 60 + minArrival.getMinutes();
+					if (slotTime < minArrivalMinutes) {
+						continue;
+					}
+				}
+
+				const slotLabel = slot.toISOString().slice(11, 16);
+				if (!occupied.has(slotLabel)) {
+					slots.push(slotLabel);
+				}
+			}
+		}
+
+		return slots;
 	}
 
 	/**

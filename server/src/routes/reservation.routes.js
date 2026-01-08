@@ -13,6 +13,7 @@ import {
 	getUpcomingCheckIns,
 	getCurrentCheckOuts,
 	updateReservationStatus,
+	getAvailableSlots,
 } from "../controllers/reservation.controller.js";
 import { requireRole, requireAuth } from "../middleware/roleAuth.js";
 
@@ -42,6 +43,9 @@ reservationRouter.get(
 
 // Get reservations by user ID (authenticated users can view their own)
 reservationRouter.get("/user/:userId", requireAuth, getReservationsByUser);
+
+// Available time slots for a room on a specific date (public)
+reservationRouter.get("/:roomId/slots", getAvailableSlots);
 
 // Get a single reservation by ID (authenticated users can view)
 reservationRouter.get("/:id", requireAuth, getReservationById);

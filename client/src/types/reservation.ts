@@ -3,8 +3,16 @@
  */
 export interface Reservation {
 	_id: string;
-	roomId: string | { _id: string; podId: string; quality: string; floor: string; pricePerNight: number };
-	userId: string | { _id: string; name: string; email: string };
+	roomId:
+		| string
+		| {
+				_id: string;
+				podId: string;
+				quality: string;
+				floor: string;
+				pricePerNight: number;
+		  };
+	userId?: string | { _id: string; name: string; email: string };
 	guestName: string;
 	guestEmail: string;
 	guestPhone?: string;
@@ -26,7 +34,7 @@ export interface Reservation {
  */
 export interface ReservationFormData {
 	roomId: string;
-	userId: string;
+	userId?: string;
 	guestName: string;
 	guestEmail: string;
 	guestPhone?: string;
