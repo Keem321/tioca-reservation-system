@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import {
 	useGetPaymentsQuery,
 	useGetPaymentStatsQuery,
@@ -7,12 +8,16 @@ import {
 	useUpdatePaymentMutation,
 	useGetPaymentHistoryQuery,
 } from "../features/paymentsApi";
+import { paymentsApi } from "../features/paymentsApi";
 import Navbar from "../components/landing/Navbar";
 import "./PaymentsManagement.css";
+import { useToast } from "../components/ToastProvider";
 
 type Tab = "reports" | "management";
 
 export default function PaymentsManagement() {
+	const dispatch = useDispatch();
+	const toast = useToast();
 	const [activeTab, setActiveTab] = useState<Tab>("reports");
 	const [dateFrom, setDateFrom] = useState("");
 	const [dateTo, setDateTo] = useState("");
@@ -42,12 +47,10 @@ export default function PaymentsManagement() {
 	const { data: revenueReport = [] } = useGetRevenueReportQuery();
 	const [processRefund] = useProcessRefundMutation();
 	const [updatePayment] = useUpdatePaymentMutation();
-	const { data: paymentHistory = [] } = useGetPaymentHistoryQuery(
-		selectedPaymentId || "",
-		{
+	const { data: paymentHistory = [], refetch: refetchHistory } =
+		useGetPaymentHistoryQuery(selectedPaymentId || "", {
 			skip: !selectedPaymentId,
-		}
-	);
+		});
 
 	const handleRefund = async (reservationId: string) => {
 		if (!window.confirm("Are you sure you want to refund this payment?")) {
@@ -55,14 +58,41 @@ export default function PaymentsManagement() {
 		}
 
 		try {
+			// Optimistic update: mark the payment as refunded in the current list
+			const patchResult = dispatch(
+				paymentsApi.util.updateQueryData(
+					"getPayments",
+					{ dateFrom, dateTo, status: statusFilter, limit: 100 },
+					(draft) => {
+						const idx = draft.findIndex(
+							(p) => p.reservationId?._id === reservationId
+						);
+						if (idx !== -1) {
+							draft[idx].status = "refunded";
+						}
+					}
+				)
+			) as unknown as { undo: () => void };
+			// Ensure variable is treated as used by TS
+			void patchResult;
 			await processRefund({ reservationId }).unwrap();
-			alert("Refund processed successfully");
+			toast.success("Refund processed successfully");
+			// No need to undo on success; cache will also be invalidated
 		} catch (error) {
-			alert(`Failed to process refund: ${error}`);
+			// Roll back optimistic update on error
+			try {
+				patchResult.undo();
+			} catch (e) {
+				console.debug("Refund optimistic rollback failed", e);
+			}
+			toast.error(`Failed to process refund: ${error}`);
 		}
 	};
 
-	const handleEditPayment = (payment: any) => {
+	const handleEditPayment = (payment: {
+		_id: string;
+		description?: string;
+	}) => {
 		setEditingPaymentId(payment._id);
 		setEditForm({
 			description: payment.description || "",
@@ -74,16 +104,43 @@ export default function PaymentsManagement() {
 		if (!editingPaymentId) return;
 
 		try {
+			// Optimistic update: update description in payments list
+			const patchResult = dispatch(
+				paymentsApi.util.updateQueryData(
+					"getPayments",
+					{ dateFrom, dateTo, status: statusFilter, limit: 100 },
+					(draft) => {
+						const idx = draft.findIndex((p) => p._id === editingPaymentId);
+						if (idx !== -1) {
+							draft[idx].description = editForm.description;
+						}
+					}
+				)
+			) as unknown as { undo: () => void };
+			// Ensure variable is treated as used by TS
+			void patchResult;
 			await updatePayment({
 				paymentId: editingPaymentId,
 				description: editForm.description,
 				reason: editForm.reason,
 			}).unwrap();
-			alert("Payment updated successfully");
+			toast.success("Payment updated successfully");
 			setEditingPaymentId(null);
 			setEditForm({ description: "", reason: "" });
+			// Refresh history for the selected payment to reflect new edit
+			try {
+				await refetchHistory();
+			} catch (e) {
+				console.debug("History refetch failed", e);
+			}
 		} catch (error) {
-			alert(`Failed to update payment: ${error}`);
+			// Roll back optimistic update on error
+			try {
+				patchResult.undo();
+			} catch (e) {
+				console.debug("Edit optimistic rollback failed", e);
+			}
+			toast.error(`Failed to update payment: ${error}`);
 		}
 	};
 
