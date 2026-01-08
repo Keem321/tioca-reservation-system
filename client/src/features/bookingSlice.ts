@@ -13,6 +13,8 @@ import type { Reservation } from "../types/reservation";
  * See: https://redux-toolkit.js.org/api/createslice
  */
 
+import type { PodFloor, PodQuality } from "../types/room";
+
 export interface BookingState {
 	checkIn: string;
 	checkOut: string;
