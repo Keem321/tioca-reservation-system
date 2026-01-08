@@ -121,7 +121,7 @@ export async function updateRoomStatus(req, res) {
  */
 export async function getAvailableRooms(req, res) {
 	try {
-		const { checkIn, checkOut } = req.query;
+		const { checkIn, checkOut, floor, quality } = req.query;
 
 		if (!checkIn || !checkOut) {
 			return res
@@ -129,7 +129,12 @@ export async function getAvailableRooms(req, res) {
 				.json({ error: "Check-in and check-out dates are required" });
 		}
 
-		const rooms = await RoomService.getAvailableRooms(checkIn, checkOut);
+		const rooms = await RoomService.getAvailableRooms(
+			checkIn,
+			checkOut,
+			floor,
+			quality
+		);
 		res.json(rooms);
 	} catch (err) {
 		res.status(400).json({ error: err.message });

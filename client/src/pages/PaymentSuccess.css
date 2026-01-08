@@ -1,0 +1,214 @@
+.payment-success {
+	min-height: 100vh;
+	background-color: var(--color-linen);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	padding: 2rem 1rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.payment-success__container {
+	background-color: var(--color-linen);
+	border: 1px solid rgba(44, 22, 7, 0.08);
+	border-radius: 16px;
+	padding: 3rem 2rem;
+	max-width: 900px;
+	width: 100%;
+	box-shadow: 0 6px 18px rgba(44, 22, 7, 0.08);
+}
+
+.payment-success__icon {
+	color: var(--color-success);
+	margin-bottom: 1.5rem;
+	display: flex;
+	justify-content: center;
+}
+
+.payment-success__header {
+	text-align: center;
+	margin-bottom: 3rem;
+	padding-bottom: 2rem;
+	border-bottom: 1px solid rgba(44, 22, 7, 0.1);
+}
+
+.payment-success__title {
+	font-family: "Playfair Display", serif;
+	font-size: 2.5rem;
+	color: var(--color-text-primary);
+	margin-bottom: 1rem;
+	font-weight: 600;
+}
+
+.payment-success__message {
+	font-size: 1.1rem;
+	color: var(--color-text-secondary);
+	margin-bottom: 0;
+	line-height: 1.6;
+}
+
+.payment-success__content {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	gap: 1.5rem;
+	margin-bottom: 2rem;
+}
+
+.payment-success__section {
+	background-color: var(--color-bone);
+	border: 1px solid rgba(44, 22, 7, 0.08);
+	border-radius: 12px;
+	padding: 1.5rem;
+	text-align: left;
+}
+
+.payment-success__section--highlight {
+	background-color: var(--color-milk-tea);
+	border: 2px solid var(--color-primary);
+}
+
+.payment-success__section-title {
+	font-family: "Playfair Display", serif;
+	font-size: 1.25rem;
+	color: var(--color-text-primary);
+	margin-bottom: 1rem;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	border-bottom: 2px solid var(--color-primary);
+	padding-bottom: 0.5rem;
+}
+
+.payment-success__detail-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.75rem 0;
+	border-bottom: 1px solid rgba(44, 22, 7, 0.1);
+}
+
+.payment-success__detail-item:last-child {
+	border-bottom: none;
+}
+
+.payment-success__detail-item .detail-label {
+	color: var(--color-text-secondary);
+	font-weight: 500;
+}
+
+.payment-success__detail-item .detail-value {
+	color: var(--color-text-primary);
+	font-weight: 600;
+	text-align: right;
+}
+
+.detail-value--status {
+	color: var(--color-success);
+	text-transform: capitalize;
+}
+
+.detail-value--paid {
+	color: var(--color-success);
+	font-weight: 700;
+}
+
+.detail-value--total {
+	color: var(--color-primary);
+	font-size: 1.25rem;
+	font-weight: 700;
+}
+
+.payment-success__next-steps {
+	background-color: var(--color-bone);
+	border: 1px solid rgba(44, 22, 7, 0.08);
+	border-radius: 12px;
+	padding: 1.5rem;
+	margin-bottom: 2rem;
+	margin-top: 2rem;
+}
+
+.payment-success__next-steps h3 {
+	font-family: "Playfair Display", serif;
+	font-size: 1.5rem;
+	color: var(--color-text-primary);
+	margin-bottom: 1rem;
+	border-bottom: 2px solid var(--color-primary);
+	padding-bottom: 0.5rem;
+}
+
+.payment-success__next-steps ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.payment-success__next-steps li {
+	padding: 0.75rem 0;
+	padding-left: 1.5rem;
+	position: relative;
+	color: var(--color-text-secondary);
+	line-height: 1.6;
+}
+
+.payment-success__next-steps li::before {
+	content: "✓";
+	position: absolute;
+	left: 0;
+	color: var(--color-success);
+	font-weight: 700;
+}
+
+.payment-success__actions {
+	display: flex;
+	gap: 1rem;
+	justify-content: center;
+}
+
+.payment-success__button {
+	padding: 1rem 2rem;
+	font-size: 1rem;
+	font-weight: 600;
+	border-radius: 12px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	border: none;
+	box-shadow: 0 4px 12px rgba(44, 22, 7, 0.08);
+}
+
+.payment-success__button--primary {
+	background: var(--color-primary);
+	color: var(--color-linen);
+}
+
+.payment-success__button--primary:hover {
+	background: var(--color-secondary);
+	transform: translateY(-1px);
+	box-shadow: 0 6px 18px rgba(44, 22, 7, 0.12);
+}
+
+.payment-success__button--secondary {
+	background-color: var(--color-bone);
+	color: var(--color-text-secondary);
+	border: 1px solid rgba(44, 22, 7, 0.15);
+}
+
+.payment-success__button--secondary:hover {
+	background-color: var(--color-milk-tea);
+	transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	.payment-success__container {
+		padding: 2rem 1.5rem;
+	}
+
+	.payment-success__title {
+		font-size: 2rem;
+	}
+
+	.payment-success__actions {
+		flex-direction: column;
+	}
+}
+

@@ -14,17 +14,17 @@
 	"type": "module",
 	"dependencies": {
 		"bcryptjs": "^3.0.3",
-		"express-session": "^1.17.3",
 		"cors": "^2.8.5",
 		"dotenv": "^17.2.3",
 		"express": "^5.2.1",
+		"express-session": "^1.17.3",
 		"jsonwebtoken": "^9.0.3",
 		"mongoose": "^9.0.2",
 		"passport": "^0.7.0",
-		"passport-local": "^1.0.0",
 		"passport-facebook": "^3.0.0",
 		"passport-google-oauth20": "^2.0.0",
-		"stripe": "^20.1.0"
+		"passport-local": "^1.0.0",
+		"stripe": "^20.1.2"
 	},
 	"devDependencies": {
 		"jest": "^30.2.0",

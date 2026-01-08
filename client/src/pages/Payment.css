@@ -1,0 +1,244 @@
+.payment-page {
+	min-height: 100vh;
+	background-color: var(--color-linen);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	padding: 2rem 1rem;
+}
+
+.payment-page__container {
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.payment-page__header {
+	text-align: center;
+	margin-bottom: 3rem;
+}
+
+.payment-page__header h1 {
+	font-family: "Playfair Display", serif;
+	font-size: 3rem;
+	color: var(--color-text-primary);
+	font-weight: 600;
+	margin-bottom: 1rem;
+}
+
+.payment-page__subtitle {
+	font-size: 1.1rem;
+	color: var(--color-text-secondary);
+	opacity: 0.9;
+}
+
+.payment-page__content {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 2rem;
+	background-color: var(--color-linen);
+	border: 1px solid rgba(44, 22, 7, 0.08);
+	border-radius: 16px;
+	padding: 2rem;
+	box-shadow: 0 6px 18px rgba(44, 22, 7, 0.08);
+}
+
+.payment-page__summary {
+	background-color: var(--color-bone);
+	border: 1px solid rgba(44, 22, 7, 0.08);
+	border-radius: 12px;
+	padding: 1.5rem;
+}
+
+.payment-page__summary h2 {
+	font-family: "Playfair Display", serif;
+	font-size: 1.5rem;
+	margin-bottom: 1.5rem;
+	color: var(--color-text-primary);
+	border-bottom: 2px solid var(--color-primary);
+	padding-bottom: 0.5rem;
+}
+
+.summary-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.75rem 0;
+	border-bottom: 1px solid rgba(44, 22, 7, 0.1);
+}
+
+.summary-item:last-child {
+	border-bottom: none;
+}
+
+.summary-item--total {
+	margin-top: 1rem;
+	padding-top: 1rem;
+	border-top: 2px solid var(--color-primary);
+	border-bottom: none;
+	font-size: 1.25rem;
+	font-weight: 700;
+}
+
+.summary-label {
+	color: var(--color-text-secondary);
+	font-weight: 500;
+}
+
+.summary-value {
+	color: var(--color-text-primary);
+	font-weight: 600;
+}
+
+.summary-item--total .summary-label,
+.summary-item--total .summary-value {
+	color: var(--color-primary);
+	font-size: 1.25rem;
+}
+
+.payment-page__form-container {
+	display: flex;
+	flex-direction: column;
+}
+
+.payment-form {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.payment-form__section {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.payment-form__label {
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--color-text-secondary);
+	margin-bottom: 0.5rem;
+}
+
+.payment-form__card-element {
+	padding: 0.875rem 1rem;
+	border: 1px solid rgba(44, 22, 7, 0.15);
+	border-radius: 12px;
+	background-color: var(--color-linen);
+	transition: border-color 0.2s ease;
+}
+
+.payment-form__card-element:focus-within {
+	border-color: var(--color-primary);
+	outline: none;
+}
+
+.payment-form__submit-button {
+	background: var(--color-primary);
+	color: var(--color-linen);
+	border: none;
+	padding: 1rem 2rem;
+	font-size: 1rem;
+	font-weight: 600;
+	border-radius: 12px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	margin-top: 1rem;
+	box-shadow: 0 4px 12px rgba(44, 22, 7, 0.08);
+}
+
+.payment-form__submit-button:hover:not(:disabled) {
+	background: var(--color-secondary);
+	transform: translateY(-1px);
+	box-shadow: 0 6px 18px rgba(44, 22, 7, 0.12);
+}
+
+.payment-form__submit-button:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.payment-form__error {
+	background-color: rgba(168, 100, 52, 0.1);
+	border: 1px solid rgba(168, 100, 52, 0.3);
+	color: var(--color-secondary);
+	padding: 1rem;
+	border-radius: 8px;
+	font-size: 0.875rem;
+}
+
+.payment-form__error h3 {
+	margin: 0 0 0.5rem 0;
+	font-size: 1.1rem;
+}
+
+.payment-form__error ul {
+	margin: 0.5rem 0;
+	padding-left: 1.5rem;
+}
+
+.payment-form__error li {
+	margin: 0.25rem 0;
+}
+
+.payment-form__loading {
+	text-align: center;
+	padding: 2rem;
+	color: var(--color-text-secondary);
+	font-size: 1rem;
+}
+
+.payment-page__error {
+	background-color: var(--color-linen);
+	border: 1px solid rgba(44, 22, 7, 0.08);
+	padding: 2rem;
+	border-radius: 12px;
+	text-align: left;
+	color: var(--color-text-primary);
+	font-size: 1rem;
+	max-width: 600px;
+	margin: 0 auto;
+	box-shadow: 0 6px 18px rgba(44, 22, 7, 0.08);
+}
+
+.payment-page__error h2 {
+	color: var(--color-secondary);
+	margin-bottom: 1rem;
+	font-size: 1.5rem;
+	font-family: "Playfair Display", serif;
+}
+
+.payment-page__error code {
+	background-color: var(--color-bone);
+	padding: 0.2rem 0.4rem;
+	border-radius: 4px;
+	font-family: "Courier New", monospace;
+	font-size: 0.9em;
+	color: var(--color-primary);
+}
+
+.payment-page__error ul {
+	margin: 1rem 0;
+	padding-left: 1.5rem;
+}
+
+.payment-page__error li {
+	margin: 0.5rem 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	.payment-page__content {
+		grid-template-columns: 1fr;
+	}
+
+	.payment-page__header h1 {
+		font-size: 2rem;
+	}
+
+	.payment-page__summary {
+		order: 2;
+	}
+
+	.payment-page__form-container {
+		order: 1;
+	}
+}
+

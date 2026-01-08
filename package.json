@@ -10,6 +10,7 @@
 	"dependencies": {
 		"express-session": "^1.18.2",
 		"lucide-react": "^0.562.0",
-		"passport-google-oauth20": "^2.0.0"
+		"passport-google-oauth20": "^2.0.0",
+		"passport-local": "^1.0.0"
 	}
 }

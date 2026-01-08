@@ -67,7 +67,7 @@ class ReservationRepository {
 			new: true,
 			runValidators: true,
 		})
-			.populate("roomId", "podId quality floor")
+			.populate("roomId", "podId quality floor pricePerNight")
 			.populate("userId", "name email");
 	}
 

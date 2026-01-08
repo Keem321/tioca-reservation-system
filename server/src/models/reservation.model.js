@@ -21,6 +21,10 @@ const reservationSchema = new Schema(
 			enum: ["unpaid", "partial", "paid", "refunded"],
 			default: "unpaid",
 		},
+		// Stripe payment fields
+		stripePaymentIntentId: { type: String },
+		stripeChargeId: { type: String },
+		stripeCustomerId: { type: String },
 		specialRequests: { type: String },
 		cancellationReason: { type: String },
 		cancelledAt: { type: Date },
