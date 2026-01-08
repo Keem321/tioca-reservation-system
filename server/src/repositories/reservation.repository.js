@@ -3,14 +3,29 @@ import Reservation from "../models/reservation.model.js";
 class ReservationRepository {
 	/**
 	 * Get all reservations with optional filtering
-	 * @param {Object} filter - Filter criteria
+	 * @param {Object} filter - Filter criteria (status, checkInDate, guestEmail, podIdFilter)
 	 * @returns {Promise<Array>}
 	 */
 	async findAll(filter = {}) {
-		return await Reservation.find(filter)
+		// Separate podIdFilter since it requires filtering after population
+		const { podIdFilter, ...dbFilter } = filter;
+
+		let query = Reservation.find(dbFilter)
 			.populate("roomId", "podId quality floor pricePerNight")
 			.populate("userId", "name email")
 			.sort({ createdAt: -1 });
+
+		const reservations = await query.exec();
+
+		// Filter by podId after population if specified
+		if (podIdFilter) {
+			return reservations.filter((res) => {
+				const room = typeof res.roomId === "object" ? res.roomId : null;
+				return room && room.podId === podIdFilter;
+			});
+		}
+
+		return reservations;
 	}
 
 	/**

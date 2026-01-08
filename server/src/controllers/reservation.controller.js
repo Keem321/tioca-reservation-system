@@ -1,15 +1,47 @@
 import ReservationService from "../services/reservation.service.js";
 
 /**
- * Get all reservations
- * @route GET /api/reservations
+ * Get all reservations with optional filtering
+ * @route GET /api/reservations?status=pending&dateFrom=2026-01-01&dateTo=2026-01-31&guestEmail=guest@example.com&podId=A101
  * @param {import('express').Request} req - Express request object
  * @param {import('express').Response} res - Express response object
  * @returns {void}
  */
 export async function getReservations(req, res) {
 	try {
-		const reservations = await ReservationService.getAllReservations();
+		const { status, dateFrom, dateTo, guestEmail, podId } = req.query;
+		const filters = {};
+
+		// Status filter
+		if (status) {
+			filters.status = status;
+		}
+
+		// Date range filters (check-in date)
+		if (dateFrom || dateTo) {
+			filters.checkInDate = {};
+			if (dateFrom) {
+				filters.checkInDate.$gte = new Date(`${dateFrom}T00:00:00`);
+			}
+			if (dateTo) {
+				filters.checkInDate.$lte = new Date(`${dateTo}T23:59:59`);
+			}
+		}
+
+		// Guest email filter (case-insensitive partial match)
+		if (guestEmail) {
+			filters.guestEmail = { $regex: guestEmail, $options: "i" };
+		}
+
+		// Pod ID filter (via roomId population)
+		if (podId) {
+			// Note: podId is a string field in Room, so we need to filter through populated data
+			// This will be handled on client-side or we'd need a separate aggregation query
+			// For now, we'll pass it through and the frontend can filter
+			filters.podIdFilter = podId; // Marker for client-side filtering
+		}
+
+		const reservations = await ReservationService.getAllReservations(filters);
 		res.json(reservations);
 	} catch (err) {
 		res.status(500).json({ error: err.message });

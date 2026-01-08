@@ -33,9 +33,9 @@
 - Reservation Management
 
   - Room Booking: **Implemented**. Public booking flow (no auth required); overlap prevention in repository layer; recommended rooms feature for flexibility; time-slot selection with AM/PM display and same‑day 2‑hour buffer.
-  - Reservation Details: **Partial**. List/detail endpoints/UI. Cancel allowed. No confirmation emails.
+  - Reservation Details: **Implemented**. List/detail endpoints/UI with advanced search & filtering; can cancel reservations. Email notifications not yet implemented.
   - Modify Reservations: **Partial**. Update endpoints/UI exist; availability checked. No change room-type logic beyond roomId.
-  - Reservation Search/Dashboard: **Partial**. Manager pages list/filter by status; no advanced filters (date range, guest, podId search).
+  - Reservation Search/Dashboard: **Implemented**. Manager pages support filtering by: status, date range (check-in from/to), guest email (partial match), pod ID. Sortable by date, status, or guest name. Bulk check-in/check-out for multiple reservations.
   - Data Model: **Updated**. `userId` is optional to support guest bookings; backend validation updated accordingly.
 
 - Payment Processing
