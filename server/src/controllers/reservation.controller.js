@@ -105,13 +105,53 @@ export async function createReservation(req, res) {
 
 /**
  * Update a reservation
- * @route PUT /api/reservations/:id
+ * @route PUT /api/reservations/:id (managers only)
+ * @route PATCH /api/reservations/:id/modify (guests can modify their own)
  * @param {import('express').Request} req - Express request object
  * @param {import('express').Response} res - Express response object
  * @returns {void}
  */
 export async function updateReservation(req, res) {
 	try {
+		// If not a manager, verify the user owns this reservation
+		if (req.user.role !== "manager") {
+			const reservation = await ReservationService.getReservationById(
+				req.params.id
+			);
+			if (!reservation) {
+				return res.status(404).json({ error: "Reservation not found" });
+			}
+			// Check if the logged-in user is the owner of the reservation
+			const reservationUserId =
+				typeof reservation.userId === "string"
+					? reservation.userId
+					: reservation.userId?._id;
+			if (reservationUserId !== req.user._id.toString()) {
+				return res.status(403).json({
+					error: "You can only modify your own reservations",
+				});
+			}
+			// Guests can only modify certain fields
+			const allowedFields = [
+				"checkInDate",
+				"checkOutDate",
+				"numberOfGuests",
+				"specialRequests",
+			];
+			const updateData = {};
+			allowedFields.forEach((field) => {
+				if (req.body[field] !== undefined) {
+					updateData[field] = req.body[field];
+				}
+			});
+			const updated = await ReservationService.updateReservation(
+				req.params.id,
+				updateData
+			);
+			return res.json(updated);
+		}
+
+		// Manager can update any field
 		const reservation = await ReservationService.updateReservation(
 			req.params.id,
 			req.body
@@ -153,12 +193,33 @@ export async function deleteReservation(req, res) {
  */
 export async function cancelReservation(req, res) {
 	try {
+		// Get the reservation first to verify ownership
+		const reservation = await ReservationService.getReservationById(
+			req.params.id
+		);
+		if (!reservation) {
+			return res.status(404).json({ error: "Reservation not found" });
+		}
+
+		// If not a manager, verify the user owns this reservation
+		if (req.user.role !== "manager") {
+			const reservationUserId =
+				typeof reservation.userId === "string"
+					? reservation.userId
+					: reservation.userId?._id;
+			if (reservationUserId !== req.user._id.toString()) {
+				return res.status(403).json({
+					error: "You can only cancel your own reservations",
+				});
+			}
+		}
+
 		const { reason } = req.body;
-		const reservation = await ReservationService.cancelReservation(
+		const cancelledReservation = await ReservationService.cancelReservation(
 			req.params.id,
 			reason
 		);
-		res.json(reservation);
+		res.json(cancelledReservation);
 	} catch (err) {
 		if (err.message === "Reservation not found") {
 			return res.status(404).json({ error: err.message });
