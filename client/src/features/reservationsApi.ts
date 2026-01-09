@@ -47,7 +47,7 @@ export const reservationsApi = createApi({
 			}),
 			invalidatesTags: ["Reservation"],
 		}),
-		// Update a reservation
+		// Update a reservation (manager only)
 		updateReservation: builder.mutation<
 			Reservation,
 			{ id: string; data: Partial<ReservationFormData> }
@@ -55,6 +55,18 @@ export const reservationsApi = createApi({
 			query: ({ id, data }) => ({
 				url: `/${id}`,
 				method: "PUT",
+				body: data,
+			}),
+			invalidatesTags: ["Reservation"],
+		}),
+		// Modify a reservation (guest can modify their own)
+		modifyReservation: builder.mutation<
+			Reservation,
+			{ id: string; data: Partial<ReservationFormData> }
+		>({
+			query: ({ id, data }) => ({
+				url: `/${id}/modify`,
+				method: "PATCH",
 				body: data,
 			}),
 			invalidatesTags: ["Reservation"],
@@ -126,6 +138,7 @@ export const {
 	useGetReservationByIdQuery,
 	useCreateReservationMutation,
 	useUpdateReservationMutation,
+	useModifyReservationMutation,
 	useDeleteReservationMutation,
 	useCancelReservationMutation,
 	useCheckInMutation,

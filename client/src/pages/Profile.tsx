@@ -6,6 +6,12 @@ import {
 	useChangePasswordMutation,
 	useGetActiveReservationsQuery,
 } from "../features/userApi";
+import {
+	useModifyReservationMutation,
+	useCancelReservationMutation,
+} from "../features/reservationsApi";
+import { useGetRoomsQuery } from "../features/roomsApi";
+import type { Reservation } from "../types/reservation";
 import "./Profile.css";
 
 /**
@@ -31,19 +37,44 @@ export default function Profile() {
 	});
 	const hasInitialized = useRef(false);
 
+	// Reservation modification state
+	const [editingReservation, setEditingReservation] =
+		useState<Reservation | null>(null);
+	const [reservationFormData, setReservationFormData] = useState<{
+		checkInDate: string;
+		checkOutDate: string;
+		numberOfGuests: number;
+		specialRequests: string;
+	}>({
+		checkInDate: "",
+		checkOutDate: "",
+		numberOfGuests: 1,
+		specialRequests: "",
+	});
+
 	// Queries
 	const {
 		data: profile,
 		isLoading: profileLoading,
 		error: profileError,
 	} = useGetProfileQuery();
-	const { data: activeReservations = [], isLoading: reservationsLoading } =
-		useGetActiveReservationsQuery();
+	const {
+		data: activeReservations = [],
+		isLoading: reservationsLoading,
+		refetch: refetchReservations,
+	} = useGetActiveReservationsQuery();
 
 	// Mutations
 	const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
 	const [changePassword, { isLoading: isChangingPassword }] =
 		useChangePasswordMutation();
+	const [modifyReservation, { isLoading: isModifying }] =
+		useModifyReservationMutation();
+	const [cancelReservation, { isLoading: isCancelling }] =
+		useCancelReservationMutation();
+
+	// Get rooms data for capacity validation
+	const { data: rooms = [] } = useGetRoomsQuery();
 
 	// Initialize edit form when profile loads - only once
 	useEffect(() => {
@@ -95,6 +126,99 @@ export default function Profile() {
 		}
 	};
 
+	// Reservation modification handlers
+	const handleOpenModifyModal = (reservation: Reservation) => {
+		setEditingReservation(reservation);
+		setReservationFormData({
+			checkInDate: reservation.checkInDate.split("T")[0],
+			checkOutDate: reservation.checkOutDate.split("T")[0],
+			numberOfGuests: reservation.numberOfGuests,
+			specialRequests: reservation.specialRequests || "",
+		});
+	};
+
+	const handleCloseModifyModal = () => {
+		setEditingReservation(null);
+		setReservationFormData({
+			checkInDate: "",
+			checkOutDate: "",
+			numberOfGuests: 1,
+			specialRequests: "",
+		});
+	};
+
+	const handleReservationFormChange = (
+		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+	) => {
+		const { name, value } = e.target;
+		setReservationFormData((prev) => ({
+			...prev,
+			[name]: name === "numberOfGuests" ? parseInt(value) || 1 : value,
+		}));
+	};
+
+	const handleSaveReservation = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!editingReservation) return;
+
+		try {
+			// Validate dates
+			const checkIn = new Date(reservationFormData.checkInDate);
+			const checkOut = new Date(reservationFormData.checkOutDate);
+			if (checkOut <= checkIn) {
+				alert("Check-out date must be after check-in date");
+				return;
+			}
+
+			// Validate guest capacity
+			const roomId =
+				typeof editingReservation.roomId === "string"
+					? editingReservation.roomId
+					: editingReservation.roomId._id;
+			const room = rooms.find((r) => r._id === roomId);
+			if (room && reservationFormData.numberOfGuests > room.capacity) {
+				alert(
+					`Number of guests exceeds room capacity (${room.capacity})`
+				);
+				return;
+			}
+
+			await modifyReservation({
+				id: editingReservation._id,
+				data: reservationFormData,
+			}).unwrap();
+			alert("Reservation modified successfully!");
+			handleCloseModifyModal();
+			// Refetch to update the list
+			refetchReservations();
+		} catch (err) {
+			const error = err as { data?: { error?: string } };
+			alert(`Error: ${error?.data?.error || "Failed to modify reservation"}`);
+		}
+	};
+
+	const handleCancelReservation = async (reservationId: string) => {
+		if (
+			!confirm(
+				"Are you sure you want to cancel this reservation? This action cannot be undone."
+			)
+		) {
+			return;
+		}
+
+		const reason = prompt("Please provide a reason for cancellation (optional):");
+
+		try {
+			await cancelReservation({ id: reservationId, reason: reason || "" }).unwrap();
+			alert("Reservation cancelled successfully!");
+			// Refetch to update the list
+			refetchReservations();
+		} catch (err) {
+			const error = err as { data?: { error?: string } };
+			alert(`Error: ${error?.data?.error || "Failed to cancel reservation"}`);
+		}
+	};
+
 	if (profileLoading) {
 		return (
 			<>
@@ -142,22 +266,22 @@ export default function Profile() {
 										{profile?.provider === "google" ? "Google OAuth" : "Local"}
 									</span>
 								</div>
-								<div className="profile-actions">
+							<div className="profile-actions">
+								<button
+									onClick={() => setIsEditing(true)}
+									className="btn-edit btn-primary"
+								>
+									Edit Profile
+								</button>
+								{profile?.provider !== "google" && (
 									<button
-										onClick={() => setIsEditing(true)}
-										className="btn-edit"
+										onClick={() => setShowPasswordForm(!showPasswordForm)}
+										className="btn-password btn-secondary"
 									>
-										Edit Profile
+										{showPasswordForm ? "Cancel" : "Change Password"}
 									</button>
-									{profile?.provider !== "google" && (
-										<button
-											onClick={() => setShowPasswordForm(!showPasswordForm)}
-											className="btn-password"
-										>
-											{showPasswordForm ? "Cancel" : "Change Password"}
-										</button>
-									)}
-								</div>
+								)}
+							</div>
 							</div>
 						) : (
 							<form onSubmit={handleSaveProfile} className="profile-form">
@@ -182,22 +306,22 @@ export default function Profile() {
 									/>
 								</label>
 
-								<div className="form-actions">
-									<button
-										type="submit"
-										disabled={isUpdating}
-										className="btn-save"
-									>
-										{isUpdating ? "Saving..." : "Save Changes"}
-									</button>
-									<button
-										type="button"
-										onClick={() => setIsEditing(false)}
-										className="btn-cancel"
-									>
-										Cancel
-									</button>
-								</div>
+							<div className="form-actions">
+								<button
+									type="submit"
+									disabled={isUpdating}
+									className="btn-save btn-primary"
+								>
+									{isUpdating ? "Saving..." : "Save Changes"}
+								</button>
+								<button
+									type="button"
+									onClick={() => setIsEditing(false)}
+									className="btn-cancel btn-ghost"
+								>
+									Cancel
+								</button>
+							</div>
 							</form>
 						)}
 
@@ -239,22 +363,22 @@ export default function Profile() {
 									/>
 								</label>
 
-								<div className="form-actions">
-									<button
-										type="submit"
-										disabled={isChangingPassword}
-										className="btn-save"
-									>
-										{isChangingPassword ? "Changing..." : "Change Password"}
-									</button>
-									<button
-										type="button"
-										onClick={() => setShowPasswordForm(false)}
-										className="btn-cancel"
-									>
-										Cancel
-									</button>
-								</div>
+							<div className="form-actions">
+								<button
+									type="submit"
+									disabled={isChangingPassword}
+									className="btn-save btn-primary"
+								>
+									{isChangingPassword ? "Changing..." : "Change Password"}
+								</button>
+								<button
+									type="button"
+									onClick={() => setShowPasswordForm(false)}
+									className="btn-cancel btn-ghost"
+								>
+									Cancel
+								</button>
+							</div>
 							</form>
 						)}
 					</div>
@@ -271,69 +395,193 @@ export default function Profile() {
 							</p>
 						)}
 
-						{!reservationsLoading && activeReservations.length > 0 && (
-							<div className="reservations-list">
-								{activeReservations.map((res) => (
-									<div key={res._id} className="reservation-card">
-										<div className="card-header">
-											<h3>
-												Pod{" "}
-												{typeof res.roomId === "string"
-													? res.roomId
-													: res.roomId?.podId}
-											</h3>
-											<span className={`status-badge status-${res.status}`}>
-												{res.status}
-											</span>
+					{!reservationsLoading && activeReservations.length > 0 && (
+						<div className="reservations-list">
+							{activeReservations.map((res) => (
+								<div key={res._id} className="reservation-card">
+									<div className="card-header">
+										<h3>
+											Pod{" "}
+											{typeof res.roomId === "string"
+												? res.roomId
+												: res.roomId?.podId}
+										</h3>
+										<span className={`status-badge status-${res.status}`}>
+											{res.status}
+										</span>
+									</div>
+									<div className="card-details">
+										<div className="detail-row">
+											<label>Guest:</label>
+											<span>{res.guestName}</span>
 										</div>
-										<div className="card-details">
-											<div className="detail-row">
-												<label>Guest:</label>
-												<span>{res.guestName}</span>
-											</div>
-											<div className="detail-row">
-												<label>Email:</label>
-												<span>{res.guestEmail}</span>
-											</div>
-											{res.guestPhone && (
-												<div className="detail-row">
-													<label>Phone:</label>
-													<span>{res.guestPhone}</span>
-												</div>
-											)}
-											<div className="detail-row">
-												<label>Check-In:</label>
-												<span>
-													{new Date(res.checkInDate).toLocaleDateString()}
-												</span>
-											</div>
-											<div className="detail-row">
-												<label>Check-Out:</label>
-												<span>
-													{new Date(res.checkOutDate).toLocaleDateString()}
-												</span>
-											</div>
-											<div className="detail-row">
-												<label>Guests:</label>
-												<span>{res.numberOfGuests}</span>
-											</div>
-											<div className="detail-row">
-												<label>Total Price:</label>
-												<span>${res.totalPrice}</span>
-											</div>
+										<div className="detail-row">
+											<label>Email:</label>
+											<span>{res.guestEmail}</span>
 										</div>
-										{res.specialRequests && (
-											<div className="special-requests">
-												<label>Special Requests:</label>
-												<p>{res.specialRequests}</p>
+										{res.guestPhone && (
+											<div className="detail-row">
+												<label>Phone:</label>
+												<span>{res.guestPhone}</span>
 											</div>
 										)}
+										<div className="detail-row">
+											<label>Check-In:</label>
+											<span>
+												{new Date(res.checkInDate).toLocaleDateString()}
+											</span>
+										</div>
+										<div className="detail-row">
+											<label>Check-Out:</label>
+											<span>
+												{new Date(res.checkOutDate).toLocaleDateString()}
+											</span>
+										</div>
+										<div className="detail-row">
+											<label>Guests:</label>
+											<span>{res.numberOfGuests}</span>
+										</div>
+										<div className="detail-row">
+											<label>Total Price:</label>
+											<span>${res.totalPrice}</span>
+										</div>
 									</div>
-								))}
-							</div>
-						)}
+									{res.specialRequests && (
+										<div className="special-requests">
+											<label>Special Requests:</label>
+											<p>{res.specialRequests}</p>
+										</div>
+									)}
+									{/* Action buttons for active reservations */}
+									{res.status !== "cancelled" &&
+										res.status !== "checked-out" && (
+											<div className="reservation-actions">
+												<button
+													onClick={() => handleOpenModifyModal(res)}
+													className="btn-modify btn-primary"
+													disabled={
+														res.status === "checked-in" || isModifying
+													}
+												>
+													Modify
+												</button>
+												<button
+													onClick={() => handleCancelReservation(res._id)}
+													className="btn-cancel-reservation btn-danger"
+													disabled={isCancelling}
+												>
+													Cancel Reservation
+												</button>
+											</div>
+										)}
+								</div>
+							))}
+						</div>
+					)}
 					</div>
 				</div>
+
+				{/* Modify Reservation Modal */}
+				{editingReservation && (
+					<div className="modal-overlay" onClick={handleCloseModifyModal}>
+						<div className="modal-content" onClick={(e) => e.stopPropagation()}>
+							<div className="modal-header">
+								<h2>Modify Reservation</h2>
+								<button
+									onClick={handleCloseModifyModal}
+									className="modal-close"
+								>
+									&times;
+								</button>
+							</div>
+							<form onSubmit={handleSaveReservation} className="modal-form">
+								<div className="modal-body">
+									<div className="modal-info">
+										<p>
+											<strong>Pod:</strong>{" "}
+											{typeof editingReservation.roomId === "string"
+												? editingReservation.roomId
+												: editingReservation.roomId?.podId}
+										</p>
+										<p>
+											<strong>Current Status:</strong>{" "}
+											<span
+												className={`status-badge status-${editingReservation.status}`}
+											>
+												{editingReservation.status}
+											</span>
+										</p>
+									</div>
+
+									<label>
+										Check-In Date:
+										<input
+											type="date"
+											name="checkInDate"
+											value={reservationFormData.checkInDate}
+											onChange={handleReservationFormChange}
+											min={new Date().toISOString().split("T")[0]}
+											required
+										/>
+									</label>
+
+									<label>
+										Check-Out Date:
+										<input
+											type="date"
+											name="checkOutDate"
+											value={reservationFormData.checkOutDate}
+											onChange={handleReservationFormChange}
+											min={reservationFormData.checkInDate}
+											required
+										/>
+									</label>
+
+									<label>
+										Number of Guests:
+										<input
+											type="number"
+											name="numberOfGuests"
+											value={reservationFormData.numberOfGuests}
+											onChange={handleReservationFormChange}
+											min={1}
+											max={2}
+											required
+										/>
+									</label>
+
+									<label>
+										Special Requests:
+										<textarea
+											name="specialRequests"
+											value={reservationFormData.specialRequests}
+											onChange={handleReservationFormChange}
+											rows={4}
+											placeholder="Any special requests or requirements..."
+										/>
+									</label>
+								</div>
+
+							<div className="modal-footer">
+								<button
+									type="submit"
+									disabled={isModifying}
+									className="btn-save btn-primary"
+								>
+									{isModifying ? "Saving..." : "Save Changes"}
+								</button>
+								<button
+									type="button"
+									onClick={handleCloseModifyModal}
+									className="btn-cancel btn-ghost"
+								>
+									Cancel
+								</button>
+							</div>
+							</form>
+						</div>
+					</div>
+				)}
 			</div>
 		</>
 	);

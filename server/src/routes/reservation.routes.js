@@ -61,6 +61,9 @@ reservationRouter.put(
 	updateReservation
 );
 
+// Guest update their own reservation (authenticated users)
+reservationRouter.patch("/:id/modify", requireAuth, updateReservation);
+
 // Update reservation status (manager only)
 reservationRouter.patch(
 	"/:id/status",
