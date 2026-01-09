@@ -9,6 +9,11 @@ import { setPendingReservation, resetBooking } from "../features/bookingSlice";
 import type { RootState } from "../store";
 import type { ReservationFormData } from "../types/reservation";
 import Navbar from "../components/landing/Navbar";
+import {
+	getRoomImage,
+	getRoomDisplayLabel,
+	getRoomQualityDescription,
+} from "../utils/roomImages";
 import "./BookingConfirmation.css";
 
 /**
@@ -178,17 +183,9 @@ const BookingConfirmation: React.FC = () => {
 		(checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
 	);
 	const totalPrice = room.pricePerNight * nights;
-
-	const getQualityLabel = (quality: string) => {
-		const labels: Record<string, string> = {
-			classic: "Classic Pearl",
-			milk: "Milk Pearl",
-			golden: "Golden Pearl",
-			crystal: "Crystal Boba Suite",
-			matcha: "Matcha Pearl",
-		};
-		return labels[quality] || quality;
-	};
+	const roomImage = getRoomImage(room.quality, room.floor);
+	const roomLabel = getRoomDisplayLabel(room.quality, room.floor);
+	const roomDescription = getRoomQualityDescription(room.quality);
 
 	return (
 		<>
@@ -321,31 +318,37 @@ const BookingConfirmation: React.FC = () => {
 							{/* Room Details */}
 							<div className="booking-confirmation__section">
 								<h2>Room Details</h2>
-								<div className="detail-item">
-									<span className="detail-label">Pod ID:</span>
-									<span className="detail-value">{room.podId}</span>
-								</div>
-								<div className="detail-item">
-									<span className="detail-label">Quality:</span>
-									<span className="detail-value">
-										{getQualityLabel(room.quality)}
-									</span>
-								</div>
-								<div className="detail-item">
-									<span className="detail-label">Floor:</span>
-									<span className="detail-value">
-										{room.floor.charAt(0).toUpperCase() + room.floor.slice(1)}
-									</span>
-								</div>
-								{room.description && (
-									<div className="detail-item">
-										<span className="detail-label">Description:</span>
-										<span className="detail-value">{room.description}</span>
-									</div>
-								)}
+							<div className="booking-confirmation__room-image">
+								<img 
+									src={roomImage} 
+									alt={roomLabel}
+									onError={(e) => {
+										e.currentTarget.style.display = 'none';
+									}}
+								/>
 							</div>
-
-							{/* Booking Details */}
+							<div className="detail-item">
+								<span className="detail-label">Pod ID:</span>
+								<span className="detail-value">{room.podId}</span>
+							</div>
+							<div className="detail-item">
+								<span className="detail-label">Type:</span>
+								<span className="detail-value">
+									{roomLabel}
+								</span>
+							</div>
+							<div className="detail-item">
+								<span className="detail-label">Description:</span>
+								<span className="detail-value">
+									{roomDescription}
+								</span>
+							</div>
+							<div className="detail-item">
+								<span className="detail-label">Floor:</span>
+								<span className="detail-value">
+									{room.floor.charAt(0).toUpperCase() + room.floor.slice(1)}
+								</span>
+							</div>
 							<div className="booking-confirmation__section">
 								<h2>Booking Details</h2>
 								<div className="detail-item">

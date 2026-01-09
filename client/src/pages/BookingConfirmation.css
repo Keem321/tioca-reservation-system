@@ -141,6 +141,23 @@
 	padding-bottom: 0.5rem;
 }
 
+/* Room image in booking confirmation */
+.booking-confirmation__room-image {
+	width: 100%;
+	height: 200px;
+	border-radius: 8px;
+	overflow: hidden;
+	margin-bottom: 1rem;
+	background-color: #e8ddcf;
+}
+
+.booking-confirmation__room-image img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
 .detail-item {
 	display: flex;
 	justify-content: space-between;

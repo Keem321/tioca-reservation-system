@@ -3,12 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setSelectedRoom } from "../../features/bookingSlice";
 import type { Room } from "../../types/room";
+import {
+	getRoomImage,
+	getRoomDisplayLabel,
+	getRoomQualityDescription,
+	getRoomDimensions,
+} from "../../utils/roomImages";
 import "./PodCard.css";
 
 /**
  * PodCard Component
  *
  * Displays a single pod/room card with details, pricing, and booking button.
+ * Now includes standardized room images that match the landing page.
  */
 
 interface PodCardProps {
@@ -27,51 +34,11 @@ const PodCard: React.FC<PodCardProps> = ({
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
-	const getQualityLabel = (quality: string) => {
-		const labels: Record<string, string> = {
-			classic: "Classic Pearl",
-			milk: "Milk Pearl",
-			golden: "Golden Pearl",
-			crystal: "Crystal Boba Suite",
-			matcha: "Matcha Pearl",
-		};
-		return labels[quality] || quality;
-	};
-
-	const getQualityDescription = (quality: string) => {
-		const descs: Record<string, string> = {
-			classic: "Essential comfort",
-			milk: "Enhanced space",
-			golden: "Premium experience",
-			crystal: "First-class luxury",
-			matcha: "Women-only exclusive",
-		};
-		return descs[quality] || "";
-	};
-
-	const getDimensions = (quality: string, floor: string) => {
-		const dims: Record<string, string> = {
-			classic: '80" × 40" × 40"',
-			milk: '84" × 42" × 45"',
-			golden: '86" × 45" × 50"',
-			crystal: '90" × 55" × 65"',
-			matcha: '86" × 45" × 50"',
-		};
-
-		let dimension = dims[quality] || dims.classic;
-
-		if (floor === "couples") {
-			dimension = dimension.replace(/× \d+"/, '× 60"');
-		}
-
-		return dimension;
-	};
-
 	const totalPrice = pod.pricePerNight * nights;
-	const displayLabel =
-		pod.floor === "couples"
-			? `Twin ${getQualityLabel(pod.quality)}`
-			: getQualityLabel(pod.quality);
+	const displayLabel = getRoomDisplayLabel(pod.quality, pod.floor);
+	const roomImage = getRoomImage(pod.quality, pod.floor);
+	const description = getRoomQualityDescription(pod.quality);
+	const dimensions = getRoomDimensions(pod.quality, pod.floor);
 
 	const handleBookNow = () => {
 		// Store selected room in Redux for booking confirmation
@@ -91,13 +58,25 @@ const PodCard: React.FC<PodCardProps> = ({
 	return (
 		<div className="pod-card">
 			<div className="pod-card__left">
-				<div className="pod-card__image">{displayLabel[0]}</div>
+				<div className="pod-card__image">
+					<img
+						src={roomImage}
+						alt={displayLabel}
+						onError={(e) => {
+							// Fallback to placeholder if image fails to load
+							e.currentTarget.style.display = "none";
+							const parent = e.currentTarget.parentElement;
+							if (parent) {
+								parent.innerHTML = `<div class="pod-card__image-placeholder">${displayLabel[0]}</div>`;
+							}
+						}}
+					/>
+				</div>
 				<div className="pod-card__content">
 					<h3 className="pod-card__title">{displayLabel}</h3>
 					<p className="pod-card__room-number">Room {pod.podId}</p>
 					<p className="pod-card__description">
-						{getQualityDescription(pod.quality)} •{" "}
-						{getDimensions(pod.quality, pod.floor)}
+						{description} • {dimensions}
 					</p>
 				</div>
 			</div>
