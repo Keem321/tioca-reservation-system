@@ -14,6 +14,7 @@ import Payment from "./pages/Payment";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import RoomManagement from "./pages/RoomManagement";
 import ReservationManagement from "./pages/ReservationManagement";
+import PaymentsManagement from "./pages/PaymentsManagement";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 /**
@@ -67,6 +68,14 @@ function App() {
 						element={
 							<ProtectedRoute requiredRole="manager">
 								<ReservationManagement />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/manage/payments"
+						element={
+							<ProtectedRoute requiredRole="manager">
+								<PaymentsManagement />
 							</ProtectedRoute>
 						}
 					/>

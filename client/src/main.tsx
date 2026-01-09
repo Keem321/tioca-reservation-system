@@ -5,11 +5,15 @@ import { store } from "./store";
 import "./globals.css";
 import "./index.css";
 import App from "./App.tsx";
+import ToastProvider from "./components/ToastProvider";
+import "./components/Toast.css";
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
 		<Provider store={store}>
-			<App />
+			<ToastProvider>
+				<App />
+			</ToastProvider>
 		</Provider>
 	</StrictMode>
 );

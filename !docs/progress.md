@@ -39,13 +39,13 @@
   - Data Model: **Updated**. `userId` is optional to support guest bookings; backend validation updated accordingly.
 
 - Payment Processing
-  - Payment flow: **Partial**. Frontend integrates Stripe Elements and calls backend create/confirm intent endpoints; routes are public for guest checkout. No webhooks yet; limited payment status lifecycle.
-  - Simulated payments/transaction IDs: **Not implemented**. No dedicated payment model; reservation `paymentStatus` string only.
-  - Stripe integration: **Partial**. Client-side Elements and intent creation/confirmation present; webhooks/refunds/capture flow pending.
-  - Transaction history/reports: **Not implemented**.
-- Capacity Reports
 
-  - Status: **Not implemented**. No reporting endpoints or UI.
+  - Payment flow: **Implemented**. Frontend integrates Stripe Elements and calls backend create/confirm intent endpoints; routes are public for guest checkout. Backend creates Payment records with status lifecycle (pending → succeeded/failed → refunded). Error handling tracks failed payments with reason/code.
+  - Transaction model: **Implemented**. Dedicated Payment model with full schema: reservationId, userId (optional), amount, currency, status enum, Stripe refs (paymentIntentId, chargeId, customerId), refund tracking (refundAmount, refundStripeId), error tracking (failureReason, failureCode), receiptUrl, timestamps, and 5 indexes for efficient querying.
+  - Transaction history/reports: **Implemented**. Backend endpoints for querying payments (filter by date, status, reservation), stats aggregation (by status count/amount, total revenue), and revenue report by month. Frontend Reports page displays stats cards, transaction table (sortable, filterable), monthly revenue breakdown, and refund capability.
+  - Stripe integration: **Mostly complete**. Client-side Elements and intent creation/confirmation present; payment records created/updated on intent and confirm. processRefund updated to track refund amount/ID in Payment model. Webhooks still pending for edge cases.
+  - Manager reports: **Implemented**. Reports page at `/manage/reports` with advanced filtering (date range, status), stats dashboard (total revenue, transaction count, breakdown by status), monthly revenue table, and transaction history with refund buttons. RTK Query hooks for payment data fetching.
+  - Payment status lifecycle: **Implemented**. Payment records track: pending (on intent), processing (optional), succeeded (on confirm), failed (on error), refunded/partial (on refund). Failed payments logged with Stripe error reason/code.
 
 - UI/UX
 
@@ -65,13 +65,10 @@
 
 ## Suggested Next Steps
 
-1. **Integrate Stripe payments**: Persist payment intents/transactions, add webhooks (payment_succeeded/failed), and refunds; tie to reservation status transitions
+1. **Stripe webhooks**: Add webhook handlers for payment_intent.succeeded/failed events for async confirmation
 2. **Email notifications**: Send booking confirmations and reservation updates to guest email
 3. **Guest account creation**: Allow optional account creation during checkout to track reservations
-4. **Manager tools enhancement**:
-   - Add advanced reservation search (date range, guest email, podId)
-   - Capacity and transaction reporting endpoints with UI
-   - Bulk operations for check-in/check-out
-5. **Pricing model update**: Implement base cost (by quality) + per-amenity pricing structure
-6. **UI polish**: Improve responsive layout, add loading states, enhance error handling; refine time pickers (accessibility, keyboard nav)
-7. **Performance**: Add pessimistic locking for high-concurrency booking scenarios
+4. **Pricing model update**: Implement base cost (by quality) + per-amenity pricing structure
+5. **UI polish**: Improve responsive layout, add loading states, enhance error handling for payment failures
+6. **Performance**: Add pessimistic locking for high-concurrency booking scenarios
+7. **Payment analytics**: Add date range filtering and export functionality to reports

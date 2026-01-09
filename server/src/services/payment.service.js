@@ -28,6 +28,8 @@ if (fs.existsSync(serverEnvPath)) {
 
 import Stripe from "stripe";
 import ReservationRepository from "../repositories/reservation.repository.js";
+import PaymentRepository from "../repositories/payment.repository.js";
+import PaymentEditRepository from "../repositories/paymentEdit.repository.js";
 
 // Initialize Stripe with secret key from environment variables
 // Check for both STRIPE_SECRET_KEY and STRIPE_SECRET (for backwards compatibility)
@@ -114,9 +116,22 @@ class PaymentService {
 			stripePaymentIntentId: paymentIntent.id,
 		});
 
+		// Create Payment record in database
+		const payment = await PaymentRepository.create({
+			reservationId,
+			userId: reservation.userId || undefined,
+			amount,
+			currency,
+			status: "pending",
+			stripePaymentIntentId: paymentIntent.id,
+			stripeCustomerId: customerId,
+			description: `Reservation payment for ${reservation.guestName}`,
+		});
+
 		return {
 			clientSecret: paymentIntent.client_secret,
 			paymentIntentId: paymentIntent.id,
+			paymentRecordId: payment._id,
 		};
 	}
 
@@ -144,35 +159,78 @@ class PaymentService {
 			throw new Error("Payment intent ID mismatch");
 		}
 
-		// Retrieve payment intent from Stripe
-		const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-
-		if (paymentIntent.status !== "succeeded") {
-			throw new Error(
-				`Payment not completed. Status: ${paymentIntent.status}`
+		try {
+			// Retrieve payment intent from Stripe
+			const paymentIntent = await stripe.paymentIntents.retrieve(
+				paymentIntentId
 			);
-		}
 
-		// Get charge ID from payment intent
-		const chargeId =
-			paymentIntent.latest_charge ||
-			(paymentIntent.charges?.data?.[0]?.id);
+			if (paymentIntent.status !== "succeeded") {
+				// Payment failed - update Payment record
+				const failureReason =
+					paymentIntent.last_payment_error?.message || "Payment declined";
+				const failureCode = paymentIntent.last_payment_error?.code || null;
 
-		// Update reservation with payment status
-		const updatedReservation = await ReservationRepository.update(
-			reservationId,
-			{
-				paymentStatus: "paid",
-				status: "confirmed",
-				stripeChargeId: chargeId,
+				await PaymentRepository.updateByReservationId(reservationId, {
+					status: "failed",
+					failureReason,
+					failureCode,
+				});
+
+				await ReservationRepository.update(reservationId, {
+					paymentStatus: "failed",
+				});
+
+				throw new Error(
+					`Payment not completed. Status: ${paymentIntent.status}. ${failureReason}`
+				);
 			}
-		);
 
-		return {
-			success: true,
-			reservation: updatedReservation,
-			chargeId,
-		};
+			// Get charge ID from payment intent
+			const chargeId =
+				paymentIntent.latest_charge || paymentIntent.charges?.data?.[0]?.id;
+
+			// Update Payment record with successful payment
+			const payment = await PaymentRepository.updateByReservationId(
+				reservationId,
+				{
+					status: "succeeded",
+					stripeChargeId: chargeId,
+					receiptUrl: paymentIntent.charges?.data?.[0]?.receipt_url,
+				}
+			);
+
+			// Update reservation with payment status
+			const updatedReservation = await ReservationRepository.update(
+				reservationId,
+				{
+					paymentStatus: "paid",
+					status: "confirmed",
+					stripeChargeId: chargeId,
+				}
+			);
+
+			return {
+				success: true,
+				reservation: updatedReservation,
+				payment,
+				chargeId,
+			};
+		} catch (error) {
+			// Catch any unexpected errors and mark payment as failed
+			if (!error.message.includes("Payment not completed")) {
+				await PaymentRepository.updateByReservationId(reservationId, {
+					status: "failed",
+					failureReason: error.message || "Unknown error",
+					failureCode: "processing_error",
+				});
+
+				await ReservationRepository.update(reservationId, {
+					paymentStatus: "failed",
+				});
+			}
+			throw error;
+		}
 	}
 
 	/**
@@ -198,6 +256,12 @@ class PaymentService {
 			throw new Error("No charge ID found for this reservation");
 		}
 
+		// Get existing payment record
+		const payment = await PaymentRepository.findByReservationId(reservationId);
+		if (!payment) {
+			throw new Error("No payment record found for this reservation");
+		}
+
 		// Create refund
 		const refundData = {
 			charge: reservation.stripeChargeId,
@@ -209,15 +273,18 @@ class PaymentService {
 
 		const refund = await stripe.refunds.create(refundData);
 
+		// Update Payment record with refund info
+		const refundAmount = refund.amount;
+		const paymentStatus =
+			amount && amount < payment.amount ? "partial" : "refunded";
+
+		await PaymentRepository.update(payment._id, {
+			status: paymentStatus,
+			refundAmount,
+			refundStripeId: refund.id,
+		});
+
 		// Update reservation payment status
-		const refundAmount = refund.amount / 100;
-		const totalAmount = reservation.totalPrice;
-
-		let paymentStatus = "refunded";
-		if (refundAmount < totalAmount) {
-			paymentStatus = "partial";
-		}
-
 		await ReservationRepository.update(reservationId, {
 			paymentStatus,
 		});
@@ -225,11 +292,60 @@ class PaymentService {
 		return {
 			success: true,
 			refundId: refund.id,
-			amount: refundAmount,
+			amount: refundAmount / 100,
 			paymentStatus,
 		};
+	}
+
+	/**
+	 * Update payment and track edit history
+	 * @param {string} paymentId - Payment ID
+	 * @param {Object} updates - Fields to update (description, metadata)
+	 * @param {Object} editor - User object who made the edit
+	 * @returns {Promise<Object>} Updated payment
+	 */
+	async updatePayment(paymentId, updates, editor) {
+		// Get current payment
+		const payment = await PaymentRepository.findById(paymentId);
+		if (!payment) {
+			throw new Error("Payment not found");
+		}
+
+		// Only allow editing of non-Stripe fields
+		const allowedFields = ["description", "metadata"];
+		const fieldsToUpdate = {};
+
+		for (const field of allowedFields) {
+			if (field in updates && updates[field] !== undefined) {
+				fieldsToUpdate[field] = updates[field];
+
+				// Track edit history
+				await PaymentEditRepository.create({
+					paymentId,
+					editedBy: editor._id,
+					editedByName: editor.name,
+					editedByEmail: editor.email,
+					fieldName: field,
+					beforeValue: payment[field] || null,
+					afterValue: updates[field],
+					reason: updates.reason || null,
+				});
+			}
+		}
+
+		// Update payment
+		const updated = await PaymentRepository.update(paymentId, fieldsToUpdate);
+		return updated;
+	}
+
+	/**
+	 * Get edit history for a payment
+	 * @param {string} paymentId - Payment ID
+	 * @returns {Promise<Array>} Edit history records
+	 */
+	async getPaymentHistory(paymentId) {
+		return await PaymentEditRepository.findByPaymentId(paymentId);
 	}
 }
 
 export default new PaymentService();
-
