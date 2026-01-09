@@ -210,36 +210,33 @@
 }
 
 .status-badge {
-	padding: 4px 12px;
+	padding: 6px 14px;
 	border-radius: 12px;
 	font-size: 12px;
-	font-weight: 500;
+	font-weight: 600;
 	display: inline-block;
+	color: white;
+	text-transform: capitalize;
 }
 
 .status-pending {
-	background: #fff3cd;
-	color: #856404;
+	background: #f59e0b;
 }
 
 .status-confirmed {
-	background: #d1ecf1;
-	color: #0c5460;
+	background: #3b82f6;
 }
 
 .status-checked-in {
-	background: #d4edda;
-	color: #155724;
+	background: #10b981;
 }
 
 .status-checked-out {
-	background: #e2e3e5;
-	color: #383d41;
+	background: #6b7280;
 }
 
 .status-cancelled {
-	background: #f8d7da;
-	color: #721c24;
+	background: #ef4444;
 }
 
 .actions {
