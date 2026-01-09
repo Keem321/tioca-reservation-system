@@ -15,10 +15,14 @@ import "./PaymentSuccess.css";
 const PaymentSuccess: React.FC = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { pendingReservation } = useSelector((state: RootState) => state.booking);
-	
+	const { pendingReservation } = useSelector(
+		(state: RootState) => state.booking
+	);
+
 	// Get reservation from location state (preferred) or Redux store (fallback)
-	const reservation = (location.state?.reservation || pendingReservation) as Reservation | undefined;
+	const reservation = (location.state?.reservation || pendingReservation) as
+		| Reservation
+		| undefined;
 
 	// Only redirect if we truly don't have a reservation (after checking both sources)
 	useEffect(() => {
@@ -208,7 +212,9 @@ const PaymentSuccess: React.FC = () => {
 
 							{/* Guest Information */}
 							<div className="payment-success__section">
-								<h2 className="payment-success__section-title">Guest Information</h2>
+								<h2 className="payment-success__section-title">
+									Guest Information
+								</h2>
 								<div className="payment-success__detail-item">
 									<span className="detail-label">Name:</span>
 									<span className="detail-value">{reservation.guestName}</span>
@@ -233,12 +239,8 @@ const PaymentSuccess: React.FC = () => {
 					<div className="payment-success__next-steps">
 						<h3>What's Next?</h3>
 						<ul>
-							<li>
-								A confirmation email has been sent to your email address
-							</li>
-							<li>
-								You can view and manage your reservation in your profile
-							</li>
+							<li>A confirmation email has been sent to your email address</li>
+							<li>You can view and manage your reservation in your profile</li>
 							<li>
 								Check-in instructions will be sent closer to your arrival date
 							</li>
@@ -266,4 +268,3 @@ const PaymentSuccess: React.FC = () => {
 };
 
 export default PaymentSuccess;
-

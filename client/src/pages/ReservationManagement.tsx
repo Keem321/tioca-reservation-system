@@ -27,14 +27,27 @@ import "./ReservationManagement.css";
  */
 
 export default function ReservationManagement() {
+	// Filters
 	const [statusFilter, setStatusFilter] = useState<string>("");
+	const [dateFromFilter, setDateFromFilter] = useState<string>("");
+	const [dateToFilter, setDateToFilter] = useState<string>("");
+	const [guestEmailFilter, setGuestEmailFilter] = useState<string>("");
+	const [podIdFilter, setPodIdFilter] = useState<string>("");
+
+	// UI state
 	const [showForm, setShowForm] = useState(false);
 	const [editingReservation, setEditingReservation] = useState<string | null>(
 		null
 	);
+	const [sortBy, setSortBy] = useState<"date" | "status" | "guest">("date");
+	const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+	const [selectedReservations, setSelectedReservations] = useState<Set<string>>(
+		new Set()
+	);
+
 	const [formData, setFormData] = useState<ReservationFormData>({
 		roomId: "",
-		userId: "000000000000000000000000", // Placeholder - in real app, would come from auth
+		userId: undefined,
 		guestName: "",
 		guestEmail: "",
 		guestPhone: "",
@@ -47,20 +60,38 @@ export default function ReservationManagement() {
 		specialRequests: "",
 	});
 
-	// Fetch data
+	// Fetch data with filters
 	const { data: rooms = [] } = useGetRoomsQuery(undefined);
 
 	const {
 		data: allReservations = [],
 		isLoading,
 		error,
-	} = useGetReservationsQuery();
+	} = useGetReservationsQuery({
+		status: statusFilter,
+		dateFrom: dateFromFilter,
+		dateTo: dateToFilter,
+		guestEmail: guestEmailFilter,
+		podId: podIdFilter,
+	});
 
-	const reservations = statusFilter
-		? (allReservations as Reservation[]).filter(
-				(r) => r.status === statusFilter
-		  )
-		: (allReservations as Reservation[]) || [];
+	// Apply local sorting
+	const reservations = [...(allReservations as Reservation[])].sort((a, b) => {
+		let compareValue = 0;
+		switch (sortBy) {
+			case "date":
+				compareValue =
+					new Date(a.checkInDate).getTime() - new Date(b.checkInDate).getTime();
+				break;
+			case "status":
+				compareValue = a.status.localeCompare(b.status);
+				break;
+			case "guest":
+				compareValue = a.guestName.localeCompare(b.guestName);
+				break;
+		}
+		return sortOrder === "asc" ? compareValue : -compareValue;
+	});
 
 	// Mutations
 	const [createReservation, { isLoading: isCreating }] =
@@ -175,10 +206,61 @@ export default function ReservationManagement() {
 		}
 	};
 
+	const toggleSelectReservation = (id: string) => {
+		const newSelected = new Set(selectedReservations);
+		if (newSelected.has(id)) {
+			newSelected.delete(id);
+		} else {
+			newSelected.add(id);
+		}
+		setSelectedReservations(newSelected);
+	};
+
+	const toggleSelectAll = (selectAll: boolean) => {
+		if (selectAll) {
+			const allIds = new Set(reservations.map((r) => r._id));
+			setSelectedReservations(allIds);
+		} else {
+			setSelectedReservations(new Set());
+		}
+	};
+
+	const bulkCheckIn = async () => {
+		if (selectedReservations.size === 0) {
+			alert("Please select at least one reservation");
+			return;
+		}
+		for (const id of selectedReservations) {
+			try {
+				await checkIn(id).unwrap();
+			} catch (err) {
+				console.error("Failed to check in reservation", id, err);
+			}
+		}
+		setSelectedReservations(new Set());
+		alert(`Checked in ${selectedReservations.size} reservation(s)`);
+	};
+
+	const bulkCheckOut = async () => {
+		if (selectedReservations.size === 0) {
+			alert("Please select at least one reservation");
+			return;
+		}
+		for (const id of selectedReservations) {
+			try {
+				await checkOut(id).unwrap();
+			} catch (err) {
+				console.error("Failed to check out reservation", id, err);
+			}
+		}
+		setSelectedReservations(new Set());
+		alert(`Checked out ${selectedReservations.size} reservation(s)`);
+	};
+
 	const resetForm = () => {
 		setFormData({
 			roomId: "",
-			userId: "000000000000000000000000",
+			userId: undefined,
 			guestName: "",
 			guestEmail: "",
 			guestPhone: "",
@@ -202,23 +284,108 @@ export default function ReservationManagement() {
 			<div className="reservation-management">
 				<h1>Reservation Management</h1>
 
-				{/* Filters */}
+				{/* Advanced Filters */}
 				<div className="filters">
-					<label>
-						Filter by Status:
-						<select
-							value={statusFilter}
-							onChange={(e) => setStatusFilter(e.target.value)}
+					<div className="filters__header">
+						<h3>Search & Filter</h3>
+						<button
+							className="filters__clear"
+							onClick={() => {
+								setStatusFilter("");
+								setDateFromFilter("");
+								setDateToFilter("");
+								setGuestEmailFilter("");
+								setPodIdFilter("");
+							}}
 						>
-							<option value="">All Statuses</option>
-							<option value="pending">Pending</option>
-							<option value="confirmed">Confirmed</option>
-							<option value="checked-in">Checked In</option>
-							<option value="checked-out">Checked Out</option>
-							<option value="cancelled">Cancelled</option>
-						</select>
-					</label>
-					<button onClick={() => setShowForm(!showForm)}>
+							Clear All Filters
+						</button>
+					</div>
+					<div className="filters__grid">
+						<label>
+							Status:
+							<select
+								value={statusFilter}
+								onChange={(e) => setStatusFilter(e.target.value)}
+							>
+								<option value="">All Statuses</option>
+								<option value="pending">Pending</option>
+								<option value="confirmed">Confirmed</option>
+								<option value="checked-in">Checked In</option>
+								<option value="checked-out">Checked Out</option>
+								<option value="cancelled">Cancelled</option>
+							</select>
+						</label>
+						<label>
+							Check-in From:
+							<input
+								type="date"
+								value={dateFromFilter}
+								onChange={(e) => setDateFromFilter(e.target.value)}
+							/>
+						</label>
+						<label>
+							Check-in To:
+							<input
+								type="date"
+								value={dateToFilter}
+								onChange={(e) => setDateToFilter(e.target.value)}
+							/>
+						</label>
+						<label>
+							Guest Email:
+							<input
+								type="email"
+								value={guestEmailFilter}
+								onChange={(e) => setGuestEmailFilter(e.target.value)}
+								placeholder="Search email..."
+							/>
+						</label>
+						<label>
+							Pod ID:
+							<input
+								type="text"
+								value={podIdFilter}
+								onChange={(e) => setPodIdFilter(e.target.value)}
+								placeholder="e.g., A101"
+							/>
+						</label>
+						<label>
+							Sort By:
+							<div style={{ display: "flex", gap: "0.5rem" }}>
+								<select
+									value={sortBy}
+									onChange={(e) =>
+										setSortBy(e.target.value as "date" | "status" | "guest")
+									}
+								>
+									<option value="date">Check-in Date</option>
+									<option value="status">Status</option>
+									<option value="guest">Guest Name</option>
+								</select>
+								<button
+									onClick={() =>
+										setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+									}
+									title={`Sort ${
+										sortOrder === "asc" ? "descending" : "ascending"
+									}`}
+									style={{ padding: "0.5rem 1rem" }}
+								>
+									{sortOrder === "asc" ? "↑" : "↓"}
+								</button>
+							</div>
+						</label>
+					</div>
+				</div>
+
+				{/* Results Count */}
+				<div className="results-info">
+					<p>Showing {reservations.length} reservation(s)</p>
+					<button
+						onClick={() => setShowForm(!showForm)}
+						className="btn-primary"
+					>
 						{showForm ? "Cancel" : "Add New Reservation"}
 					</button>
 				</div>
@@ -397,97 +564,149 @@ export default function ReservationManagement() {
 					)}
 
 					{reservations.length > 0 && (
-						<table>
-							<thead>
-								<tr>
-									<th>Guest</th>
+						<>
+							{/* Bulk Actions */}
+							{selectedReservations.size > 0 && (
+								<div className="bulk-actions">
+									<span className="bulk-info">
+										{selectedReservations.size} selected
+									</span>
+									<button
+										className="btn-bulk-checkin"
+										onClick={bulkCheckIn}
+										title="Check in all selected reservations"
+									>
+										Bulk Check In
+									</button>
+									<button
+										className="btn-bulk-checkout"
+										onClick={bulkCheckOut}
+										title="Check out all selected reservations"
+									>
+										Bulk Check Out
+									</button>
+									<button
+										className="btn-clear-selection"
+										onClick={() => setSelectedReservations(new Set())}
+									>
+										Clear Selection
+									</button>
+								</div>
+							)}
 
-									<th>Room</th>
-									<th>Check-In</th>
-									<th>Check-Out</th>
-									<th>Guests</th>
-									<th>Total</th>
-									<th>Status</th>
-									<th>Actions</th>
-								</tr>
-							</thead>
-							<tbody>
-								{reservations.map((reservation: Reservation) => (
-									<tr key={reservation._id}>
-										<td>
-											<div>{reservation.guestName}</div>
-											<div className="email">{reservation.guestEmail}</div>
-										</td>
-
-										<td>
-											{typeof reservation.roomId === "string"
-												? reservation.roomId
-												: reservation.roomId?.podId
-												? `Pod ${reservation.roomId.podId} (${reservation.roomId.quality})`
-												: "N/A"}
-										</td>
-										<td>
-											{new Date(reservation.checkInDate).toLocaleDateString()}
-										</td>
-										<td>
-											{new Date(reservation.checkOutDate).toLocaleDateString()}
-										</td>
-										<td>{reservation.numberOfGuests}</td>
-										<td>${reservation.totalPrice}</td>
-										<td>
-											<span
-												className={`status-badge status-${reservation.status}`}
-											>
-												{reservation.status}
-											</span>
-										</td>
-										<td className="actions">
-											<button
-												onClick={() => handleEdit(reservation)}
-												className="btn-edit"
-											>
-												Edit
-											</button>
-											{reservation.status === "confirmed" && (
-												<button
-													onClick={() => handleCheckIn(reservation._id)}
-													className="btn-checkin"
-												>
-													Check In
-												</button>
-											)}
-											{reservation.status === "checked-in" && (
-												<button
-													onClick={() => handleCheckOut(reservation._id)}
-													className="btn-checkout"
-												>
-													Check Out
-												</button>
-											)}
-											{!["cancelled", "checked-out"].includes(
-												reservation.status
-											) && (
-												<button
-													onClick={() => handleCancel(reservation._id)}
-													className="btn-cancel"
-												>
-													Cancel
-												</button>
-											)}
-											<button
-												onClick={() => handleDelete(reservation._id)}
-												className="btn-delete"
-											>
-												Delete
-											</button>
-										</td>
+							<table>
+								<thead>
+									<tr>
+										<th>
+											<input
+												type="checkbox"
+												checked={
+													selectedReservations.size === reservations.length &&
+													reservations.length > 0
+												}
+												onChange={(e) => toggleSelectAll(e.target.checked)}
+												title="Select all"
+											/>
+										</th>
+										<th>Guest</th>
+										<th>Room</th>
+										<th>Check-In</th>
+										<th>Check-Out</th>
+										<th>Guests</th>
+										<th>Total</th>
+										<th>Status</th>
+										<th>Actions</th>
 									</tr>
-								))}
-							</tbody>
-						</table>
+								</thead>
+								<tbody>
+									{reservations.map((reservation: Reservation) => (
+										<tr key={reservation._id}>
+											<td>
+												<input
+													type="checkbox"
+													checked={selectedReservations.has(reservation._id)}
+													onChange={() =>
+														toggleSelectReservation(reservation._id)
+													}
+												/>
+											</td>
+											<td>
+												<div>{reservation.guestName}</div>
+												<div className="email">{reservation.guestEmail}</div>
+											</td>
+
+											<td>
+												{typeof reservation.roomId === "string"
+													? reservation.roomId
+													: reservation.roomId?.podId
+													? `Pod ${reservation.roomId.podId} (${reservation.roomId.quality})`
+													: "N/A"}
+											</td>
+											<td>
+												{new Date(reservation.checkInDate).toLocaleDateString()}
+											</td>
+											<td>
+												{new Date(
+													reservation.checkOutDate
+												).toLocaleDateString()}
+											</td>
+											<td>{reservation.numberOfGuests}</td>
+											<td>${reservation.totalPrice}</td>
+											<td>
+												<span
+													className={`status-badge status-${reservation.status}`}
+												>
+													{reservation.status}
+												</span>
+											</td>
+											<td className="actions">
+												<button
+													onClick={() => handleEdit(reservation)}
+													className="btn-edit"
+												>
+													Edit
+												</button>
+												{reservation.status === "confirmed" && (
+													<button
+														onClick={() => handleCheckIn(reservation._id)}
+														className="btn-checkin"
+													>
+														Check In
+													</button>
+												)}
+												{reservation.status === "checked-in" && (
+													<button
+														onClick={() => handleCheckOut(reservation._id)}
+														className="btn-checkout"
+													>
+														Check Out
+													</button>
+												)}
+												{!["cancelled", "checked-out"].includes(
+													reservation.status
+												) && (
+													<button
+														onClick={() => handleCancel(reservation._id)}
+														className="btn-cancel"
+													>
+														Cancel
+													</button>
+												)}
+												<button
+													onClick={() => handleDelete(reservation._id)}
+													className="btn-delete"
+												>
+													Delete
+												</button>
+											</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+						</>
 					)}
 				</div>
-			</div>{" "}
+			</div>
 		</>
 	);
 }

@@ -16,9 +16,30 @@ export const reservationsApi = createApi({
 	}),
 	tagTypes: ["Reservation"],
 	endpoints: (builder) => ({
-		// Get all reservations
-		getReservations: builder.query<Reservation[], void>({
-			query: () => "/",
+		// Get all reservations with optional filters
+		getReservations: builder.query<
+			Reservation[],
+			{
+				status?: string;
+				dateFrom?: string;
+				dateTo?: string;
+				guestEmail?: string;
+				podId?: string;
+			} | void
+		>({
+			query: (filters) => {
+				const params = new URLSearchParams();
+				if (filters) {
+					if (filters.status) params.append("status", filters.status);
+					if (filters.dateFrom) params.append("dateFrom", filters.dateFrom);
+					if (filters.dateTo) params.append("dateTo", filters.dateTo);
+					if (filters.guestEmail)
+						params.append("guestEmail", filters.guestEmail);
+					if (filters.podId) params.append("podId", filters.podId);
+				}
+				const queryString = params.toString();
+				return queryString ? `/?${queryString}` : "/";
+			},
 			providesTags: ["Reservation"],
 		}),
 		// Get available time slots for a room on a date
