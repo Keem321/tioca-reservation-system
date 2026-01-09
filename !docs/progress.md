@@ -36,7 +36,6 @@
   - Reservation Details: **Implemented**. List/detail endpoints/UI with advanced search & filtering; can cancel reservations. Email notifications not yet implemented.
   - Modify Reservations: **Partial**. Update endpoints/UI exist; availability checked. No change room-type logic beyond roomId.
   - Reservation Search/Dashboard: **Implemented**. Manager pages support filtering by: status, date range (check-in from/to), guest email (partial match), pod ID. Sortable by date, status, or guest name. Bulk check-in/check-out for multiple reservations.
-  - Data Model: **Updated**. `userId` is optional to support guest bookings; backend validation updated accordingly.
 
 - Payment Processing
 

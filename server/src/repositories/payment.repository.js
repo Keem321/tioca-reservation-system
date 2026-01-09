@@ -89,10 +89,18 @@ class PaymentRepository {
 
 	/**
 	 * Get payment statistics
+	 * @param {Object} filter - Filter criteria (e.g., createdAt, status)
 	 * @returns {Promise<Object>}
 	 */
-	async getStats() {
-		const stats = await Payment.aggregate([
+	async getStats(filter = {}) {
+		const pipeline = [];
+
+		// Apply filter if provided
+		if (Object.keys(filter).length > 0) {
+			pipeline.push({ $match: filter });
+		}
+
+		pipeline.push(
 			{
 				$group: {
 					_id: "$status",
@@ -100,8 +108,10 @@ class PaymentRepository {
 					totalAmount: { $sum: "$amount" },
 				},
 			},
-			{ $sort: { _id: 1 } },
-		]);
+			{ $sort: { _id: 1 } }
+		);
+
+		const stats = await Payment.aggregate(pipeline);
 
 		const result = {
 			byStatus: {},

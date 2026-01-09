@@ -168,11 +168,12 @@ export async function getPayments(req, res) {
  * @route GET /api/payments/stats
  * @query {string} dateFrom - Filter from date (YYYY-MM-DD)
  * @query {string} dateTo - Filter to date (YYYY-MM-DD)
+ * @query {string} status - Filter by payment status
  * @returns {void}
  */
 export async function getPaymentStats(req, res) {
 	try {
-		const { dateFrom, dateTo } = req.query;
+		const { dateFrom, dateTo, status } = req.query;
 
 		const filter = {};
 
@@ -187,6 +188,11 @@ export async function getPaymentStats(req, res) {
 				endDate.setHours(23, 59, 59, 999);
 				filter.createdAt.$lte = endDate;
 			}
+		}
+
+		// Status filter
+		if (status) {
+			filter.status = status;
 		}
 
 		// Get stats from repository

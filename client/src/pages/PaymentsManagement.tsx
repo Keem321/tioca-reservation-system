@@ -42,6 +42,7 @@ export default function PaymentsManagement() {
 	const { data: stats } = useGetPaymentStatsQuery({
 		dateFrom,
 		dateTo,
+		status: statusFilter,
 	});
 
 	const { data: revenueReport = [] } = useGetRevenueReportQuery();
@@ -229,17 +230,25 @@ export default function PaymentsManagement() {
 							</div>
 						</div>
 
-						{/* Stats Cards */}
-						{stats && (
+						{/* Stats Cards - Only show when no specific status is selected */}
+						{!statusFilter && stats && (
 							<div className="stats-grid">
 								<div className="stat-card">
-									<div className="stat-label">Total Revenue</div>
+									<div className="stat-label">
+										{dateFrom || dateTo
+											? "Total Revenue (Filtered)"
+											: "Total Revenue (All Time)"}
+									</div>
 									<div className="stat-value">
 										{formatCurrency(stats.totalRevenue)}
 									</div>
 								</div>
 								<div className="stat-card">
-									<div className="stat-label">Total Transactions</div>
+									<div className="stat-label">
+										{dateFrom || dateTo
+											? "Total Transactions (Filtered)"
+											: "Total Transactions (All Time)"}
+									</div>
 									<div className="stat-value">{stats.totalCount}</div>
 								</div>
 
@@ -283,13 +292,13 @@ export default function PaymentsManagement() {
 						{revenueReport.length > 0 && (
 							<div className="revenue-report">
 								<h2>Monthly Revenue</h2>
-								<table className="revenue-table">
+								<table>
 									<thead>
 										<tr>
 											<th>Month</th>
 											<th>Transactions</th>
-											<th>Average</th>
-											<th>Total</th>
+											<th>Avg Amount</th>
+											<th>Total Revenue</th>
 										</tr>
 									</thead>
 									<tbody>

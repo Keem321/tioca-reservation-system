@@ -131,6 +131,7 @@ export const paymentsApi = createApi({
 				const params = new URLSearchParams();
 				if (filters.dateFrom) params.append("dateFrom", filters.dateFrom);
 				if (filters.dateTo) params.append("dateTo", filters.dateTo);
+				if (filters.status) params.append("status", filters.status);
 				return `/stats?${params.toString()}`;
 			},
 			providesTags: ["PaymentStats"],
