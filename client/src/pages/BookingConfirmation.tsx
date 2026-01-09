@@ -318,37 +318,36 @@ const BookingConfirmation: React.FC = () => {
 							{/* Room Details */}
 							<div className="booking-confirmation__section">
 								<h2>Room Details</h2>
-							<div className="booking-confirmation__room-image">
-								<img 
-									src={roomImage} 
-									alt={roomLabel}
-									onError={(e) => {
-										e.currentTarget.style.display = 'none';
-									}}
-								/>
+								<div className="booking-confirmation__room-image">
+									<img
+										src={roomImage}
+										alt={roomLabel}
+										onError={(e) => {
+											e.currentTarget.style.display = "none";
+										}}
+									/>
+								</div>
+								<div className="detail-item">
+									<span className="detail-label">Pod ID:</span>
+									<span className="detail-value">{room.podId}</span>
+								</div>
+								<div className="detail-item">
+									<span className="detail-label">Type:</span>
+									<span className="detail-value">{roomLabel}</span>
+								</div>
+								<div className="detail-item">
+									<span className="detail-label">Description:</span>
+									<span className="detail-value">{roomDescription}</span>
+								</div>
+								<div className="detail-item">
+									<span className="detail-label">Floor:</span>
+									<span className="detail-value">
+										{room.floor.charAt(0).toUpperCase() + room.floor.slice(1)}
+									</span>
+								</div>
 							</div>
-							<div className="detail-item">
-								<span className="detail-label">Pod ID:</span>
-								<span className="detail-value">{room.podId}</span>
-							</div>
-							<div className="detail-item">
-								<span className="detail-label">Type:</span>
-								<span className="detail-value">
-									{roomLabel}
-								</span>
-							</div>
-							<div className="detail-item">
-								<span className="detail-label">Description:</span>
-								<span className="detail-value">
-									{roomDescription}
-								</span>
-							</div>
-							<div className="detail-item">
-								<span className="detail-label">Floor:</span>
-								<span className="detail-value">
-									{room.floor.charAt(0).toUpperCase() + room.floor.slice(1)}
-								</span>
-							</div>
+
+							{/* Booking Details */}
 							<div className="booking-confirmation__section">
 								<h2>Booking Details</h2>
 								<div className="detail-item">
