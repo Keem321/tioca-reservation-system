@@ -15,7 +15,7 @@ import type { Room, RoomFormData } from "../types/room";
 export const roomsApi = createApi({
 	reducerPath: "roomsApi",
 	baseQuery: fetchBaseQuery({
-		baseUrl: "/api/rooms",
+		baseUrl: `${import.meta.env.VITE_API_URL || ""}/api/rooms`,
 		credentials: "include",
 	}),
 	tagTypes: ["Room"],

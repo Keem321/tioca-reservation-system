@@ -22,7 +22,7 @@ export interface PasswordChangeData {
 export const userApi = createApi({
 	reducerPath: "userApi",
 	baseQuery: fetchBaseQuery({
-		baseUrl: "/api/user",
+		baseUrl: `${import.meta.env.VITE_API_URL || ""}/api/user`,
 		credentials: "include",
 	}),
 	tagTypes: ["Profile", "ActiveReservations"],

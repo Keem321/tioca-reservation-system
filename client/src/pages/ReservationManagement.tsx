@@ -148,7 +148,7 @@ export default function ReservationManagement() {
 			userId:
 				typeof reservation.userId === "string"
 					? reservation.userId
-					: reservation.userId._id,
+					: reservation.userId?._id || "",
 			guestName: reservation.guestName,
 			guestEmail: reservation.guestEmail,
 			guestPhone: reservation.guestPhone || "",

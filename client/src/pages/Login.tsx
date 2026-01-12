@@ -28,7 +28,8 @@ const Login: React.FC = () => {
 		setSuccess(null);
 		setIsSubmitting(true);
 		try {
-			const res = await fetch("/auth/login", {
+			const apiUrl = import.meta.env.VITE_API_URL || "";
+			const res = await fetch(`${apiUrl}/auth/login`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",

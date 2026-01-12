@@ -82,7 +82,7 @@ interface PaymentFilter {
 export const paymentsApi = createApi({
 	reducerPath: "paymentsApi",
 	baseQuery: fetchBaseQuery({
-		baseUrl: "/api/payments",
+		baseUrl: `${import.meta.env.VITE_API_URL || ""}/api/payments`,
 		credentials: "include",
 	}),
 	tagTypes: ["Payment", "PaymentStats", "RevenueReport", "Reservation"],
@@ -139,14 +139,14 @@ export const paymentsApi = createApi({
 		// Get single payment
 		getPayment: builder.query<Payment, string>({
 			query: (paymentId) => `/${paymentId}`,
-			providesTags: (result, error, paymentId) => [
+			providesTags: (_result, _error, paymentId) => [
 				{ type: "Payment", id: paymentId },
 			],
 		}),
 		// Get payment by reservation
 		getPaymentByReservation: builder.query<Payment, string>({
 			query: (reservationId) => `/reservation/${reservationId}`,
-			providesTags: (result, error, reservationId) => [
+			providesTags: (_result, _error, reservationId) => [
 				{ type: "Payment", id: reservationId },
 			],
 		}),
@@ -182,7 +182,7 @@ export const paymentsApi = createApi({
 				method: "PATCH",
 				body,
 			}),
-			invalidatesTags: (result, error, { paymentId }) => [
+			invalidatesTags: (_result, _error, { paymentId }) => [
 				{ type: "Payment", id: paymentId },
 				"PaymentStats",
 			],
@@ -204,7 +204,7 @@ export const paymentsApi = createApi({
 			string
 		>({
 			query: (paymentId) => `/${paymentId}/history`,
-			providesTags: (result, error, paymentId) => [
+			providesTags: (_result, _error, paymentId) => [
 				{ type: "Payment", id: paymentId },
 			],
 		}),

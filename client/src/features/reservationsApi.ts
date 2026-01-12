@@ -11,7 +11,7 @@ import type { Reservation, ReservationFormData } from "../types/reservation";
 export const reservationsApi = createApi({
 	reducerPath: "reservationsApi",
 	baseQuery: fetchBaseQuery({
-		baseUrl: "/api/reservations",
+		baseUrl: `${import.meta.env.VITE_API_URL || ""}/api/reservations`,
 		credentials: "include",
 	}),
 	tagTypes: ["Reservation"],
