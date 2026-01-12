@@ -23,16 +23,45 @@ const MONGO_URI =
 // Middleware
 // Allow cross-origin requests from the client and include credentials (cookies)
 const clientOrigin = process.env.CLIENT_ORIGIN || "http://localhost:5173";
-app.use(cors({ 
-	origin: clientOrigin, 
-	credentials: true,
-	allowedHeaders: ['Content-Type', 'Authorization'],
-	exposedHeaders: ['set-cookie']
-}));
+console.log(`[CORS] Configured with origin: ${clientOrigin}`);
+
+app.use(
+	cors({
+		origin: clientOrigin,
+		credentials: true,
+		allowedHeaders: ["Content-Type", "Authorization"],
+		exposedHeaders: ["set-cookie"],
+		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+	})
+);
+
+// Handle preflight requests explicitly
+app.options("*", (req, res) => {
+	console.log(
+		`[CORS] Preflight OPTIONS request from origin: ${req.get("origin")}`
+	);
+	res.header("Access-Control-Allow-Origin", clientOrigin);
+	res.header("Access-Control-Allow-Credentials", "true");
+	res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+	res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+	res.header("Access-Control-Expose-Headers", "set-cookie");
+	res.sendStatus(200);
+});
+
 app.use(json());
 
 // Always set trust proxy (harmless in local dev, needed behind AWS Beanstalk/CloudFront)
 app.set("trust proxy", 1);
+
+// Request logging middleware
+app.use((req, res, next) => {
+	console.log(
+		`[REQUEST] ${req.method} ${req.path} | Origin: ${req.get(
+			"origin"
+		)} | User-Agent: ${req.get("user-agent")?.substring(0, 50)}`
+	);
+	next();
+});
 
 // Session setup - detect secure mode by checking if CLIENT_ORIGIN is HTTPS
 const isSecureEnv =
@@ -56,7 +85,9 @@ app.use(passport.session());
 
 // Debug middleware - log session info
 app.use((req, res, next) => {
-	console.log(`[Session] ${req.method} ${req.path} - Session ID: ${req.sessionID}`);
+	console.log(
+		`[Session] ${req.method} ${req.path} - Session ID: ${req.sessionID}`
+	);
 	next();
 });
 
@@ -100,7 +131,7 @@ if (useDocDBTls) {
 connect(MONGO_URI, mongoOptions)
 	.then(() => {
 		console.log("MongoDB connected successfully");
-		
+
 		// Start the hold cleanup service after successful DB connection
 		holdCleanupService.start();
 	})
