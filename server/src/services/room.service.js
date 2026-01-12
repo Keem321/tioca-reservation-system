@@ -124,9 +124,10 @@ class RoomService {
 	 * @param {string} checkOut - Check-out date
 	 * @param {string} [floor] - Optional floor filter
 	 * @param {string} [quality] - Optional quality filter
+	 * @param {string} [excludeSessionId] - Optional session ID to exclude from hold checks
 	 * @returns {Promise<Array>}
 	 */
-	async getAvailableRooms(checkIn, checkOut, floor, quality) {
+	async getAvailableRooms(checkIn, checkOut, floor, quality, excludeSessionId = null) {
 		if (!checkIn || !checkOut) {
 			throw new Error("Check-in and check-out dates are required");
 		}
@@ -139,7 +140,8 @@ class RoomService {
 			checkIn,
 			checkOut,
 			floor,
-			quality
+			quality,
+			excludeSessionId
 		);
 	}
 
@@ -149,9 +151,10 @@ class RoomService {
 	 * @param {string} checkOut - Check-out date
 	 * @param {string} [floor] - Optional floor filter
 	 * @param {string} [quality] - Optional quality filter
+	 * @param {string} [excludeSessionId] - Optional session ID to exclude from hold checks
 	 * @returns {Promise<Array>}
 	 */
-	async getRecommendedRooms(checkIn, checkOut, floor, quality) {
+	async getRecommendedRooms(checkIn, checkOut, floor, quality, excludeSessionId = null) {
 		if (!checkIn || !checkOut) {
 			throw new Error("Check-in and check-out dates are required");
 		}
@@ -164,7 +167,8 @@ class RoomService {
 			checkIn,
 			checkOut,
 			floor,
-			quality
+			quality,
+			excludeSessionId
 		);
 	}
 }

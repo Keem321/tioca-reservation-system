@@ -122,6 +122,7 @@ export async function updateRoomStatus(req, res) {
 export async function getAvailableRooms(req, res) {
 	try {
 		const { checkIn, checkOut, floor, quality } = req.query;
+		const sessionId = req.sessionID; // Exclude holds from current session
 
 		if (!checkIn || !checkOut) {
 			return res
@@ -133,7 +134,8 @@ export async function getAvailableRooms(req, res) {
 			checkIn,
 			checkOut,
 			floor,
-			quality
+			quality,
+			sessionId
 		);
 		res.json(rooms);
 	} catch (err) {
@@ -151,6 +153,7 @@ export async function getAvailableRooms(req, res) {
 export async function getRecommendedRooms(req, res) {
 	try {
 		const { checkIn, checkOut, floor, quality } = req.query;
+		const sessionId = req.sessionID; // Exclude holds from current session
 
 		if (!checkIn || !checkOut) {
 			return res
@@ -162,7 +165,8 @@ export async function getRecommendedRooms(req, res) {
 			checkIn,
 			checkOut,
 			floor,
-			quality
+			quality,
+			sessionId
 		);
 		res.json(rooms);
 	} catch (err) {

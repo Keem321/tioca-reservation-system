@@ -1,5 +1,6 @@
 import Room from "../models/room.model.js";
 import Reservation from "../models/reservation.model.js";
+import RoomHold from "../models/roomHold.model.js";
 
 class RoomRepository {
 	/**
@@ -58,11 +59,13 @@ class RoomRepository {
 	 * @param {string} checkOut - Check-out date
 	 * @param {string} [floor] - Optional floor filter
 	 * @param {string} [quality] - Optional quality filter
+	 * @param {string} [excludeSessionId] - Optional session ID to exclude from hold checks
 	 * @returns {Promise<Array>}
 	 */
-	async findAvailableRooms(checkIn, checkOut, floor, quality) {
+	async findAvailableRooms(checkIn, checkOut, floor, quality, excludeSessionId = null) {
 		const checkInDate = new Date(checkIn);
 		const checkOutDate = new Date(checkOut);
+		const now = new Date();
 
 		// Build filter query - only return available rooms
 		const filter = {
@@ -95,14 +98,38 @@ class RoomRepository {
 			],
 		}).select("roomId");
 
-		// Get set of booked room IDs
+		// Get set of booked room IDs from reservations
 		const bookedRoomIds = new Set(
 			overlappingReservations.map((res) => res.roomId.toString())
 		);
 
-		// Filter out rooms that have overlapping reservations
+		// Find all active holds (non-expired, non-converted) for the date range
+		const holdQuery = {
+			converted: false,
+			holdExpiry: { $gt: now },
+			$or: [
+				{
+					checkInDate: { $lt: checkOutDate },
+					checkOutDate: { $gt: checkInDate },
+				},
+			],
+		};
+
+		// Exclude holds from the current session if sessionId provided
+		if (excludeSessionId) {
+			holdQuery.sessionId = { $ne: excludeSessionId };
+		}
+
+		const activeHolds = await RoomHold.find(holdQuery).select("roomId");
+
+		// Get set of held room IDs
+		const heldRoomIds = new Set(
+			activeHolds.map((hold) => hold.roomId.toString())
+		);
+
+		// Filter out rooms that have overlapping reservations OR active holds
 		const availableRooms = rooms.filter(
-			(room) => !bookedRoomIds.has(room._id.toString())
+			(room) => !bookedRoomIds.has(room._id.toString()) && !heldRoomIds.has(room._id.toString())
 		);
 
 		return availableRooms;
@@ -115,11 +142,13 @@ class RoomRepository {
 	 * @param {string} checkOut - Check-out date
 	 * @param {string} [floor] - Requested floor filter
 	 * @param {string} [quality] - Optional quality filter
+	 * @param {string} [excludeSessionId] - Optional session ID to exclude from hold checks
 	 * @returns {Promise<Array>} Array of recommended rooms with availability info
 	 */
-	async findRecommendedRooms(checkIn, checkOut, floor, quality) {
+	async findRecommendedRooms(checkIn, checkOut, floor, quality, excludeSessionId = null) {
 		const checkInDate = new Date(checkIn);
 		const checkOutDate = new Date(checkOut);
+		const now = new Date();
 		const totalDays = Math.ceil(
 			(checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
 		);
@@ -162,23 +191,59 @@ class RoomRepository {
 			],
 		});
 
+		// Get all active holds that overlap with the date range
+		const holdQuery = {
+			converted: false,
+			holdExpiry: { $gt: now },
+			$or: [
+				{
+					checkInDate: { $lt: checkOutDate },
+					checkOutDate: { $gt: checkInDate },
+				},
+			],
+		};
+
+		// Exclude holds from the current session if sessionId provided
+		if (excludeSessionId) {
+			holdQuery.sessionId = { $ne: excludeSessionId };
+		}
+
+		const activeHolds = await RoomHold.find(holdQuery);
+
 		// Calculate availability for each room
 		const roomsWithAvailability = rooms.map((room) => {
 			const roomReservations = overlappingReservations.filter(
 				(res) => res.roomId.toString() === room._id.toString()
 			);
 
-			if (roomReservations.length === 0) {
-				return null; // Skip fully available rooms (they're in main results)
+			const roomHolds = activeHolds.filter(
+				(hold) => hold.roomId.toString() === room._id.toString()
+			);
+
+			// If room has no reservations or holds, skip (it's fully available)
+			if (roomReservations.length === 0 && roomHolds.length === 0) {
+				return null;
 			}
 
-			// Calculate unavailable days
+			// Calculate unavailable days from reservations
 			let unavailableDays = 0;
 			roomReservations.forEach((res) => {
 				const resStart = new Date(res.checkInDate);
 				const resEnd = new Date(res.checkOutDate);
 				const overlapStart = new Date(Math.max(resStart, checkInDate));
 				const overlapEnd = new Date(Math.min(resEnd, checkOutDate));
+				const overlapDays = Math.ceil(
+					(overlapEnd - overlapStart) / (1000 * 60 * 60 * 24)
+				);
+				unavailableDays += overlapDays;
+			});
+
+			// Calculate unavailable days from holds
+			roomHolds.forEach((hold) => {
+				const holdStart = new Date(hold.checkInDate);
+				const holdEnd = new Date(hold.checkOutDate);
+				const overlapStart = new Date(Math.max(holdStart, checkInDate));
+				const overlapEnd = new Date(Math.min(holdEnd, checkOutDate));
 				const overlapDays = Math.ceil(
 					(overlapEnd - overlapStart) / (1000 * 60 * 60 * 24)
 				);
