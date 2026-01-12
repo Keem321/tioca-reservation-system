@@ -51,8 +51,8 @@ app.use((req, res, next) => {
 });
 
 // Session setup - detect secure mode by checking if CLIENT_ORIGIN is HTTPS
-const isSecureEnv =
-	process.env.CLIENT_ORIGIN && process.env.CLIENT_ORIGIN.startsWith("https");
+// Force secure cookies to false for HTTP Beanstalk deployment
+const isSecureEnv = false; // Set to true when using HTTPS load balancer
 app.use(
 	session({
 		secret: process.env.SESSION_SECRET || "tioca-session-secret-2026",
