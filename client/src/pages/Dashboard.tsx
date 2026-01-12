@@ -84,16 +84,21 @@ const Dashboard: React.FC = () => {
 						</button>
 					</span>
 				) : (
-					<a
-						href="/auth/google"
-						style={{
-							color: "var(--tioca-blue)",
-							textDecoration: "none",
-							fontWeight: "500",
-						}}
-					>
-						Login with Google
-					</a>
+					(() => {
+						const apiUrl = import.meta.env.VITE_API_URL || "";
+						return (
+							<a
+								href={`${apiUrl}/auth/google`}
+								style={{
+									color: "var(--tioca-blue)",
+									textDecoration: "none",
+									fontWeight: "500",
+								}}
+							>
+								Login with Google
+							</a>
+						);
+					})()
 				)}
 			</div>
 		</div>

@@ -19,7 +19,8 @@ const Login: React.FC = () => {
 	};
 
 	const handleGoogleLogin = () => {
-		window.location.href = "/auth/google?redirect=/";
+		const apiUrl = import.meta.env.VITE_API_URL || "";
+		window.location.href = `${apiUrl}/auth/google?redirect=/`;
 	};
 
 	const handleLocalLogin = async (e: React.FormEvent) => {
