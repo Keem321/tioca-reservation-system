@@ -21,6 +21,7 @@ export interface BookingState {
 	quality: PodQuality | "";
 	selectedRoom: Room | null;
 	pendingReservation: Reservation | null;
+	holdId: string | null; // Track active room hold
 }
 
 const initialState: BookingState = {
@@ -31,6 +32,7 @@ const initialState: BookingState = {
 	quality: "",
 	selectedRoom: null,
 	pendingReservation: null,
+	holdId: null,
 };
 
 const bookingSlice = createSlice({
@@ -65,6 +67,9 @@ const bookingSlice = createSlice({
 		) => {
 			state.pendingReservation = action.payload;
 		},
+		setHoldId: (state, action: PayloadAction<string | null>) => {
+			state.holdId = action.payload;
+		},
 		resetBooking: (state) => {
 			state.checkIn = "";
 			state.checkOut = "";
@@ -73,6 +78,7 @@ const bookingSlice = createSlice({
 			state.quality = "";
 			state.selectedRoom = null;
 			state.pendingReservation = null;
+			state.holdId = null;
 		},
 	},
 });
@@ -85,6 +91,7 @@ export const {
 	setQuality,
 	setSelectedRoom,
 	setPendingReservation,
+	setHoldId,
 	resetBooking,
 } = bookingSlice.actions;
 export default bookingSlice.reducer;
