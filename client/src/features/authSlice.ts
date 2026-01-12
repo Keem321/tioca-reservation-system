@@ -31,7 +31,10 @@ const initialState: AuthState = {
  * Queries the server to get current auth status
  */
 export const checkAuth = createAsyncThunk("auth/checkAuth", async () => {
-	const res = await fetch("/auth/loggedin", { credentials: "include" });
+	const apiUrl = import.meta.env.VITE_API_URL || "";
+	const res = await fetch(`${apiUrl}/auth/loggedin`, {
+		credentials: "include",
+	});
 	if (!res.ok) throw new Error("Not authenticated");
 	const data = await res.json();
 	return data.user;
@@ -42,7 +45,8 @@ export const checkAuth = createAsyncThunk("auth/checkAuth", async () => {
  * Calls the server logout endpoint and clears session
  */
 export const logout = createAsyncThunk("auth/logout", async () => {
-	await fetch("/auth/logout", {
+	const apiUrl = import.meta.env.VITE_API_URL || "";
+	await fetch(`${apiUrl}/auth/logout`, {
 		method: "POST",
 		credentials: "include",
 	});

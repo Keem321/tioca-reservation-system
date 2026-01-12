@@ -24,7 +24,8 @@ const Dashboard: React.FC = () => {
 	useEffect(() => {
 		const check = async () => {
 			try {
-				const res = await fetch("/auth/loggedin", {
+				const apiUrl = import.meta.env.VITE_API_URL || "";
+				const res = await fetch(`${apiUrl}/auth/loggedin`, {
 					credentials: "include",
 				});
 				if (res.ok) {
@@ -67,7 +68,8 @@ const Dashboard: React.FC = () => {
 							}}
 							onClick={async () => {
 								try {
-									await fetch("/auth/logout", {
+									const apiUrl = import.meta.env.VITE_API_URL || "";
+									await fetch(`${apiUrl}/auth/logout`, {
 										method: "POST",
 										credentials: "include",
 									});
