@@ -35,19 +35,6 @@ app.use(
 	})
 );
 
-// Handle preflight requests explicitly
-app.options("*", (req, res) => {
-	console.log(
-		`[CORS] Preflight OPTIONS request from origin: ${req.get("origin")}`
-	);
-	res.header("Access-Control-Allow-Origin", clientOrigin);
-	res.header("Access-Control-Allow-Credentials", "true");
-	res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-	res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-	res.header("Access-Control-Expose-Headers", "set-cookie");
-	res.sendStatus(200);
-});
-
 app.use(json());
 
 // Always set trust proxy (harmless in local dev, needed behind AWS Beanstalk/CloudFront)
