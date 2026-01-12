@@ -13,6 +13,7 @@ import path from "path";
 import cors from "cors";
 import { apiRouter, publicRouter } from "./routes/index.js";
 import passport from "passport";
+import holdCleanupService from "./services/holdCleanup.service.js";
 const app = express();
 
 const PORT = process.env.PORT || 5000;
@@ -21,8 +22,13 @@ const MONGO_URI =
 
 // Middleware
 // Allow cross-origin requests from the client and include credentials (cookies)
-const clientOrigin = process.env.CLIENT_ORIGIN || true;
-app.use(cors({ origin: clientOrigin, credentials: true }));
+const clientOrigin = process.env.CLIENT_ORIGIN || "http://localhost:5173";
+app.use(cors({ 
+	origin: clientOrigin, 
+	credentials: true,
+	allowedHeaders: ['Content-Type', 'Authorization'],
+	exposedHeaders: ['set-cookie']
+}));
 app.use(json());
 
 // Always set trust proxy (harmless in local dev, needed behind AWS Beanstalk/CloudFront)
@@ -33,18 +39,26 @@ const isSecureEnv =
 	process.env.CLIENT_ORIGIN && process.env.CLIENT_ORIGIN.startsWith("https");
 app.use(
 	session({
-		secret: process.env.SESSION_SECRET || "default_secret",
+		secret: process.env.SESSION_SECRET || "tioca-session-secret-2026",
+		name: "tioca.sid", // Custom session cookie name
 		resave: false,
-		saveUninitialized: false,
+		saveUninitialized: true, // Create session even if not modified (important for holds)
 		cookie: {
 			secure: isSecureEnv,
 			sameSite: isSecureEnv ? "none" : "lax",
 			httpOnly: true,
+			maxAge: 24 * 60 * 60 * 1000, // 24 hours
 		},
 	})
 );
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Debug middleware - log session info
+app.use((req, res, next) => {
+	console.log(`[Session] ${req.method} ${req.path} - Session ID: ${req.sessionID}`);
+	next();
+});
 
 // Health check endpoint for deployment verification
 app.get("/health", (req, res) => {
@@ -86,6 +100,9 @@ if (useDocDBTls) {
 connect(MONGO_URI, mongoOptions)
 	.then(() => {
 		console.log("MongoDB connected successfully");
+		
+		// Start the hold cleanup service after successful DB connection
+		holdCleanupService.start();
 	})
 	.catch((err) => {
 		console.error("MongoDB connection error:", err);
@@ -107,6 +124,19 @@ process.on("unhandledRejection", (reason, p) => {
 process.on("uncaughtException", (err) => {
 	console.error("Uncaught Exception:", err);
 	// Always log and do not exit
+});
+
+// Graceful shutdown handlers
+process.on("SIGINT", () => {
+	console.log("\nReceived SIGINT, shutting down gracefully...");
+	holdCleanupService.stop();
+	process.exit(0);
+});
+
+process.on("SIGTERM", () => {
+	console.log("\nReceived SIGTERM, shutting down gracefully...");
+	holdCleanupService.stop();
+	process.exit(0);
 });
 
 export default app;

@@ -9,6 +9,7 @@ import roomRouter from "./room.routes.js";
 import reservationRouter from "./reservation.routes.js";
 import userRouter from "./user.routes.js";
 import paymentRouter from "./payment.routes.js";
+import holdRouter from "./hold.routes.js";
 import authRouter from "./auth.js";
 
 // middleware MUST import strategies to register them with passport
@@ -21,6 +22,7 @@ apiRouter.use("/rooms", roomRouter);
 apiRouter.use("/reservations", reservationRouter);
 apiRouter.use("/user", userRouter);
 apiRouter.use("/payments", paymentRouter);
+apiRouter.use("/holds", holdRouter);
 
 // Public router (for non-API routes)
 const publicRouter = Router();

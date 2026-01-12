@@ -1,5 +1,7 @@
 import ReservationRepository from "../repositories/reservation.repository.js";
 import RoomRepository from "../repositories/room.repository.js";
+import RoomHoldRepository from "../repositories/roomHold.repository.js";
+import mongoose from "mongoose";
 
 class ReservationService {
 	/**
@@ -31,7 +33,7 @@ class ReservationService {
 
 	/**
 	 * Create a new reservation
-	 * @param {Object} reservationData - Reservation data
+	 * @param {Object} reservationData - Reservation data (includes holdId and sessionId if from a hold)
 	 * @returns {Promise<Object>}
 	 */
 	async createReservation(reservationData) {
@@ -44,6 +46,8 @@ class ReservationService {
 			checkOutDate,
 			numberOfGuests,
 			totalPrice,
+			holdId,
+			sessionId,
 		} = reservationData;
 
 		// Validate required fields (userId is optional for guest bookings)
@@ -83,40 +87,112 @@ class ReservationService {
 			throw new Error("Check-out date must be after check-in date");
 		}
 
-		// Check if room exists and get details
-		const room = await RoomRepository.findById(roomId);
-		if (!room) {
-			throw new Error("Room not found");
-		}
+		// Use a transaction to ensure atomicity
+		const session = await mongoose.startSession();
+		session.startTransaction();
 
-		// Validate number of guests doesn't exceed room capacity
-		if (numberOfGuests > room.capacity) {
-			throw new Error(
-				`Number of guests (${numberOfGuests}) exceeds room capacity (${room.capacity})`
+		try {
+			// Check if room exists and get details
+			const room = await RoomRepository.findById(roomId);
+			if (!room) {
+				throw new Error("Room not found");
+			}
+
+			// Validate number of guests doesn't exceed room capacity
+			if (numberOfGuests > room.capacity) {
+				throw new Error(
+					`Number of guests (${numberOfGuests}) exceeds room capacity (${room.capacity})`
+				);
+			}
+
+			// If holdId provided, verify the hold exists and belongs to this session
+			if (holdId && sessionId) {
+				const hold = await RoomHoldRepository.findById(holdId);
+				
+				if (!hold) {
+					throw new Error("Hold not found. The room may no longer be available.");
+				}
+
+				// Verify hold ownership
+				if (hold.sessionId !== sessionId) {
+					throw new Error("Hold belongs to a different session");
+				}
+
+				// Verify hold hasn't expired
+				if (new Date() > new Date(hold.holdExpiry)) {
+					throw new Error("Hold has expired. Please search for rooms again.");
+				}
+
+				// Verify hold hasn't been converted already
+				if (hold.converted) {
+					throw new Error("Hold has already been converted to a reservation");
+				}
+
+				// Verify hold dates match reservation dates (compare date parts only, not times)
+				const holdCheckInDate = new Date(hold.checkInDate).toISOString().split('T')[0];
+				const holdCheckOutDate = new Date(hold.checkOutDate).toISOString().split('T')[0];
+				const reservationCheckInDate = checkIn.toISOString().split('T')[0];
+				const reservationCheckOutDate = checkOut.toISOString().split('T')[0];
+
+				if (holdCheckInDate !== reservationCheckInDate || holdCheckOutDate !== reservationCheckOutDate) {
+					throw new Error(`Reservation dates do not match the hold. Hold: ${holdCheckInDate} to ${holdCheckOutDate}, Reservation: ${reservationCheckInDate} to ${reservationCheckOutDate}`);
+				}
+
+				// Verify hold room matches reservation room
+				const holdRoomId = hold.roomId._id ? hold.roomId._id.toString() : hold.roomId.toString();
+				if (holdRoomId !== roomId) {
+					throw new Error("Reservation room does not match the hold");
+				}
+			}
+
+			// Check for overlapping reservations (excluding current session's holds if holdId provided)
+			const overlapping = await ReservationRepository.findOverlapping(
+				roomId,
+				checkIn,
+				checkOut
 			);
+
+			if (overlapping.length > 0) {
+				throw new Error("Room is not available for the selected dates");
+			}
+
+			// Check for other active holds (excluding this session if holdId provided)
+			const overlappingHolds = await RoomHoldRepository.findActiveHolds(
+				roomId,
+				checkIn,
+				checkOut,
+				sessionId // Exclude holds from this session
+			);
+
+			if (overlappingHolds.length > 0) {
+				throw new Error("Room is currently being booked by another user");
+			}
+
+			// Create reservation
+			const reservation = await ReservationRepository.create(reservationData);
+
+			// Populate room details before returning
+			await reservation.populate("roomId", "podId quality floor pricePerNight");
+
+			// If hold exists, mark it as converted
+			if (holdId) {
+				await RoomHoldRepository.markAsConverted(holdId, reservation._id);
+			}
+
+			// Update room status to reserved
+			await RoomRepository.updateStatus(roomId, "reserved");
+
+			// Commit the transaction
+			await session.commitTransaction();
+			session.endSession();
+
+			return reservation;
+		} catch (error) {
+			// Abort transaction on error
+			await session.abortTransaction();
+			session.endSession();
+			throw error;
 		}
-
-		// Check for overlapping reservations
-		const overlapping = await ReservationRepository.findOverlapping(
-			roomId,
-			checkIn,
-			checkOut
-		);
-
-		if (overlapping.length > 0) {
-			throw new Error("Room is not available for the selected dates");
-		}
-
-		// Create reservation
-		const reservation = await ReservationRepository.create(reservationData);
-
-		// Populate room details before returning
-		await reservation.populate("roomId", "podId quality floor pricePerNight");
-
-		// Update room status to reserved
-		await RoomRepository.updateStatus(roomId, "reserved");
-
-		return reservation;
 	}
 
 	/**

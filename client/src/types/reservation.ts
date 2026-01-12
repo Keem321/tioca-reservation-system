@@ -45,4 +45,5 @@ export interface ReservationFormData {
 	status?: "pending" | "confirmed" | "checked-in" | "checked-out" | "cancelled";
 	paymentStatus?: "unpaid" | "partial" | "paid" | "refunded";
 	specialRequests?: string;
+	holdId?: string; // Optional hold ID for overbooking prevention
 }

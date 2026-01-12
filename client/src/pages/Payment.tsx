@@ -300,11 +300,27 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({ reservation }) =>
 const Payment: React.FC = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
-	const { pendingReservation } = useSelector((state: RootState) => state.booking);
+	const dispatch = useDispatch();
+	const { pendingReservation, holdId } = useSelector((state: RootState) => state.booking);
 
 	// Get reservation from location state or Redux store
 	const reservation: Reservation | null =
 		location.state?.reservation || pendingReservation;
+
+	// Note: We don't extend the hold here because:
+	// - The reservation was already created on the confirmation page
+	// - The hold was converted and linked to the reservation
+	// - The room is already reserved (reservation status: "pending")
+	// - If payment succeeds → reservation becomes "confirmed"
+	// - If payment fails → reservation stays "pending" (can be cleaned up later)
+	
+	// Log for debugging
+	useEffect(() => {
+		if (holdId) {
+			console.log('[Payment] Reservation created, hold already converted. Payment processing...');
+		}
+		// No cleanup needed - hold is already converted and linked to reservation
+	}, [holdId]);
 
 	// Redirect if no reservation
 	useEffect(() => {
