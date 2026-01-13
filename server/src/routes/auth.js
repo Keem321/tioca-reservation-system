@@ -62,6 +62,20 @@ authRouter.get("/loggedin", (req, res) => {
 	}
 });
 
+// Keepalive route - refreshes session activity timestamp
+authRouter.post("/keepalive", (req, res) => {
+	if (req.isAuthenticated && req.isAuthenticated()) {
+		// Session activity middleware will update lastActivity automatically
+		// Just need to return success
+		console.log(
+			`[Auth] Keepalive ping from user ${req.user?.email || "unknown"}`
+		);
+		res.json({ message: "Session refreshed", timestamp: Date.now() });
+	} else {
+		res.status(401).json({ message: "Not authenticated" });
+	}
+});
+
 // Logout route - destroys session and clears cookie
 authRouter.post("/logout", (req, res) => {
 	// Use callback form for req.logout and destroy the session afterwards.

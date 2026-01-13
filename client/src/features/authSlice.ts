@@ -52,6 +52,21 @@ export const logout = createAsyncThunk("auth/logout", async () => {
 	});
 });
 
+/**
+ * Async thunk to keep session alive
+ * Pings the server to refresh the session activity timestamp
+ */
+export const keepAlive = createAsyncThunk("auth/keepAlive", async () => {
+	const apiUrl = import.meta.env.VITE_API_URL || "";
+	const res = await fetch(`${apiUrl}/api/auth/keepalive`, {
+		method: "POST",
+		credentials: "include",
+	});
+	if (!res.ok) throw new Error("Failed to refresh session");
+	const data = await res.json();
+	return data;
+});
+
 const authSlice = createSlice({
 	name: "auth",
 	initialState,
