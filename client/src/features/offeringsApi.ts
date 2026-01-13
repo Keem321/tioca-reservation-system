@@ -67,6 +67,47 @@ export const offeringsApi = createApi({
 			providesTags: (_result, _error, id) => [{ type: "Offering", id }],
 		}),
 
+		/**
+		 * Create new offering
+		 */
+		createOffering: builder.mutation<Offering, Partial<Offering>>({
+			query: (data) => ({
+				url: "/offerings",
+				method: "POST",
+				body: data,
+			}),
+			invalidatesTags: ["Offering"],
+		}),
+
+		/**
+		 * Update existing offering
+		 */
+		updateOffering: builder.mutation<
+			Offering,
+			{ id: string; data: Partial<Offering> }
+		>({
+			query: ({ id, data }) => ({
+				url: `/offerings/${id}`,
+				method: "PUT",
+				body: data,
+			}),
+			invalidatesTags: (_result, _error, { id }) => [
+				{ type: "Offering", id },
+				"Offering",
+			],
+		}),
+
+		/**
+		 * Delete offering
+		 */
+		deleteOffering: builder.mutation<void, string>({
+			query: (id) => ({
+				url: `/offerings/${id}`,
+				method: "DELETE",
+			}),
+			invalidatesTags: ["Offering"],
+		}),
+
 		// Note: Price calculation is handled server-side via reservation service
 	}),
 });
@@ -76,4 +117,7 @@ export const {
 	useGetRoomOfferingsQuery,
 	useGetAmenityOfferingsQuery,
 	useGetOfferingByIdQuery,
+	useCreateOfferingMutation,
+	useUpdateOfferingMutation,
+	useDeleteOfferingMutation,
 } = offeringsApi;

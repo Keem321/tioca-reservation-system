@@ -8,6 +8,7 @@ import {
 	useUpdateRoomStatusMutation,
 } from "../features/roomsApi";
 import { useGetReservationsQuery } from "../features/reservationsApi";
+import { useGetRoomOfferingsQuery } from "../features/offeringsApi";
 import type { Room, RoomFormData, PodQuality, PodFloor } from "../types/room";
 import "./RoomManagement.css";
 
@@ -80,6 +81,9 @@ export default function RoomManagement() {
 
 	// Fetch all reservations (manager-only)
 	const { data: reservations = [] } = useGetReservationsQuery();
+
+	// Fetch offerings for dropdown
+	const { data: offerings = [] } = useGetRoomOfferingsQuery({});
 
 	// Filters
 	const [search, setSearch] = useState("");
@@ -405,16 +409,32 @@ export default function RoomManagement() {
 								</label>
 
 								<label>
-									Price Per Night ($):
-									<input
-										type="number"
-										name="pricePerNight"
-										value={formData.pricePerNight}
+									Price Per Night ($): Room Offering (Pricing Tier):
+									<select
+										name="offeringId"
+										value={formData.offeringId}
 										onChange={handleInputChange}
-										min="0"
-										step="0.01"
 										required
-									/>
+									>
+										<option value="">Select offering...</option>
+										{offerings.map((offering) => (
+											<option key={offering._id} value={offering._id}>
+												{offering.name} - $
+												{(offering.basePrice / 100).toFixed(2)}/night (
+												{offering.quality})
+											</option>
+										))}
+									</select>
+									<small
+										style={{
+											display: "block",
+											marginTop: "0.25rem",
+											color: "#666",
+										}}
+									>
+										Select the pricing tier for this room. Manage offerings in
+										Offering Management.
+									</small>
 								</label>
 
 								<label>

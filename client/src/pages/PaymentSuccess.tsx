@@ -150,12 +150,6 @@ const PaymentSuccess: React.FC = () => {
 												roomInfo.floor.slice(1)}
 										</span>
 									</div>
-									<div className="payment-success__detail-item">
-										<span className="detail-label">Price per Night:</span>
-										<span className="detail-value">
-											${roomInfo.pricePerNight.toFixed(2)}
-										</span>
-									</div>
 								</div>
 							)}
 

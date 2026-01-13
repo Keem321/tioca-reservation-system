@@ -15,6 +15,7 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import RoomManagement from "./pages/RoomManagement";
 import ReservationManagement from "./pages/ReservationManagement";
 import PaymentsManagement from "./pages/PaymentsManagement";
+import OfferingManagement from "./pages/OfferingManagement";
 import SessionTimeoutTest from "./pages/SessionTimeoutTest";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SessionTimeoutWarning from "./components/SessionTimeoutWarning";
@@ -105,6 +106,14 @@ function App() {
 						element={
 							<ProtectedRoute requiredRole="manager">
 								<RoomManagement />
+								<Route
+									path="/manage/offerings"
+									element={
+										<ProtectedRoute requiredRole="manager">
+											<OfferingManagement />
+										</ProtectedRoute>
+									}
+								/>
 							</ProtectedRoute>
 						}
 					/>

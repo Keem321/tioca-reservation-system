@@ -11,6 +11,7 @@ import {
 	useCancelReservationMutation,
 } from "../features/reservationsApi";
 import { useGetRoomsQuery } from "../features/roomsApi";
+import { formatMoney, getDefaultCurrency } from "../utils/money";
 import type { Reservation } from "../types/reservation";
 import "./Profile.css";
 
@@ -29,7 +30,8 @@ export default function Profile() {
 	const [editFormData, setEditFormData] = useState<{
 		name: string;
 		email: string;
-	}>({ name: "", email: "" });
+		currencyPreference: string;
+	}>({ name: "", email: "", currencyPreference: "USD" });
 	const [passwordFormData, setPasswordFormData] = useState({
 		currentPassword: "",
 		newPassword: "",
@@ -64,6 +66,8 @@ export default function Profile() {
 		refetch: refetchReservations,
 	} = useGetActiveReservationsQuery();
 
+	const currency = getDefaultCurrency(profile?.currencyPreference || "USD");
+
 	// Mutations
 	const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
 	const [changePassword, { isLoading: isChangingPassword }] =
@@ -83,6 +87,7 @@ export default function Profile() {
 			setEditFormData({
 				name: profile.name || "",
 				email: profile.email || "",
+				currencyPreference: profile.currencyPreference || "USD",
 			});
 		}
 	}, [profile, editFormData.name]);
@@ -269,6 +274,10 @@ export default function Profile() {
 										{profile?.provider === "google" ? "Google OAuth" : "Local"}
 									</span>
 								</div>
+								<div className="profile-field">
+									<label>Currency Preference:</label>
+									<span>{currency}</span>
+								</div>
 								<div className="profile-actions">
 									<button
 										onClick={() => setIsEditing(true)}
@@ -307,6 +316,18 @@ export default function Profile() {
 										onChange={handleEditChange}
 										required
 									/>
+								</label>
+
+								<label>
+									Currency Preference:
+									<select
+										name="currencyPreference"
+										value={editFormData.currencyPreference}
+										onChange={handleEditChange}
+									>
+										<option value="USD">USD ($)</option>
+										<option value="JPY">JPY (¥)</option>
+									</select>
 								</label>
 
 								<div className="form-actions">
@@ -446,7 +467,7 @@ export default function Profile() {
 											</div>
 											<div className="detail-row">
 												<label>Total Price:</label>
-												<span>${res.totalPrice}</span>
+												<span>{formatMoney(res.totalPrice, currency)}</span>
 											</div>
 										</div>
 										{res.specialRequests && (

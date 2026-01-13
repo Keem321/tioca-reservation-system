@@ -95,6 +95,15 @@ const Navbar: React.FC = () => {
 									className="navbar__dropdown-item"
 								>
 									Room Management
+									<button
+										onClick={() => {
+											navigate("/manage/offerings");
+											setManagerMenuOpen(false);
+										}}
+										className="navbar__dropdown-item"
+									>
+										Offering Management
+									</button>
 								</button>
 								<button
 									onClick={() => {

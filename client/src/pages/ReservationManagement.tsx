@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Navbar from "../components/landing/Navbar";
 import {
 	useGetReservationsQuery,
@@ -10,22 +10,18 @@ import {
 	useCheckOutMutation,
 } from "../features/reservationsApi";
 import { useGetRoomsQuery } from "../features/roomsApi";
+import {
+	useGetAmenityOfferingsQuery,
+	useGetRoomOfferingsQuery,
+} from "../features/offeringsApi";
+import { formatMoney, formatPricePerNight } from "../utils/money";
 import type { ReservationFormData, Reservation } from "../types/reservation";
 import type { Room } from "../types/room";
 import "./ReservationManagement.css";
 
 /**
  * ReservationManagement - Manager page for CRUD operations on reservations
- *
- * Features:
- * - View all reservations
- * - Create new reservations
- * - Update existing reservations
- * - Cancel reservations
- * - Check in/check out guests
- * - Update reservation status
  */
-
 export default function ReservationManagement() {
 	// Filters
 	const [statusFilter, setStatusFilter] = useState<string>("");
@@ -62,6 +58,9 @@ export default function ReservationManagement() {
 		specialRequests: "",
 	});
 
+	// Display currency (manager view stays in USD for now)
+	const displayCurrency = "USD";
+
 	// Fetch data with filters
 	const { data: rooms = [] } = useGetRoomsQuery(undefined);
 
@@ -77,7 +76,65 @@ export default function ReservationManagement() {
 		podId: podIdFilter,
 	});
 
-	// Apply local sorting
+	// Mutations
+	const [createReservation, { isLoading: isCreating }] =
+		useCreateReservationMutation();
+	const [updateReservation, { isLoading: isUpdating }] =
+		useUpdateReservationMutation();
+	const [deleteReservation] = useDeleteReservationMutation();
+	const [cancelReservation] = useCancelReservationMutation();
+	const [checkIn] = useCheckInMutation();
+	const [checkOut] = useCheckOutMutation();
+
+	// Offerings
+	const { data: roomOfferings = [] } = useGetRoomOfferingsQuery({});
+	const { data: amenityOfferings = [] } = useGetAmenityOfferingsQuery({});
+
+	// Derived selections
+	const selectedRoom = useMemo(
+		() => rooms.find((r) => r._id === formData.roomId),
+		[rooms, formData.roomId]
+	);
+
+	const effectiveOfferingId = selectedRoom?.offeringId || formData.offeringId;
+	const selectedRoomOffering = useMemo(
+		() => roomOfferings.find((o) => o._id === effectiveOfferingId),
+		[roomOfferings, effectiveOfferingId]
+	);
+
+	const nights = useMemo(() => {
+		if (!formData.checkInDate || !formData.checkOutDate) return 0;
+		const start = new Date(formData.checkInDate);
+		const end = new Date(formData.checkOutDate);
+		const diff = end.getTime() - start.getTime();
+		return diff > 0 ? Math.ceil(diff / (1000 * 60 * 60 * 24)) : 0;
+	}, [formData.checkInDate, formData.checkOutDate]);
+
+	const pricing = useMemo(() => {
+		const basePerNight = selectedRoomOffering?.basePrice || 0;
+		const baseTotal = nights > 0 ? basePerNight * nights : 0;
+		const amenitiesTotal = formData.selectedAmenities.reduce((total, id) => {
+			const amenity = amenityOfferings.find((a) => a._id === id);
+			if (!amenity) return total;
+			if (amenity.priceType === "per-night") {
+				return total + amenity.basePrice * Math.max(nights, 1);
+			}
+			return total + amenity.basePrice;
+		}, 0);
+
+		return {
+			basePerNight,
+			amenitiesTotal,
+			total: baseTotal + amenitiesTotal,
+		};
+	}, [
+		amenityOfferings,
+		formData.selectedAmenities,
+		nights,
+		selectedRoomOffering,
+	]);
+
+	// Sorting
 	const reservations = [...(allReservations as Reservation[])].sort((a, b) => {
 		let compareValue = 0;
 		switch (sortBy) {
@@ -95,22 +152,38 @@ export default function ReservationManagement() {
 		return sortOrder === "asc" ? compareValue : -compareValue;
 	});
 
-	// Mutations
-	const [createReservation, { isLoading: isCreating }] =
-		useCreateReservationMutation();
-	const [updateReservation, { isLoading: isUpdating }] =
-		useUpdateReservationMutation();
-	const [deleteReservation] = useDeleteReservationMutation();
-	const [cancelReservation] = useCancelReservationMutation();
-	const [checkIn] = useCheckInMutation();
-	const [checkOut] = useCheckOutMutation();
-
 	const handleInputChange = (
 		e: React.ChangeEvent<
 			HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 		>
 	) => {
 		const { name, value } = e.target;
+
+		if (name === "selectedAmenities") {
+			const target = e.target as HTMLInputElement;
+			const amenityId = target.value;
+			setFormData((prev) => {
+				const next = new Set(prev.selectedAmenities);
+				if (next.has(amenityId)) {
+					next.delete(amenityId);
+				} else {
+					next.add(amenityId);
+				}
+				return { ...prev, selectedAmenities: Array.from(next) };
+			});
+			return;
+		}
+
+		if (name === "roomId") {
+			const room = rooms.find((r) => r._id === value);
+			setFormData((prev) => ({
+				...prev,
+				roomId: value,
+				offeringId: room?.offeringId || "",
+			}));
+			return;
+		}
+
 		setFormData((prev) => ({
 			...prev,
 			[name]:
@@ -122,15 +195,34 @@ export default function ReservationManagement() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+
+		if (nights <= 0) {
+			alert("Check-out date must be after check-in date");
+			return;
+		}
+
+		if (selectedRoom && formData.numberOfGuests > selectedRoom.capacity) {
+			alert(
+				`Number of guests exceeds room capacity (${selectedRoom.capacity})`
+			);
+			return;
+		}
+
+		const payload: ReservationFormData = {
+			...formData,
+			offeringId: effectiveOfferingId || formData.offeringId,
+			totalPrice: pricing.total,
+		};
+
 		try {
 			if (editingReservation) {
 				await updateReservation({
 					id: editingReservation,
-					data: formData,
+					data: payload,
 				}).unwrap();
 				alert("Reservation updated successfully!");
 			} else {
-				await createReservation(formData).unwrap();
+				await createReservation(payload).unwrap();
 				alert("Reservation created successfully!");
 			}
 			resetForm();
@@ -418,15 +510,28 @@ export default function ReservationManagement() {
 										<option value="">Select Room</option>
 										{getAvailableRooms().map((room: Room) => (
 											<option key={room._id} value={room._id}>
-												Pod {room.podId} - {room.quality} ({room.floor}) ($ $
+												Pod {room.podId} - {room.quality} ({room.floor})
 												{room.offering?.basePrice
-													? (room.offering.basePrice / 100).toFixed(2)
-													: "0.00"}
-												/night)
+													? ` • ${formatPricePerNight(
+															room.offering.basePrice,
+															displayCurrency
+													  )}`
+													: ""}
 											</option>
 										))}
 									</select>
 								</label>
+
+								{selectedRoomOffering && (
+									<div className="price-hint">
+										Base rate:{" "}
+										{formatPricePerNight(
+											selectedRoomOffering.basePrice,
+											displayCurrency
+										)}
+										{nights > 0 && <span> × {nights} night(s)</span>}
+									</div>
+								)}
 
 								<label>
 									Guest Name:
@@ -457,11 +562,12 @@ export default function ReservationManagement() {
 										name="guestPhone"
 										value={formData.guestPhone}
 										onChange={handleInputChange}
+										placeholder="Optional"
 									/>
 								</label>
 
 								<label>
-									Check-In Date:
+									Check-in Date:
 									<input
 										type="date"
 										name="checkInDate"
@@ -472,7 +578,7 @@ export default function ReservationManagement() {
 								</label>
 
 								<label>
-									Check-Out Date:
+									Check-out Date:
 									<input
 										type="date"
 										name="checkOutDate"
@@ -488,21 +594,8 @@ export default function ReservationManagement() {
 										type="number"
 										name="numberOfGuests"
 										value={formData.numberOfGuests}
+										min={1}
 										onChange={handleInputChange}
-										min="1"
-										required
-									/>
-								</label>
-
-								<label>
-									Total Price ($):
-									<input
-										type="number"
-										name="totalPrice"
-										value={formData.totalPrice}
-										onChange={handleInputChange}
-										min="0"
-										step="0.01"
 										required
 									/>
 								</label>
@@ -535,185 +628,235 @@ export default function ReservationManagement() {
 										<option value="refunded">Refunded</option>
 									</select>
 								</label>
+
+								<label className="full-width">
+									Special Requests:
+									<textarea
+										name="specialRequests"
+										value={formData.specialRequests}
+										onChange={handleInputChange}
+										rows={2}
+										placeholder="Any special notes for the stay"
+									/>
+								</label>
 							</div>
 
-							<label>
-								Special Requests:
-								<textarea
-									name="specialRequests"
-									value={formData.specialRequests}
-									onChange={handleInputChange}
-									rows={3}
-								/>
-							</label>
+							<div className="amenities">
+								<h4>Add Amenities</h4>
+								<div className="amenities__list">
+									{amenityOfferings.map((amenity) => (
+										<label key={amenity._id} className="amenity-item">
+											<input
+												type="checkbox"
+												name="selectedAmenities"
+												value={amenity._id}
+												checked={formData.selectedAmenities.includes(
+													amenity._id
+												)}
+												onChange={handleInputChange}
+											/>
+											<div>
+												<div className="amenity-item__name">{amenity.name}</div>
+												<div className="amenity-item__price">
+													{formatMoney(amenity.basePrice, displayCurrency)}
+													{amenity.priceType === "per-night"
+														? " per night"
+														: " flat"}
+												</div>
+											</div>
+										</label>
+									))}
+									{amenityOfferings.length === 0 && (
+										<p className="muted">No amenities configured.</p>
+									)}
+								</div>
+							</div>
+
+							<div className="price-summary">
+								<div>
+									<strong>Base rate:</strong>{" "}
+									{formatPricePerNight(pricing.basePerNight, displayCurrency)}
+									{nights > 0 && <span> × {nights} night(s)</span>}
+								</div>
+								<div>
+									<strong>Amenities:</strong>{" "}
+									{formatMoney(pricing.amenitiesTotal, displayCurrency)}
+								</div>
+								<div className="price-summary__total">
+									<strong>Total:</strong>{" "}
+									{formatMoney(pricing.total, displayCurrency)}
+								</div>
+							</div>
 
 							<div className="form-actions">
-								<button type="submit" disabled={isCreating || isUpdating}>
-									{isCreating || isUpdating
-										? "Saving..."
-										: editingReservation
-										? "Update Reservation"
-										: "Create Reservation"}
+								<button
+									type="submit"
+									className="btn-primary"
+									disabled={isCreating || isUpdating}
+								>
+									{editingReservation ? "Update" : "Create"} Reservation
 								</button>
 								<button type="button" onClick={resetForm}>
-									Cancel
+									Reset
 								</button>
 							</div>
 						</form>
 					</div>
 				)}
 
-				{/* Reservation List */}
+				{/* Bulk actions */}
+				<div className="bulk-actions">
+					<div className="bulk-actions__left">
+						<label>
+							<input
+								type="checkbox"
+								onChange={(e) => toggleSelectAll(e.target.checked)}
+								checked={
+									selectedReservations.size > 0 &&
+									selectedReservations.size === reservations.length
+								}
+							/>
+							Select All
+						</label>
+						<span>{selectedReservations.size} selected</span>
+					</div>
+					<div className="bulk-actions__right">
+						<button
+							onClick={bulkCheckIn}
+							disabled={selectedReservations.size === 0}
+						>
+							Bulk Check-in
+						</button>
+						<button
+							onClick={bulkCheckOut}
+							disabled={selectedReservations.size === 0}
+						>
+							Bulk Check-out
+						</button>
+					</div>
+				</div>
+
+				{/* Reservations List */}
 				<div className="reservation-list">
 					<h2>Reservations</h2>
 					{isLoading && <p>Loading reservations...</p>}
-					{error && <p className="error">Error loading reservations</p>}
+					{error && <p className="error">Failed to load reservations.</p>}
 
 					{!isLoading && reservations.length === 0 && (
-						<p>No reservations found. Create one to get started!</p>
+						<p className="muted">No reservations found.</p>
 					)}
 
-					{reservations.length > 0 && (
-						<>
-							{/* Bulk Actions */}
-							{selectedReservations.size > 0 && (
-								<div className="bulk-actions">
-									<span className="bulk-info">
-										{selectedReservations.size} selected
-									</span>
-									<button
-										className="btn-bulk-checkin"
-										onClick={bulkCheckIn}
-										title="Check in all selected reservations"
-									>
-										Bulk Check In
-									</button>
-									<button
-										className="btn-bulk-checkout"
-										onClick={bulkCheckOut}
-										title="Check out all selected reservations"
-									>
-										Bulk Check Out
-									</button>
-									<button
-										className="btn-clear-selection"
-										onClick={() => setSelectedReservations(new Set())}
-									>
-										Clear Selection
-									</button>
-								</div>
-							)}
-
+					{!isLoading && reservations.length > 0 && (
+						<div className="table-wrapper">
 							<table>
 								<thead>
 									<tr>
-										<th>
-											<input
-												type="checkbox"
-												checked={
-													selectedReservations.size === reservations.length &&
-													reservations.length > 0
-												}
-												onChange={(e) => toggleSelectAll(e.target.checked)}
-												title="Select all"
-											/>
-										</th>
+										<th></th>
 										<th>Guest</th>
 										<th>Room</th>
-										<th>Check-In</th>
-										<th>Check-Out</th>
-										<th>Guests</th>
-										<th>Total</th>
+										<th>Dates</th>
 										<th>Status</th>
+										<th>Payment</th>
+										<th>Total</th>
 										<th>Actions</th>
 									</tr>
 								</thead>
 								<tbody>
-									{reservations.map((reservation: Reservation) => (
-										<tr key={reservation._id}>
-											<td>
-												<input
-													type="checkbox"
-													checked={selectedReservations.has(reservation._id)}
-													onChange={() =>
-														toggleSelectReservation(reservation._id)
-													}
-												/>
-											</td>
-											<td>
-												<div>{reservation.guestName}</div>
-												<div className="email">{reservation.guestEmail}</div>
-											</td>
+									{reservations.map((reservation) => {
+										const roomDisplay =
+											typeof reservation.roomId === "string"
+												? reservation.roomId
+												: `Pod ${reservation.roomId.podId} (${reservation.roomId.quality})`;
+										const isChecked = selectedReservations.has(reservation._id);
+										const canCheckIn = reservation.status === "confirmed";
+										const canCheckOut = reservation.status === "checked-in";
 
-											<td>
-												{typeof reservation.roomId === "string"
-													? reservation.roomId
-													: reservation.roomId?.podId
-													? `Pod ${reservation.roomId.podId} (${reservation.roomId.quality})`
-													: "N/A"}
-											</td>
-											<td>
-												{new Date(reservation.checkInDate).toLocaleDateString()}
-											</td>
-											<td>
-												{new Date(
-													reservation.checkOutDate
-												).toLocaleDateString()}
-											</td>
-											<td>{reservation.numberOfGuests}</td>
-											<td>${reservation.totalPrice}</td>
-											<td>
-												<span
-													className={`status-badge status-${reservation.status}`}
-												>
-													{reservation.status}
-												</span>
-											</td>
-											<td className="actions">
-												<button
-													onClick={() => handleEdit(reservation)}
-													className="btn-edit"
-												>
-													Edit
-												</button>
-												{reservation.status === "confirmed" && (
-													<button
-														onClick={() => handleCheckIn(reservation._id)}
-														className="btn-checkin"
+										return (
+											<tr key={reservation._id}>
+												<td>
+													<input
+														type="checkbox"
+														checked={isChecked}
+														onChange={() =>
+															toggleSelectReservation(reservation._id)
+														}
+													/>
+												</td>
+												<td>
+													<div className="guest-name">
+														{reservation.guestName}
+													</div>
+													<div className="guest-email">
+														{reservation.guestEmail}
+													</div>
+												</td>
+												<td>{roomDisplay}</td>
+												<td>
+													<div>
+														{new Date(
+															reservation.checkInDate
+														).toLocaleDateString()}{" "}
+														-
+														{new Date(
+															reservation.checkOutDate
+														).toLocaleDateString()}
+													</div>
+													<div className="muted">
+														{reservation.numberOfGuests} guest(s)
+													</div>
+												</td>
+												<td>
+													<span
+														className={`status status--${reservation.status}`}
 													>
-														Check In
-													</button>
-												)}
-												{reservation.status === "checked-in" && (
-													<button
-														onClick={() => handleCheckOut(reservation._id)}
-														className="btn-checkout"
+														{reservation.status}
+													</span>
+												</td>
+												<td>
+													<span
+														className={`payment payment--${reservation.paymentStatus}`}
 													>
-														Check Out
+														{reservation.paymentStatus}
+													</span>
+												</td>
+												<td>
+													{formatMoney(reservation.totalPrice, displayCurrency)}
+												</td>
+												<td className="actions">
+													<button onClick={() => handleEdit(reservation)}>
+														Edit
 													</button>
-												)}
-												{!["cancelled", "checked-out"].includes(
-													reservation.status
-												) && (
-													<button
-														onClick={() => handleCancel(reservation._id)}
-														className="btn-cancel"
-													>
-														Cancel
+													<button onClick={() => handleDelete(reservation._id)}>
+														Delete
 													</button>
-												)}
-												<button
-													onClick={() => handleDelete(reservation._id)}
-													className="btn-delete"
-												>
-													Delete
-												</button>
-											</td>
-										</tr>
-									))}
+													{reservation.status !== "cancelled" && (
+														<button
+															onClick={() => handleCancel(reservation._id)}
+														>
+															Cancel
+														</button>
+													)}
+													{canCheckIn && (
+														<button
+															onClick={() => handleCheckIn(reservation._id)}
+														>
+															Check-in
+														</button>
+													)}
+													{canCheckOut && (
+														<button
+															onClick={() => handleCheckOut(reservation._id)}
+														>
+															Check-out
+														</button>
+													)}
+												</td>
+											</tr>
+										);
+									})}
 								</tbody>
 							</table>
-						</>
+						</div>
 					)}
 				</div>
 			</div>
