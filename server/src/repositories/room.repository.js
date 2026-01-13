@@ -62,7 +62,13 @@ class RoomRepository {
 	 * @param {string} [excludeSessionId] - Optional session ID to exclude from hold checks
 	 * @returns {Promise<Array>}
 	 */
-	async findAvailableRooms(checkIn, checkOut, floor, quality, excludeSessionId = null) {
+	async findAvailableRooms(
+		checkIn,
+		checkOut,
+		floor,
+		quality,
+		excludeSessionId = null
+	) {
 		const checkInDate = new Date(checkIn);
 		const checkOutDate = new Date(checkOut);
 		const now = new Date();
@@ -129,7 +135,9 @@ class RoomRepository {
 
 		// Filter out rooms that have overlapping reservations OR active holds
 		const availableRooms = rooms.filter(
-			(room) => !bookedRoomIds.has(room._id.toString()) && !heldRoomIds.has(room._id.toString())
+			(room) =>
+				!bookedRoomIds.has(room._id.toString()) &&
+				!heldRoomIds.has(room._id.toString())
 		);
 
 		return availableRooms;
@@ -145,7 +153,13 @@ class RoomRepository {
 	 * @param {string} [excludeSessionId] - Optional session ID to exclude from hold checks
 	 * @returns {Promise<Array>} Array of recommended rooms with availability info
 	 */
-	async findRecommendedRooms(checkIn, checkOut, floor, quality, excludeSessionId = null) {
+	async findRecommendedRooms(
+		checkIn,
+		checkOut,
+		floor,
+		quality,
+		excludeSessionId = null
+	) {
 		const checkInDate = new Date(checkIn);
 		const checkOutDate = new Date(checkOut);
 		const now = new Date();

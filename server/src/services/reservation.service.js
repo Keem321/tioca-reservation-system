@@ -108,9 +108,11 @@ class ReservationService {
 			// If holdId provided, verify the hold exists and belongs to this session
 			if (holdId && sessionId) {
 				const hold = await RoomHoldRepository.findById(holdId);
-				
+
 				if (!hold) {
-					throw new Error("Hold not found. The room may no longer be available.");
+					throw new Error(
+						"Hold not found. The room may no longer be available."
+					);
 				}
 
 				// Verify hold ownership
@@ -129,17 +131,28 @@ class ReservationService {
 				}
 
 				// Verify hold dates match reservation dates (compare date parts only, not times)
-				const holdCheckInDate = new Date(hold.checkInDate).toISOString().split('T')[0];
-				const holdCheckOutDate = new Date(hold.checkOutDate).toISOString().split('T')[0];
-				const reservationCheckInDate = checkIn.toISOString().split('T')[0];
-				const reservationCheckOutDate = checkOut.toISOString().split('T')[0];
+				const holdCheckInDate = new Date(hold.checkInDate)
+					.toISOString()
+					.split("T")[0];
+				const holdCheckOutDate = new Date(hold.checkOutDate)
+					.toISOString()
+					.split("T")[0];
+				const reservationCheckInDate = checkIn.toISOString().split("T")[0];
+				const reservationCheckOutDate = checkOut.toISOString().split("T")[0];
 
-				if (holdCheckInDate !== reservationCheckInDate || holdCheckOutDate !== reservationCheckOutDate) {
-					throw new Error(`Reservation dates do not match the hold. Hold: ${holdCheckInDate} to ${holdCheckOutDate}, Reservation: ${reservationCheckInDate} to ${reservationCheckOutDate}`);
+				if (
+					holdCheckInDate !== reservationCheckInDate ||
+					holdCheckOutDate !== reservationCheckOutDate
+				) {
+					throw new Error(
+						`Reservation dates do not match the hold. Hold: ${holdCheckInDate} to ${holdCheckOutDate}, Reservation: ${reservationCheckInDate} to ${reservationCheckOutDate}`
+					);
 				}
 
 				// Verify hold room matches reservation room
-				const holdRoomId = hold.roomId._id ? hold.roomId._id.toString() : hold.roomId.toString();
+				const holdRoomId = hold.roomId._id
+					? hold.roomId._id.toString()
+					: hold.roomId.toString();
 				if (holdRoomId !== roomId) {
 					throw new Error("Reservation room does not match the hold");
 				}

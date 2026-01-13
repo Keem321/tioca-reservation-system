@@ -11,7 +11,9 @@ import type { Reservation, ReservationFormData } from "../types/reservation";
 
 export const reservationsApi = createApi({
 	reducerPath: "reservationsApi",
-	baseQuery: createBaseQueryWithReauth(`${import.meta.env.VITE_API_URL || ""}/api/reservations`),
+	baseQuery: createBaseQueryWithReauth(
+		`${import.meta.env.VITE_API_URL || ""}/api/reservations`
+	),
 	tagTypes: ["Reservation"],
 	endpoints: (builder) => ({
 		// Get all reservations with optional filters

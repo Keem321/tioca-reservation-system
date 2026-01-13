@@ -22,7 +22,9 @@ export interface PasswordChangeData {
  */
 export const userApi = createApi({
 	reducerPath: "userApi",
-	baseQuery: createBaseQueryWithReauth(`${import.meta.env.VITE_API_URL || ""}/api/user`),
+	baseQuery: createBaseQueryWithReauth(
+		`${import.meta.env.VITE_API_URL || ""}/api/user`
+	),
 	tagTypes: ["Profile", "ActiveReservations"],
 	endpoints: (builder) => ({
 		// Get current user's profile

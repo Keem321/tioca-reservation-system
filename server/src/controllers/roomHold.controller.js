@@ -14,16 +14,16 @@ export async function createHold(req, res) {
 		const userId = req.user?._id || req.user?.id;
 
 		if (!sessionId) {
-			console.error('[Hold] No session found in request');
+			console.error("[Hold] No session found in request");
 			return res.status(400).json({ error: "No session found" });
 		}
 
-		console.log('[Hold] Creating hold:', {
+		console.log("[Hold] Creating hold:", {
 			roomId,
 			checkInDate,
 			checkOutDate,
 			sessionId,
-			stage: stage || "confirmation"
+			stage: stage || "confirmation",
 		});
 
 		const hold = await RoomHoldService.createHold({
@@ -35,12 +35,15 @@ export async function createHold(req, res) {
 			stage: stage || "confirmation",
 		});
 
-		console.log('[Hold] Hold created successfully:', hold._id);
+		console.log("[Hold] Hold created successfully:", hold._id);
 		res.status(201).json(hold);
 	} catch (err) {
-		console.error('[Hold] Error creating hold:', err.message);
+		console.error("[Hold] Error creating hold:", err.message);
 		// More specific error status codes
-		if (err.message.includes("already booked") || err.message.includes("being booked")) {
+		if (
+			err.message.includes("already booked") ||
+			err.message.includes("being booked")
+		) {
 			return res.status(409).json({ error: err.message });
 		}
 		res.status(400).json({ error: err.message });

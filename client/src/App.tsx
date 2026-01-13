@@ -43,23 +43,29 @@ function App() {
 
 	// Session timeout hook - only active when user is authenticated
 	const isAuthenticated = user !== null;
-	const { showWarning, remainingSeconds, resetActivity } = useSessionTimeout(
-		isAuthenticated
-	);
+	const { showWarning, remainingSeconds, resetActivity } =
+		useSessionTimeout(isAuthenticated);
 
 	// Debug: Log when authentication status changes
 	useEffect(() => {
-		console.log('[App] Authentication status:', isAuthenticated ? 'LOGGED IN' : 'LOGGED OUT');
+		console.log(
+			"[App] Authentication status:",
+			isAuthenticated ? "LOGGED IN" : "LOGGED OUT"
+		);
 		if (isAuthenticated && user) {
-			console.log('[App] User:', user.email, 'Role:', user.role);
+			console.log("[App] User:", user.email, "Role:", user.role);
 		}
 	}, [isAuthenticated, user]);
 
 	// Debug: Log when warning state changes
 	useEffect(() => {
-		console.log('[App] 🔔 showWarning changed to:', showWarning);
+		console.log("[App] 🔔 showWarning changed to:", showWarning);
 		if (showWarning) {
-			console.log('[App] ⚠️ WARNING MODAL SHOULD BE VISIBLE NOW with', remainingSeconds, 'seconds remaining');
+			console.log(
+				"[App] ⚠️ WARNING MODAL SHOULD BE VISIBLE NOW with",
+				remainingSeconds,
+				"seconds remaining"
+			);
 		}
 	}, [showWarning, remainingSeconds]);
 
@@ -67,8 +73,13 @@ function App() {
 		<Router>
 			<div className="App">
 				{/* Debug: Always show modal state in console */}
-				{console.log('[App Render] showWarning =', showWarning, 'remainingSeconds =', remainingSeconds)}
-				
+				{console.log(
+					"[App Render] showWarning =",
+					showWarning,
+					"remainingSeconds =",
+					remainingSeconds
+				)}
+
 				{/* Session timeout warning modal */}
 				{showWarning && (
 					<SessionTimeoutWarning
@@ -85,7 +96,10 @@ function App() {
 					<Route path="/booking/confirm" element={<BookingConfirmation />} />
 					<Route path="/payment" element={<Payment />} />
 					<Route path="/payment/success" element={<PaymentSuccess />} />
-					<Route path="/session-timeout-test" element={<SessionTimeoutTest />} />
+					<Route
+						path="/session-timeout-test"
+						element={<SessionTimeoutTest />}
+					/>
 					<Route
 						path="/profile"
 						element={

@@ -21,7 +21,9 @@ export const requireRole = (requiredRoles) => {
 		// Check if user's role is in the allowed roles
 		if (!roles.includes(req.user.role)) {
 			return res.status(403).json({
-				error: `Insufficient permissions. Required role(s): ${roles.join(", ")}`,
+				error: `Insufficient permissions. Required role(s): ${roles.join(
+					", "
+				)}`,
 			});
 		}
 

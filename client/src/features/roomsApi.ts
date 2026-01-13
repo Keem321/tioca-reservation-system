@@ -15,7 +15,9 @@ import { createBaseQueryWithReauth } from "../utils/baseQueryWithReauth";
 
 export const roomsApi = createApi({
 	reducerPath: "roomsApi",
-	baseQuery: createBaseQueryWithReauth(`${import.meta.env.VITE_API_URL || ""}/api/rooms`),
+	baseQuery: createBaseQueryWithReauth(
+		`${import.meta.env.VITE_API_URL || ""}/api/rooms`
+	),
 	tagTypes: ["Room"],
 	endpoints: (builder) => ({
 		// Get all rooms

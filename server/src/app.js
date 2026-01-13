@@ -70,15 +70,22 @@ app.use((req, res, next) => {
 // Session setup: configure secure cookies for HTTPS environments
 const isSecureEnv = clientOrigin.startsWith("https://");
 
+// Conditionally apply TLS settings for AWS DocumentDB (not localhost)
+const useDocDBTls =
+	process.env.DOCDB_TLS === "true" ||
+	/ssl=true|tls=true/i.test(MONGO_URI || "");
+
 const sessionStore = new MongoStore({
 	mongoUrl: MONGO_URI,
 	touchAfter: 24 * 3600, // lazy session update interval (seconds)
-	mongoOptions: {
-		// Allow TLS connections without strict certificate validation
-		// (required for AWS DocumentDB)
-		tls: true,
-		tlsAllowInvalidCertificates: true,
-	},
+	mongoOptions: useDocDBTls
+		? {
+				// Allow TLS connections without strict certificate validation
+				// (required for AWS DocumentDB)
+				tls: true,
+				tlsAllowInvalidCertificates: true,
+		  }
+		: {},
 });
 
 // Monitor session store connection
@@ -121,9 +128,6 @@ const mongoOptions = {
 	socketTimeoutMS: 45000,
 };
 
-const useDocDBTls =
-	process.env.DOCDB_TLS === "true" ||
-	/ssl=true|tls=true/i.test(MONGO_URI || "");
 if (useDocDBTls) {
 	mongoOptions.tls = true;
 	mongoOptions.retryWrites = false;

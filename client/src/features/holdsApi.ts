@@ -3,7 +3,7 @@ import { createBaseQueryWithReauth } from "../utils/baseQueryWithReauth";
 
 /**
  * holdsApi - RTK Query API Slice for Room Holds
- * 
+ *
  * This file defines the API endpoints for managing temporary room holds
  * to prevent overbooking during the booking process.
  */
@@ -54,20 +54,23 @@ export const holdsApi = createApi({
 			}),
 			invalidatesTags: ["Hold"],
 		}),
-		
+
 		// Get active holds for current session
 		getSessionHolds: builder.query<RoomHold[], void>({
 			query: () => "session",
 			providesTags: ["Hold"],
 		}),
-		
+
 		// Validate a hold
 		validateHold: builder.query<{ valid: boolean }, string>({
 			query: (holdId) => `/${holdId}/validate`,
 		}),
-		
+
 		// Extend an existing hold
-		extendHold: builder.mutation<RoomHold, { id: string; data: ExtendHoldRequest }>({
+		extendHold: builder.mutation<
+			RoomHold,
+			{ id: string; data: ExtendHoldRequest }
+		>({
 			query: ({ id, data }) => ({
 				url: `/${id}/extend`,
 				method: "PATCH",
@@ -75,7 +78,7 @@ export const holdsApi = createApi({
 			}),
 			invalidatesTags: ["Hold"],
 		}),
-		
+
 		// Release a hold
 		releaseHold: builder.mutation<void, string>({
 			query: (holdId) => ({

@@ -5,184 +5,186 @@
  */
 
 .session-timeout-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(44, 22, 7, 0.85);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  animation: fadeIn 0.3s ease-out;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(44, 22, 7, 0.85);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 9999;
+	animation: fadeIn 0.3s ease-out;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 .session-timeout-modal {
-  background: var(--tioca-beige, #f5f1e8);
-  border-radius: 16px;
-  padding: 2.5rem;
-  max-width: 480px;
-  width: 90%;
-  box-shadow: 0 20px 60px rgba(44, 22, 7, 0.3);
-  text-align: center;
-  animation: slideUp 0.3s ease-out;
-  position: relative;
+	background: var(--tioca-beige, #f5f1e8);
+	border-radius: 16px;
+	padding: 2.5rem;
+	max-width: 480px;
+	width: 90%;
+	box-shadow: 0 20px 60px rgba(44, 22, 7, 0.3);
+	text-align: center;
+	animation: slideUp 0.3s ease-out;
+	position: relative;
 }
 
 @keyframes slideUp {
-  from {
-    transform: translateY(30px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+	from {
+		transform: translateY(30px);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
 }
 
 .session-timeout-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 1.5rem;
-  background: linear-gradient(135deg, #d4a574 0%, #c8956a 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--tioca-beige, #f5f1e8);
-  animation: pulse 2s ease-in-out infinite;
+	width: 80px;
+	height: 80px;
+	margin: 0 auto 1.5rem;
+	background: linear-gradient(135deg, #d4a574 0%, #c8956a 100%);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--tioca-beige, #f5f1e8);
+	animation: pulse 2s ease-in-out infinite;
 }
 
 @keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 0.9;
-  }
+	0%,
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+	50% {
+		transform: scale(1.05);
+		opacity: 0.9;
+	}
 }
 
 .session-timeout-title {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: var(--tioca-brown, #2c1607);
-  margin: 0 0 1rem 0;
-  line-height: 1.2;
+	font-size: 1.75rem;
+	font-weight: 600;
+	color: var(--tioca-brown, #2c1607);
+	margin: 0 0 1rem 0;
+	line-height: 1.2;
 }
 
 .session-timeout-message {
-  font-size: 1rem;
-  color: var(--tioca-tan, #8b6f47);
-  margin: 0 0 1.5rem 0;
-  line-height: 1.5;
+	font-size: 1rem;
+	color: var(--tioca-tan, #8b6f47);
+	margin: 0 0 1.5rem 0;
+	line-height: 1.5;
 }
 
 .session-timeout-countdown {
-  font-size: 3.5rem;
-  font-weight: 700;
-  color: var(--tioca-brown, #2c1607);
-  margin: 1.5rem 0;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.05em;
-  transition: all 0.3s ease;
+	font-size: 3.5rem;
+	font-weight: 700;
+	color: var(--tioca-brown, #2c1607);
+	margin: 1.5rem 0;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: 0.05em;
+	transition: all 0.3s ease;
 }
 
 .session-timeout-countdown--urgent {
-  color: #d97706;
-  animation: urgentPulse 1s ease-in-out infinite;
+	color: #d97706;
+	animation: urgentPulse 1s ease-in-out infinite;
 }
 
 @keyframes urgentPulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.08);
-  }
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.08);
+	}
 }
 
 .session-timeout-button {
-  background: linear-gradient(135deg, #d4a574 0%, #c8956a 100%);
-  color: var(--tioca-beige, #f5f1e8);
-  border: none;
-  border-radius: 12px;
-  padding: 1rem 2.5rem;
-  font-size: 1.125rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
-  width: 100%;
-  margin-bottom: 1rem;
+	background: linear-gradient(135deg, #d4a574 0%, #c8956a 100%);
+	color: var(--tioca-beige, #f5f1e8);
+	border: none;
+	border-radius: 12px;
+	padding: 1rem 2.5rem;
+	font-size: 1.125rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+	width: 100%;
+	margin-bottom: 1rem;
 }
 
 .session-timeout-button:hover {
-  background: linear-gradient(135deg, #c8956a 0%, #b8845a 100%);
-  box-shadow: 0 6px 16px rgba(212, 165, 116, 0.4);
-  transform: translateY(-2px);
+	background: linear-gradient(135deg, #c8956a 0%, #b8845a 100%);
+	box-shadow: 0 6px 16px rgba(212, 165, 116, 0.4);
+	transform: translateY(-2px);
 }
 
 .session-timeout-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(212, 165, 116, 0.3);
+	transform: translateY(0);
+	box-shadow: 0 2px 8px rgba(212, 165, 116, 0.3);
 }
 
 .session-timeout-button:focus {
-  outline: 3px solid rgba(212, 165, 116, 0.5);
-  outline-offset: 2px;
+	outline: 3px solid rgba(212, 165, 116, 0.5);
+	outline-offset: 2px;
 }
 
 .session-timeout-hint {
-  font-size: 0.875rem;
-  color: var(--tioca-tan, #8b6f47);
-  margin: 0;
-  font-style: italic;
-  opacity: 0.8;
+	font-size: 0.875rem;
+	color: var(--tioca-tan, #8b6f47);
+	margin: 0;
+	font-style: italic;
+	opacity: 0.8;
 }
 
 /* Responsive adjustments */
 @media (max-width: 640px) {
-  .session-timeout-modal {
-    padding: 2rem 1.5rem;
-  }
+	.session-timeout-modal {
+		padding: 2rem 1.5rem;
+	}
 
-  .session-timeout-title {
-    font-size: 1.5rem;
-  }
+	.session-timeout-title {
+		font-size: 1.5rem;
+	}
 
-  .session-timeout-countdown {
-    font-size: 3rem;
-  }
+	.session-timeout-countdown {
+		font-size: 3rem;
+	}
 
-  .session-timeout-button {
-    padding: 0.875rem 2rem;
-    font-size: 1rem;
-  }
+	.session-timeout-button {
+		padding: 0.875rem 2rem;
+		font-size: 1rem;
+	}
 }
 
 /* Accessibility: Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
-  .session-timeout-overlay,
-  .session-timeout-modal,
-  .session-timeout-icon,
-  .session-timeout-countdown,
-  .session-timeout-countdown--urgent {
-    animation: none;
-  }
+	.session-timeout-overlay,
+	.session-timeout-modal,
+	.session-timeout-icon,
+	.session-timeout-countdown,
+	.session-timeout-countdown--urgent {
+		animation: none;
+	}
 
-  .session-timeout-button:hover {
-    transform: none;
-  }
+	.session-timeout-button:hover {
+		transform: none;
+	}
 }

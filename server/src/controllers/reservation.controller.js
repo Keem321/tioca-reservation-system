@@ -101,24 +101,32 @@ export async function createReservation(req, res) {
 			...req.body,
 			sessionId: req.sessionID,
 		};
-		
-		console.log('[Reservation] Creating reservation with data:', {
+
+		console.log("[Reservation] Creating reservation with data:", {
 			roomId: reservationData.roomId,
 			holdId: reservationData.holdId,
 			sessionId: reservationData.sessionId,
 			checkInDate: reservationData.checkInDate,
 			checkOutDate: reservationData.checkOutDate,
 		});
-		
-		const reservation = await ReservationService.createReservation(reservationData);
+
+		const reservation = await ReservationService.createReservation(
+			reservationData
+		);
 		res.status(201).json(reservation);
 	} catch (err) {
-		console.error('[Reservation] Error creating reservation:', err.message);
+		console.error("[Reservation] Error creating reservation:", err.message);
 		// Provide more specific status codes
-		if (err.message.includes("not available") || err.message.includes("being booked")) {
+		if (
+			err.message.includes("not available") ||
+			err.message.includes("being booked")
+		) {
 			return res.status(409).json({ error: err.message });
 		}
-		if (err.message.includes("expired") || err.message.includes("no longer available")) {
+		if (
+			err.message.includes("expired") ||
+			err.message.includes("no longer available")
+		) {
 			return res.status(410).json({ error: err.message });
 		}
 		res.status(400).json({ error: err.message });

@@ -177,9 +177,7 @@ export default function Profile() {
 					: editingReservation.roomId._id;
 			const room = rooms.find((r) => r._id === roomId);
 			if (room && reservationFormData.numberOfGuests > room.capacity) {
-				alert(
-					`Number of guests exceeds room capacity (${room.capacity})`
-				);
+				alert(`Number of guests exceeds room capacity (${room.capacity})`);
 				return;
 			}
 
@@ -206,10 +204,15 @@ export default function Profile() {
 			return;
 		}
 
-		const reason = prompt("Please provide a reason for cancellation (optional):");
+		const reason = prompt(
+			"Please provide a reason for cancellation (optional):"
+		);
 
 		try {
-			await cancelReservation({ id: reservationId, reason: reason || "" }).unwrap();
+			await cancelReservation({
+				id: reservationId,
+				reason: reason || "",
+			}).unwrap();
 			alert("Reservation cancelled successfully!");
 			// Refetch to update the list
 			refetchReservations();
@@ -266,22 +269,22 @@ export default function Profile() {
 										{profile?.provider === "google" ? "Google OAuth" : "Local"}
 									</span>
 								</div>
-							<div className="profile-actions">
-								<button
-									onClick={() => setIsEditing(true)}
-									className="btn-edit btn-primary"
-								>
-									Edit Profile
-								</button>
-								{profile?.provider !== "google" && (
+								<div className="profile-actions">
 									<button
-										onClick={() => setShowPasswordForm(!showPasswordForm)}
-										className="btn-password btn-secondary"
+										onClick={() => setIsEditing(true)}
+										className="btn-edit btn-primary"
 									>
-										{showPasswordForm ? "Cancel" : "Change Password"}
+										Edit Profile
 									</button>
-								)}
-							</div>
+									{profile?.provider !== "google" && (
+										<button
+											onClick={() => setShowPasswordForm(!showPasswordForm)}
+											className="btn-password btn-secondary"
+										>
+											{showPasswordForm ? "Cancel" : "Change Password"}
+										</button>
+									)}
+								</div>
 							</div>
 						) : (
 							<form onSubmit={handleSaveProfile} className="profile-form">
@@ -306,22 +309,22 @@ export default function Profile() {
 									/>
 								</label>
 
-							<div className="form-actions">
-								<button
-									type="submit"
-									disabled={isUpdating}
-									className="btn-save btn-primary"
-								>
-									{isUpdating ? "Saving..." : "Save Changes"}
-								</button>
-								<button
-									type="button"
-									onClick={() => setIsEditing(false)}
-									className="btn-cancel btn-ghost"
-								>
-									Cancel
-								</button>
-							</div>
+								<div className="form-actions">
+									<button
+										type="submit"
+										disabled={isUpdating}
+										className="btn-save btn-primary"
+									>
+										{isUpdating ? "Saving..." : "Save Changes"}
+									</button>
+									<button
+										type="button"
+										onClick={() => setIsEditing(false)}
+										className="btn-cancel btn-ghost"
+									>
+										Cancel
+									</button>
+								</div>
 							</form>
 						)}
 
@@ -363,22 +366,22 @@ export default function Profile() {
 									/>
 								</label>
 
-							<div className="form-actions">
-								<button
-									type="submit"
-									disabled={isChangingPassword}
-									className="btn-save btn-primary"
-								>
-									{isChangingPassword ? "Changing..." : "Change Password"}
-								</button>
-								<button
-									type="button"
-									onClick={() => setShowPasswordForm(false)}
-									className="btn-cancel btn-ghost"
-								>
-									Cancel
-								</button>
-							</div>
+								<div className="form-actions">
+									<button
+										type="submit"
+										disabled={isChangingPassword}
+										className="btn-save btn-primary"
+									>
+										{isChangingPassword ? "Changing..." : "Change Password"}
+									</button>
+									<button
+										type="button"
+										onClick={() => setShowPasswordForm(false)}
+										className="btn-cancel btn-ghost"
+									>
+										Cancel
+									</button>
+								</div>
 							</form>
 						)}
 					</div>
@@ -395,89 +398,89 @@ export default function Profile() {
 							</p>
 						)}
 
-					{!reservationsLoading && activeReservations.length > 0 && (
-						<div className="reservations-list">
-							{activeReservations.map((res) => (
-								<div key={res._id} className="reservation-card">
-									<div className="card-header">
-										<h3>
-											Pod{" "}
-											{typeof res.roomId === "string"
-												? res.roomId
-												: res.roomId?.podId}
-										</h3>
-										<span className={`status-badge status-${res.status}`}>
-											{res.status}
-										</span>
-									</div>
-									<div className="card-details">
-										<div className="detail-row">
-											<label>Guest:</label>
-											<span>{res.guestName}</span>
+						{!reservationsLoading && activeReservations.length > 0 && (
+							<div className="reservations-list">
+								{activeReservations.map((res) => (
+									<div key={res._id} className="reservation-card">
+										<div className="card-header">
+											<h3>
+												Pod{" "}
+												{typeof res.roomId === "string"
+													? res.roomId
+													: res.roomId?.podId}
+											</h3>
+											<span className={`status-badge status-${res.status}`}>
+												{res.status}
+											</span>
 										</div>
-										<div className="detail-row">
-											<label>Email:</label>
-											<span>{res.guestEmail}</span>
-										</div>
-										{res.guestPhone && (
+										<div className="card-details">
 											<div className="detail-row">
-												<label>Phone:</label>
-												<span>{res.guestPhone}</span>
+												<label>Guest:</label>
+												<span>{res.guestName}</span>
+											</div>
+											<div className="detail-row">
+												<label>Email:</label>
+												<span>{res.guestEmail}</span>
+											</div>
+											{res.guestPhone && (
+												<div className="detail-row">
+													<label>Phone:</label>
+													<span>{res.guestPhone}</span>
+												</div>
+											)}
+											<div className="detail-row">
+												<label>Check-In:</label>
+												<span>
+													{new Date(res.checkInDate).toLocaleDateString()}
+												</span>
+											</div>
+											<div className="detail-row">
+												<label>Check-Out:</label>
+												<span>
+													{new Date(res.checkOutDate).toLocaleDateString()}
+												</span>
+											</div>
+											<div className="detail-row">
+												<label>Guests:</label>
+												<span>{res.numberOfGuests}</span>
+											</div>
+											<div className="detail-row">
+												<label>Total Price:</label>
+												<span>${res.totalPrice}</span>
+											</div>
+										</div>
+										{res.specialRequests && (
+											<div className="special-requests">
+												<label>Special Requests:</label>
+												<p>{res.specialRequests}</p>
 											</div>
 										)}
-										<div className="detail-row">
-											<label>Check-In:</label>
-											<span>
-												{new Date(res.checkInDate).toLocaleDateString()}
-											</span>
-										</div>
-										<div className="detail-row">
-											<label>Check-Out:</label>
-											<span>
-												{new Date(res.checkOutDate).toLocaleDateString()}
-											</span>
-										</div>
-										<div className="detail-row">
-											<label>Guests:</label>
-											<span>{res.numberOfGuests}</span>
-										</div>
-										<div className="detail-row">
-											<label>Total Price:</label>
-											<span>${res.totalPrice}</span>
-										</div>
+										{/* Action buttons for active reservations */}
+										{res.status !== "cancelled" &&
+											res.status !== "checked-out" && (
+												<div className="reservation-actions">
+													<button
+														onClick={() => handleOpenModifyModal(res)}
+														className="btn-modify btn-primary"
+														disabled={
+															res.status === "checked-in" || isModifying
+														}
+													>
+														Modify
+													</button>
+													<button
+														onClick={() => handleCancelReservation(res._id)}
+														className="btn-cancel-reservation btn-danger"
+														disabled={isCancelling}
+													>
+														Cancel Reservation
+													</button>
+												</div>
+											)}
 									</div>
-									{res.specialRequests && (
-										<div className="special-requests">
-											<label>Special Requests:</label>
-											<p>{res.specialRequests}</p>
-										</div>
-									)}
-									{/* Action buttons for active reservations */}
-									{res.status !== "cancelled" &&
-										res.status !== "checked-out" && (
-											<div className="reservation-actions">
-												<button
-													onClick={() => handleOpenModifyModal(res)}
-													className="btn-modify btn-primary"
-													disabled={
-														res.status === "checked-in" || isModifying
-													}
-												>
-													Modify
-												</button>
-												<button
-													onClick={() => handleCancelReservation(res._id)}
-													className="btn-cancel-reservation btn-danger"
-													disabled={isCancelling}
-												>
-													Cancel Reservation
-												</button>
-											</div>
-										)}
-								</div>
-							))}
-						</div>
-					)}
+								))}
+							</div>
+						)}
 					</div>
 				</div>
 
@@ -562,22 +565,22 @@ export default function Profile() {
 									</label>
 								</div>
 
-							<div className="modal-footer">
-								<button
-									type="submit"
-									disabled={isModifying}
-									className="btn-save btn-primary"
-								>
-									{isModifying ? "Saving..." : "Save Changes"}
-								</button>
-								<button
-									type="button"
-									onClick={handleCloseModifyModal}
-									className="btn-cancel btn-ghost"
-								>
-									Cancel
-								</button>
-							</div>
+								<div className="modal-footer">
+									<button
+										type="submit"
+										disabled={isModifying}
+										className="btn-save btn-primary"
+									>
+										{isModifying ? "Saving..." : "Save Changes"}
+									</button>
+									<button
+										type="button"
+										onClick={handleCloseModifyModal}
+										className="btn-cancel btn-ghost"
+									>
+										Cancel
+									</button>
+								</div>
 							</form>
 						</div>
 					</div>

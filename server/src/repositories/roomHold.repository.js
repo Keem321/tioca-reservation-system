@@ -32,7 +32,7 @@ class RoomHoldRepository {
 	 */
 	async findActiveHolds(roomId, checkIn, checkOut, excludeSessionId = null) {
 		const now = new Date();
-		
+
 		const query = {
 			roomId,
 			converted: false,
@@ -60,7 +60,7 @@ class RoomHoldRepository {
 	 */
 	async findBySessionId(sessionId, activeOnly = true) {
 		const query = { sessionId };
-		
+
 		if (activeOnly) {
 			const now = new Date();
 			query.converted = false;

@@ -35,7 +35,12 @@ export interface ConfirmPaymentResponse {
 	reservation: {
 		_id: string;
 		paymentStatus: "paid" | "partial" | "unpaid" | "refunded";
-		status: "pending" | "confirmed" | "checked-in" | "checked-out" | "cancelled";
+		status:
+			| "pending"
+			| "confirmed"
+			| "checked-in"
+			| "checked-out"
+			| "cancelled";
 	};
 	chargeId?: string;
 	message?: string;
@@ -49,4 +54,3 @@ export interface PaymentError {
 	code?: string;
 	type?: string;
 }
-

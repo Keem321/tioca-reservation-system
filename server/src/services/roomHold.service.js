@@ -126,7 +126,9 @@ class RoomHoldService {
 		// If hold was already converted, it's okay - reservation was created successfully
 		// Just return the hold without extending (payment can proceed)
 		if (hold.converted) {
-			console.log('[Hold] Hold already converted to reservation - skipping extension');
+			console.log(
+				"[Hold] Hold already converted to reservation - skipping extension"
+			);
 			return hold;
 		}
 

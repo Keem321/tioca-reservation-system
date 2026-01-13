@@ -9,7 +9,11 @@ import {
 	useCreateHoldMutation,
 	useReleaseHoldMutation,
 } from "../features/holdsApi";
-import { setPendingReservation, resetBooking, setHoldId } from "../features/bookingSlice";
+import {
+	setPendingReservation,
+	resetBooking,
+	setHoldId,
+} from "../features/bookingSlice";
 import type { RootState } from "../store";
 import type { ReservationFormData } from "../types/reservation";
 import Navbar from "../components/landing/Navbar";
@@ -132,7 +136,8 @@ const BookingConfirmation: React.FC = () => {
 			} catch (err: any) {
 				if (mounted) {
 					const errorMessage =
-						err?.data?.error || "Failed to reserve this room. It may no longer be available.";
+						err?.data?.error ||
+						"Failed to reserve this room. It may no longer be available.";
 					setHoldError(errorMessage);
 				}
 			} finally {
@@ -221,7 +226,10 @@ const BookingConfirmation: React.FC = () => {
 		} catch (err: any) {
 			console.error("Failed to create reservation:", err);
 			// Show user-friendly error message
-			const errorMessage = err?.data?.error || err?.message || "Failed to create reservation. Please try again.";
+			const errorMessage =
+				err?.data?.error ||
+				err?.message ||
+				"Failed to create reservation. Please try again.";
 			setTimeError(errorMessage);
 		}
 	};
@@ -264,71 +272,81 @@ const BookingConfirmation: React.FC = () => {
 			<Navbar />
 			<div className="booking-confirmation">
 				<div className="booking-confirmation__container">
-				<div className="booking-confirmation__header">
-					<h1>Confirm Your Booking</h1>
-					<p className="booking-confirmation__subtitle">
-						Please review your reservation details before proceeding to
-						payment
-					</p>
-				</div>
-
-				{/* Hold status messages */}
-				{isCreatingHold && (
-					<div className="booking-confirmation__notice" style={{ 
-						background: "rgba(168, 100, 52, 0.1)", 
-						padding: "1rem", 
-						borderRadius: "8px",
-						marginBottom: "1rem"
-					}}>
-						<p style={{ margin: 0, textAlign: "center" }}>
-							🔒 Reserving this room for you...
+					<div className="booking-confirmation__header">
+						<h1>Confirm Your Booking</h1>
+						<p className="booking-confirmation__subtitle">
+							Please review your reservation details before proceeding to
+							payment
 						</p>
 					</div>
-				)}
 
-				{holdError && (
-					<div className="booking-confirmation__error" style={{ 
-						background: "rgba(220, 53, 69, 0.1)", 
-						border: "2px solid #dc3545",
-						padding: "1rem", 
-						borderRadius: "8px",
-						marginBottom: "1rem"
-					}}>
-						<h3 style={{ marginTop: 0 }}>⚠️ Room Unavailable</h3>
-						<p style={{ marginBottom: 0 }}>{holdError}</p>
-						<button
-							onClick={() => navigate("/booking")}
+					{/* Hold status messages */}
+					{isCreatingHold && (
+						<div
+							className="booking-confirmation__notice"
 							style={{
-								marginTop: "1rem",
-								padding: "0.5rem 1rem",
-								background: "var(--color-primary)",
-								color: "white",
-								border: "none",
+								background: "rgba(168, 100, 52, 0.1)",
+								padding: "1rem",
 								borderRadius: "8px",
-								cursor: "pointer"
+								marginBottom: "1rem",
 							}}
 						>
-							Search for Other Rooms
-						</button>
-					</div>
-				)}
+							<p style={{ margin: 0, textAlign: "center" }}>
+								🔒 Reserving this room for you...
+							</p>
+						</div>
+					)}
 
-				{holdId && !isCreatingHold && !holdError && (
-					<div className="booking-confirmation__notice" style={{ 
-						background: "rgba(40, 167, 69, 0.1)", 
-						border: "2px solid #28a745",
-						padding: "1rem", 
-						borderRadius: "8px",
-						marginBottom: "1rem",
-						textAlign: "center"
-					}}>
-						<p style={{ margin: 0 }}>
-							✅ <strong>Room Reserved!</strong> This room is held for you for the next 5 minutes.
-						</p>
-					</div>
-				)}
+					{holdError && (
+						<div
+							className="booking-confirmation__error"
+							style={{
+								background: "rgba(220, 53, 69, 0.1)",
+								border: "2px solid #dc3545",
+								padding: "1rem",
+								borderRadius: "8px",
+								marginBottom: "1rem",
+							}}
+						>
+							<h3 style={{ marginTop: 0 }}>⚠️ Room Unavailable</h3>
+							<p style={{ marginBottom: 0 }}>{holdError}</p>
+							<button
+								onClick={() => navigate("/booking")}
+								style={{
+									marginTop: "1rem",
+									padding: "0.5rem 1rem",
+									background: "var(--color-primary)",
+									color: "white",
+									border: "none",
+									borderRadius: "8px",
+									cursor: "pointer",
+								}}
+							>
+								Search for Other Rooms
+							</button>
+						</div>
+					)}
 
-				{/* Guest Information Form */}
+					{holdId && !isCreatingHold && !holdError && (
+						<div
+							className="booking-confirmation__notice"
+							style={{
+								background: "rgba(40, 167, 69, 0.1)",
+								border: "2px solid #28a745",
+								padding: "1rem",
+								borderRadius: "8px",
+								marginBottom: "1rem",
+								textAlign: "center",
+							}}
+						>
+							<p style={{ margin: 0 }}>
+								✅ <strong>Room Reserved!</strong> This room is held for you for
+								the next 5 minutes.
+							</p>
+						</div>
+					)}
+
+					{/* Guest Information Form */}
 					<div className="booking-confirmation__section">
 						<h2>Guest Information</h2>
 						<div className="guest-form">
@@ -539,23 +557,27 @@ const BookingConfirmation: React.FC = () => {
 						>
 							Cancel
 						</button>
-					<button
-						onClick={handleProceedToPayment}
-						className="booking-confirmation__button booking-confirmation__button--primary"
-						disabled={
-							isLoading ||
-							!!error ||
-							!guestName ||
-							!guestEmail ||
-							!checkInTime ||
-							!checkOutTime ||
-							isCreatingHold ||
-							!!holdError ||
-							!holdId
-						}
-					>
-						{isLoading ? "Creating Reservation..." : isCreatingHold ? "Reserving Room..." : "Proceed to Payment"}
-					</button>
+						<button
+							onClick={handleProceedToPayment}
+							className="booking-confirmation__button booking-confirmation__button--primary"
+							disabled={
+								isLoading ||
+								!!error ||
+								!guestName ||
+								!guestEmail ||
+								!checkInTime ||
+								!checkOutTime ||
+								isCreatingHold ||
+								!!holdError ||
+								!holdId
+							}
+						>
+							{isLoading
+								? "Creating Reservation..."
+								: isCreatingHold
+								? "Reserving Room..."
+								: "Proceed to Payment"}
+						</button>
 					</div>
 					{(!guestName || !guestEmail || !checkInTime || !checkOutTime) && (
 						<p

@@ -2,7 +2,7 @@ import RoomHoldService from "./roomHold.service.js";
 
 /**
  * Background Cleanup Service for Expired Holds
- * 
+ *
  * This service runs periodically to clean up expired holds.
  * Note: MongoDB TTL index on holdExpiry field also handles automatic cleanup,
  * but this service provides additional manual cleanup and logging.
@@ -45,7 +45,7 @@ class HoldCleanupService {
 		}
 
 		console.log("Stopping hold cleanup service...");
-		
+
 		if (this.intervalId) {
 			clearInterval(this.intervalId);
 			this.intervalId = null;
@@ -61,10 +61,12 @@ class HoldCleanupService {
 	async runCleanup() {
 		try {
 			const result = await RoomHoldService.cleanupExpiredHolds();
-			
+
 			if (result.deletedCount > 0) {
 				console.log(
-					`[Hold Cleanup] Cleaned up ${result.deletedCount} expired hold(s) at ${new Date().toISOString()}`
+					`[Hold Cleanup] Cleaned up ${
+						result.deletedCount
+					} expired hold(s) at ${new Date().toISOString()}`
 				);
 			}
 		} catch (error) {

@@ -17,7 +17,7 @@ const INACTIVITY_TIMEOUT = 30 * 1000; // 10 minutes in milliseconds
 
 /**
  * Middleware to track and enforce session activity timeout
- * 
+ *
  * @param {object} req - Express request object
  * @param {object} res - Express response object
  * @param {function} next - Express next middleware function
@@ -25,17 +25,17 @@ const INACTIVITY_TIMEOUT = 30 * 1000; // 10 minutes in milliseconds
 export const sessionActivityMiddleware = (req, res, next) => {
 	// Skip public endpoints (booking searches should work for everyone)
 	const publicEndpoints = [
-		'/api/rooms/available',
-		'/api/rooms/recommended',
-		'/api/rooms/',
-		'/api/rooms',
+		"/api/rooms/available",
+		"/api/rooms/recommended",
+		"/api/rooms/",
+		"/api/rooms",
 	];
-	
+
 	// Check if current path is public
-	const isPublicEndpoint = publicEndpoints.some(endpoint => 
-		req.path === endpoint || req.originalUrl.startsWith(endpoint)
+	const isPublicEndpoint = publicEndpoints.some(
+		(endpoint) => req.path === endpoint || req.originalUrl.startsWith(endpoint)
 	);
-	
+
 	if (isPublicEndpoint) {
 		return next();
 	}
@@ -54,26 +54,30 @@ export const sessionActivityMiddleware = (req, res, next) => {
 		// If inactive for more than 10 minutes, destroy session
 		if (timeSinceLastActivity > INACTIVITY_TIMEOUT) {
 			console.log(
-				`[Session Activity] User ${req.user?.id || 'unknown'} session expired due to inactivity (${Math.floor(timeSinceLastActivity / 1000)}s)`
+				`[Session Activity] User ${
+					req.user?.id || "unknown"
+				} session expired due to inactivity (${Math.floor(
+					timeSinceLastActivity / 1000
+				)}s)`
 			);
 
 			// Destroy the session
 			return req.session.destroy((err) => {
 				if (err) {
-					console.error('[Session Activity] Error destroying session:', err);
+					console.error("[Session Activity] Error destroying session:", err);
 				}
 
 				// Clear the session cookie
-				res.clearCookie('tioca.sid', {
+				res.clearCookie("tioca.sid", {
 					httpOnly: true,
-					sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-					secure: process.env.NODE_ENV === 'production',
+					sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+					secure: process.env.NODE_ENV === "production",
 				});
 
 				// Return 401 Unauthorized
 				return res.status(401).json({
-					error: 'Session expired due to inactivity',
-					code: 'SESSION_TIMEOUT',
+					error: "Session expired due to inactivity",
+					code: "SESSION_TIMEOUT",
 				});
 			});
 		}
@@ -89,12 +93,16 @@ export const sessionActivityMiddleware = (req, res, next) => {
 /**
  * Initialize session activity tracking for a new session
  * Call this after successful login/authentication
- * 
+ *
  * @param {object} req - Express request object with session
  */
 export const initializeSessionActivity = (req) => {
 	if (req.session) {
 		req.session.lastActivity = Date.now();
-		console.log(`[Session Activity] Initialized activity tracking for user ${req.user?.id || 'unknown'}`);
+		console.log(
+			`[Session Activity] Initialized activity tracking for user ${
+				req.user?.id || "unknown"
+			}`
+		);
 	}
 };

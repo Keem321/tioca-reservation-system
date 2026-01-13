@@ -5,7 +5,7 @@ const router = Router();
 
 /**
  * Room Hold Routes
- * 
+ *
  * These routes handle temporary room holds during the booking process
  * to prevent overbooking.
  */
