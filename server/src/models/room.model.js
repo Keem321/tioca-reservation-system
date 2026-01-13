@@ -14,19 +14,24 @@ const roomSchema = new Schema(
 			],
 			required: true,
 		},
+		// Reference to the Offering that defines this room's pricing and details
+		offeringId: {
+			type: Schema.Types.ObjectId,
+			ref: "Offering",
+			required: true,
+		},
 		floor: {
 			type: String,
 			enum: ["women-only", "men-only", "couples", "business"],
 			required: true,
 		},
-		pricePerNight: { type: Number, required: true, min: 0 },
 		description: { type: String },
 		dimensions: {
 			length: { type: Number }, // in inches
 			width: { type: Number }, // in inches
 			height: { type: Number }, // in inches
 		},
-		amenities: [{ type: String }],
+		amenities: [{ type: String }], // Amenity names/descriptions
 		images: [{ type: String }],
 		status: {
 			type: String,

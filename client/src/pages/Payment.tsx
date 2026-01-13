@@ -65,7 +65,7 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 							"Stripe failed to initialize. This may be due to an ad blocker blocking Stripe requests. Please disable ad blockers for this site and refresh the page."
 						);
 					}
-				} catch (err) {
+				} catch {
 					setStripeLoadError(
 						"Stripe failed to load. This may be due to an ad blocker blocking Stripe requests. Please disable ad blockers for this site and refresh the page."
 					);
@@ -81,8 +81,8 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 		}
 	}, [stripe]);
 
-	// Calculate total amount in cents
-	const amountInCents = Math.round(reservation.totalPrice * 100);
+	// Calculate total amount in cents (totalPrice is already in cents from backend)
+	const amountInCents = Math.round(reservation.totalPrice);
 
 	// Create payment intent when component mounts
 	useEffect(() => {

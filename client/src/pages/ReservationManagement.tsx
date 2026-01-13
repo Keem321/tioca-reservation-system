@@ -47,6 +47,8 @@ export default function ReservationManagement() {
 
 	const [formData, setFormData] = useState<ReservationFormData>({
 		roomId: "",
+		offeringId: "",
+		selectedAmenities: [],
 		userId: undefined,
 		guestName: "",
 		guestEmail: "",
@@ -145,6 +147,9 @@ export default function ReservationManagement() {
 				typeof reservation.roomId === "string"
 					? reservation.roomId
 					: reservation.roomId._id,
+			offeringId: reservation.offeringId || "",
+			selectedAmenities:
+				reservation.selectedAmenities?.map((a) => a.offeringId) || [],
 			userId:
 				typeof reservation.userId === "string"
 					? reservation.userId
@@ -260,6 +265,8 @@ export default function ReservationManagement() {
 	const resetForm = () => {
 		setFormData({
 			roomId: "",
+			offeringId: "",
+			selectedAmenities: [],
 			userId: undefined,
 			guestName: "",
 			guestEmail: "",
@@ -411,8 +418,11 @@ export default function ReservationManagement() {
 										<option value="">Select Room</option>
 										{getAvailableRooms().map((room: Room) => (
 											<option key={room._id} value={room._id}>
-												Pod {room.podId} - {room.quality} ({room.floor}) ($
-												{room.pricePerNight}/night)
+												Pod {room.podId} - {room.quality} ({room.floor}) ($ $
+												{room.offering?.basePrice
+													? (room.offering.basePrice / 100).toFixed(2)
+													: "0.00"}
+												/night)
 											</option>
 										))}
 									</select>

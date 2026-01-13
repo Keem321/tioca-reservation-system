@@ -11,6 +11,12 @@ const userSchema = new mongoose.Schema({
 		enum: ["user", "manager", "admin"],
 		default: "user",
 	},
+	// Currency preference for displaying prices
+	currencyPreference: {
+		type: String,
+		enum: ["USD", "JPY"],
+		default: "USD",
+	},
 	createdAt: { type: Date, default: Date.now },
 	lastLogin: { type: Date },
 });

@@ -54,7 +54,6 @@ const PaymentSuccess: React.FC = () => {
 				podId: reservation.roomId.podId,
 				quality: reservation.roomId.quality,
 				floor: reservation.roomId.floor,
-				pricePerNight: reservation.roomId.pricePerNight,
 			};
 		}
 		return null;

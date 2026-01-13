@@ -74,8 +74,8 @@ class PaymentService {
 			throw new Error("Reservation is already paid");
 		}
 
-		// Validate amount matches reservation total
-		const expectedAmount = Math.round(reservation.totalPrice * 100);
+		// Validate amount matches reservation total (totalPrice is already in cents)
+		const expectedAmount = reservation.totalPrice;
 		if (amount !== expectedAmount) {
 			throw new Error(
 				`Amount mismatch. Expected ${expectedAmount} cents, got ${amount}`

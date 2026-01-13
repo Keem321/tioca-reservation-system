@@ -68,7 +68,7 @@ export default function RoomManagement() {
 		podId: "", // Will be auto-generated on submit
 		quality: "classic",
 		floor: "men-only", // Floor is now the zone
-		pricePerNight: 0,
+		offeringId: "",
 		description: "",
 		amenities: [],
 		status: "available",
@@ -237,7 +237,7 @@ export default function RoomManagement() {
 			podId: room.podId,
 			quality: room.quality,
 			floor: room.floor,
-			pricePerNight: room.pricePerNight,
+			offeringId: room.offeringId || "",
 			description: room.description || "",
 			amenities: room.amenities || [],
 			status: room.status,
@@ -273,7 +273,7 @@ export default function RoomManagement() {
 			podId: "",
 			quality: "classic",
 			floor: "men-only",
-			pricePerNight: 0,
+			offeringId: "",
 			description: "",
 			amenities: [],
 			status: "available",
@@ -697,7 +697,12 @@ export default function RoomManagement() {
 												</span>
 											</td>
 											<td>{room.capacity}</td>
-											<td>${room.pricePerNight}</td>
+											<td>
+												$
+												{room.offering?.basePrice
+													? (room.offering.basePrice / 100).toFixed(2)
+													: "0.00"}
+											</td>
 											<td>
 												<select
 													value={room.status}

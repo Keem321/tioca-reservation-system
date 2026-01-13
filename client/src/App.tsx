@@ -72,14 +72,6 @@ function App() {
 	return (
 		<Router>
 			<div className="App">
-				{/* Debug: Always show modal state in console */}
-				{console.log(
-					"[App Render] showWarning =",
-					showWarning,
-					"remainingSeconds =",
-					remainingSeconds
-				)}
-
 				{/* Session timeout warning modal */}
 				{showWarning && (
 					<SessionTimeoutWarning

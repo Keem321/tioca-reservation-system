@@ -1,22 +1,50 @@
 import RoomRepository from "../repositories/room.repository.js";
+import Offering from "../models/offering.model.js";
 
 class RoomService {
 	/**
-	 * Get all rooms
+	 * Get all rooms with offering details populated
 	 * @param {Object} filter - Optional filter criteria
 	 * @returns {Promise<Array>}
 	 */
 	async getAllRooms(filter = {}) {
-		return await RoomRepository.findAll(filter);
+		const rooms = await RoomRepository.findAll(filter);
+		return await this._populateOfferingData(rooms);
 	}
 
 	/**
-	 * Get a single room by ID
+	 * Populate offering data for room(s)
+	 * @param {Object|Array} rooms - Room(s) to populate
+	 * @returns {Promise<Object|Array>}
+	 */
+	async _populateOfferingData(rooms) {
+		if (Array.isArray(rooms)) {
+			for (let i = 0; i < rooms.length; i++) {
+				if (rooms[i].offeringId) {
+					const offering = await Offering.findById(rooms[i].offeringId);
+					rooms[i] = rooms[i].toObject ? rooms[i].toObject() : rooms[i];
+					rooms[i].offering = offering;
+				}
+			}
+		} else {
+			if (rooms.offeringId) {
+				const offering = await Offering.findById(rooms.offeringId);
+				rooms = rooms.toObject ? rooms.toObject() : rooms;
+				rooms.offering = offering;
+			}
+		}
+		return rooms;
+	}
+
+	/**
+	 * Get a single room by ID with offering details
 	 * @param {string} id - Room ID
 	 * @returns {Promise<Object|null>}
 	 */
 	async getRoomById(id) {
-		return await RoomRepository.findById(id);
+		const room = await RoomRepository.findById(id);
+		if (!room) return null;
+		return await this._populateOfferingData(room);
 	}
 
 	/**
@@ -26,12 +54,10 @@ class RoomService {
 	 */
 	async createRoom(roomData) {
 		// Validate required fields
-		const { quality, floor, pricePerNight } = roomData;
+		const { quality, floor, offeringId } = roomData;
 
-		if (!quality || !floor || pricePerNight === undefined) {
-			throw new Error(
-				"Missing required fields (quality, floor, pricePerNight)"
-			);
+		if (!quality || !floor || !offeringId) {
+			throw new Error("Missing required fields (quality, floor, offeringId)");
 		}
 
 		// Validate floor is a valid zone
@@ -42,9 +68,10 @@ class RoomService {
 			);
 		}
 
-		// Validate price is non-negative
-		if (pricePerNight < 0) {
-			throw new Error("Price per night cannot be negative");
+		// Validate offering exists
+		const offering = await Offering.findById(offeringId);
+		if (!offering) {
+			throw new Error("Invalid offering ID");
 		}
 
 		// Auto-generate pod ID if not provided
@@ -53,7 +80,8 @@ class RoomService {
 		}
 
 		// Create the room
-		return await RoomRepository.create(roomData);
+		const room = await RoomRepository.create(roomData);
+		return await this._populateOfferingData(room);
 	}
 
 	/**
@@ -69,19 +97,19 @@ class RoomService {
 		delete updateData.updatedAt;
 		delete updateData.capacity; // Capacity is auto-calculated based on floor
 
-		// Validate price if being updated
-		if (
-			updateData.pricePerNight !== undefined &&
-			updateData.pricePerNight < 0
-		) {
-			throw new Error("Price per night cannot be negative");
+		// Validate offering if being updated
+		if (updateData.offeringId) {
+			const offering = await Offering.findById(updateData.offeringId);
+			if (!offering) {
+				throw new Error("Invalid offering ID");
+			}
 		}
 
 		const room = await RoomRepository.update(id, updateData);
 		if (!room) {
 			throw new Error("Room not found");
 		}
-		return room;
+		return await this._populateOfferingData(room);
 	}
 
 	/**
@@ -142,13 +170,14 @@ class RoomService {
 			throw new Error("Check-out date must be after check-in date");
 		}
 
-		return await RoomRepository.findAvailableRooms(
+		const rooms = await RoomRepository.findAvailableRooms(
 			checkIn,
 			checkOut,
 			floor,
 			quality,
 			excludeSessionId
 		);
+		return await this._populateOfferingData(rooms);
 	}
 
 	/**
@@ -175,13 +204,14 @@ class RoomService {
 			throw new Error("Check-out date must be after check-in date");
 		}
 
-		return await RoomRepository.findRecommendedRooms(
+		const rooms = await RoomRepository.findRecommendedRooms(
 			checkIn,
 			checkOut,
 			floor,
 			quality,
 			excludeSessionId
 		);
+		return await this._populateOfferingData(rooms);
 	}
 }
 

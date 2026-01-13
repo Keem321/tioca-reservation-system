@@ -35,10 +35,10 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 	const [remainingSeconds, setRemainingSeconds] = useState(0);
 
 	// Use refs to avoid stale closures
-	const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
-	const warningTimerRef = useRef<NodeJS.Timeout | null>(null);
-	const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
-	const lastActivityRef = useRef<number>(Date.now());
+	const inactivityTimerRef = useRef<number | null>(null);
+	const warningTimerRef = useRef<number | null>(null);
+	const countdownIntervalRef = useRef<number | null>(null);
+	const lastActivityRef = useRef<number>(0);
 	const warningStartTimeRef = useRef<number | null>(null);
 
 	// Cleanup all timers

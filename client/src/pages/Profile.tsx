@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useLayoutEffect, useRef } from "react";
 import Navbar from "../components/landing/Navbar";
 import {
 	useGetProfileQuery,
@@ -76,16 +76,16 @@ export default function Profile() {
 	// Get rooms data for capacity validation
 	const { data: rooms = [] } = useGetRoomsQuery();
 
-	// Initialize edit form when profile loads - only once
-	useEffect(() => {
-		if (profile && !hasInitialized.current) {
+	// Initialize edit form when profile loads
+	useLayoutEffect(() => {
+		if (profile && editFormData.name === "" && !hasInitialized.current) {
+			hasInitialized.current = true;
 			setEditFormData({
 				name: profile.name || "",
 				email: profile.email || "",
 			});
-			hasInitialized.current = true;
 		}
-	}, [profile]);
+	}, [profile, editFormData.name]);
 
 	const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
