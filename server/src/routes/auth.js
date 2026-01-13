@@ -27,10 +27,14 @@ authRouter.get("/google/callback", (req, res, next) => {
 			}
 			req.session.passport = { user: user.id };
 
-			console.log(`OAuth callback: attached user ${user.id} to session`);
-			const clientHome = process.env.CLIENT_HOME_URL || "http://localhost:5173";
-			const redirectPath = req.query.redirect || "/";
-			return res.redirect(clientHome + redirectPath);
+			// Explicitly save session before redirecting
+			req.session.save((saveErr) => {
+				if (saveErr) return next(saveErr);
+				const clientHome =
+					process.env.CLIENT_HOME_URL || "http://localhost:5173";
+				const redirectPath = req.query.redirect || "/";
+				return res.redirect(clientHome + redirectPath);
+			});
 		}
 	)(req, res, next);
 });
@@ -62,7 +66,7 @@ authRouter.post("/logout", (req, res) => {
 				return res.status(500).json({ message: "Error logging out" });
 			}
 			req.session?.destroy((destroyErr) => {
-				res.clearCookie("connect.sid");
+				res.clearCookie("tioca.sid");
 				if (destroyErr)
 					return res.status(500).json({ message: "Error logging out" });
 				res.json({ message: "Logged out" });
@@ -71,7 +75,7 @@ authRouter.post("/logout", (req, res) => {
 	}
 	// Fallback: no passport logout available
 	req.session?.destroy((err) => {
-		res.clearCookie("connect.sid");
+		res.clearCookie("tioca.sid");
 		if (err) return res.status(500).json({ message: "Error logging out" });
 		res.json({ message: "Logged out" });
 	});
@@ -106,13 +110,17 @@ authRouter.post("/login", (req, res, next) => {
 		}
 		req.login(user, (loginErr) => {
 			if (loginErr) return next(loginErr);
-			const safeUser = {
-				id: user._id,
-				email: user.email,
-				name: user.name,
-				role: user.role || "user",
-			};
-			return res.json({ message: "Logged in", user: safeUser });
+			// Explicitly save session to store before responding
+			req.session.save((saveErr) => {
+				if (saveErr) return next(saveErr);
+				const safeUser = {
+					id: user._id,
+					email: user.email,
+					name: user.name,
+					role: user.role || "user",
+				};
+				return res.json({ message: "Logged in", user: safeUser });
+			});
 		});
 	})(req, res, next);
 });

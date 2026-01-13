@@ -23,10 +23,10 @@ apiRouter.use("/reservations", reservationRouter);
 apiRouter.use("/user", userRouter);
 apiRouter.use("/payments", paymentRouter);
 apiRouter.use("/holds", holdRouter);
+apiRouter.use("/auth", authRouter); // Auth routes now under /api/auth
 
-// Public router (for non-API routes)
+// Public router (for non-API routes like health check)
 const publicRouter = Router();
-publicRouter.use("/auth", authRouter);
 publicRouter.get("/open", (req, res) => {
 	res.status(200).json({ message: "This is an open route." });
 });

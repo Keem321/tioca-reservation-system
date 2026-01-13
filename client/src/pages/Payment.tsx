@@ -33,7 +33,9 @@ const stripePromise = STRIPE_PUBLISHABLE_KEY
  * Payment Form Component
  * Handles the actual payment form with Stripe Elements
  */
-const PaymentForm: React.FC<{ reservation: Reservation }> = ({ reservation }) => {
+const PaymentForm: React.FC<{ reservation: Reservation }> = ({
+	reservation,
+}) => {
 	const stripe = useStripe();
 	const elements = useElements();
 	const navigate = useNavigate();
@@ -95,7 +97,8 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({ reservation }) =>
 			} catch (err) {
 				const error = err as { data?: { error?: string } };
 				setError(
-					error?.data?.error || "Failed to initialize payment. Please try again."
+					error?.data?.error ||
+						"Failed to initialize payment. Please try again."
 				);
 			}
 		};
@@ -133,14 +136,12 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({ reservation }) =>
 
 		try {
 			// Confirm payment with Stripe
-			const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
-				paymentIntentData.clientSecret,
-				{
+			const { error: stripeError, paymentIntent } =
+				await stripe.confirmCardPayment(paymentIntentData.clientSecret, {
 					payment_method: {
 						card: cardElement,
 					},
-				}
-			);
+				});
 
 			if (stripeError) {
 				setError(stripeError.message || "Payment failed");
@@ -176,7 +177,7 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({ reservation }) =>
 		} catch (err) {
 			const error = err as { data?: { error?: string }; message?: string };
 			const errorMessage = error?.data?.error || error?.message || "";
-			
+
 			// Check if it's a network/blocked error
 			if (
 				errorMessage.includes("Failed to fetch") ||
@@ -189,7 +190,8 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({ reservation }) =>
 				);
 			} else {
 				setError(
-					errorMessage || "An error occurred during payment processing. Please try again."
+					errorMessage ||
+						"An error occurred during payment processing. Please try again."
 				);
 			}
 			setIsProcessing(false);
@@ -262,11 +264,21 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({ reservation }) =>
 					<h3>Payment Error</h3>
 					<p>{error}</p>
 					{error.includes("ad blocker") && (
-						<div style={{ marginTop: "1rem", padding: "1rem", background: "rgba(168, 100, 52, 0.1)", borderRadius: "8px" }}>
+						<div
+							style={{
+								marginTop: "1rem",
+								padding: "1rem",
+								background: "rgba(168, 100, 52, 0.1)",
+								borderRadius: "8px",
+							}}
+						>
 							<strong>Quick Fix:</strong>
 							<ol style={{ marginTop: "0.5rem", paddingLeft: "1.5rem" }}>
 								<li>Disable your ad blocker for localhost</li>
-								<li>Or whitelist <code>*.stripe.com</code> and <code>*.stripejs.com</code></li>
+								<li>
+									Or whitelist <code>*.stripe.com</code> and{" "}
+									<code>*.stripejs.com</code>
+								</li>
 								<li>Refresh the page and try again</li>
 							</ol>
 						</div>
@@ -300,8 +312,10 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({ reservation }) =>
 const Payment: React.FC = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
-	const dispatch = useDispatch();
-	const { pendingReservation, holdId } = useSelector((state: RootState) => state.booking);
+	// const dispatch = useDispatch();
+	const { pendingReservation, holdId } = useSelector(
+		(state: RootState) => state.booking
+	);
 
 	// Get reservation from location state or Redux store
 	const reservation: Reservation | null =
@@ -313,11 +327,13 @@ const Payment: React.FC = () => {
 	// - The room is already reserved (reservation status: "pending")
 	// - If payment succeeds → reservation becomes "confirmed"
 	// - If payment fails → reservation stays "pending" (can be cleaned up later)
-	
+
 	// Log for debugging
 	useEffect(() => {
 		if (holdId) {
-			console.log('[Payment] Reservation created, hold already converted. Payment processing...');
+			console.log(
+				"[Payment] Reservation created, hold already converted. Payment processing..."
+			);
 		}
 		// No cleanup needed - hold is already converted and linked to reservation
 	}, [holdId]);
@@ -395,19 +411,29 @@ const Payment: React.FC = () => {
 					</div>
 
 					{/* Ad Blocker Warning */}
-					<div className="payment-page__adblock-warning" style={{
-						background: "rgba(168, 100, 52, 0.15)",
-						border: "2px solid var(--color-primary)",
-						borderRadius: "12px",
-						padding: "1rem 1.5rem",
-						marginBottom: "2rem",
-						textAlign: "center"
-					}}>
+					<div
+						className="payment-page__adblock-warning"
+						style={{
+							background: "rgba(168, 100, 52, 0.15)",
+							border: "2px solid var(--color-primary)",
+							borderRadius: "12px",
+							padding: "1rem 1.5rem",
+							marginBottom: "2rem",
+							textAlign: "center",
+						}}
+					>
 						<strong style={{ color: "var(--color-text-primary)" }}>
 							⚠️ Important: Ad blockers may prevent payment processing
 						</strong>
-						<p style={{ marginTop: "0.5rem", fontSize: "0.9rem", color: "var(--color-text-secondary)" }}>
-							If you see errors when submitting, please disable your ad blocker for this site or whitelist <code>*.stripe.com</code>
+						<p
+							style={{
+								marginTop: "0.5rem",
+								fontSize: "0.9rem",
+								color: "var(--color-text-secondary)",
+							}}
+						>
+							If you see errors when submitting, please disable your ad blocker
+							for this site or whitelist <code>*.stripe.com</code>
 						</p>
 					</div>
 
@@ -477,4 +503,3 @@ const Payment: React.FC = () => {
 };
 
 export default Payment;
-
