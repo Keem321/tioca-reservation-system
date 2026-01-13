@@ -25,7 +25,7 @@ const Dashboard: React.FC = () => {
 		const check = async () => {
 			try {
 				const apiUrl = import.meta.env.VITE_API_URL || "";
-				const res = await fetch(`${apiUrl}/auth/loggedin`, {
+				const res = await fetch(`${apiUrl}/api/auth/loggedin`, {
 					credentials: "include",
 				});
 				if (res.ok) {
@@ -69,7 +69,7 @@ const Dashboard: React.FC = () => {
 							onClick={async () => {
 								try {
 									const apiUrl = import.meta.env.VITE_API_URL || "";
-									await fetch(`${apiUrl}/auth/logout`, {
+									await fetch(`${apiUrl}/api/auth/logout`, {
 										method: "POST",
 										credentials: "include",
 									});
@@ -88,7 +88,7 @@ const Dashboard: React.FC = () => {
 						const apiUrl = import.meta.env.VITE_API_URL || "";
 						return (
 							<a
-								href={`${apiUrl}/auth/google`}
+								href={`${apiUrl}/api/auth/google`}
 								style={{
 									color: "var(--tioca-blue)",
 									textDecoration: "none",

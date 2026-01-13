@@ -6,6 +6,7 @@
 import express, { json } from "express";
 // must setup sessions when using passport OAuth strategies by default -- it can be done statelessly with more config
 import session from "express-session";
+import MongoStore from "connect-mongo";
 
 import { connect } from "mongoose";
 import fs from "fs";
@@ -37,31 +38,64 @@ app.use(
 
 app.use(json());
 
-// Always set trust proxy (harmless in local dev, needed behind AWS Beanstalk/CloudFront)
-app.set("trust proxy", 1);
+// Trust the entire proxy chain (CloudFront -> ALB -> Nginx) so req.secure is accurate
+app.set("trust proxy", true);
 
-// Request logging middleware
+// Proxy-chain secure override: when behind multi-hop proxies (e.g., CloudFront -> ALB),
+// req.secure may be false even for HTTPS requests. Override it to match CLIENT_ORIGIN protocol.
 app.use((req, res, next) => {
-	console.log(
-		`[REQUEST] ${req.method} ${req.path} | Origin: ${req.get(
-			"origin"
-		)} | User-Agent: ${req.get("user-agent")?.substring(0, 50)}`
-	);
+	const xForwardedFor = req.headers["x-forwarded-for"];
+	if (xForwardedFor && xForwardedFor.split(",").length >= 2) {
+		const isHttpsOrigin = clientOrigin.startsWith("https://");
+		if (isHttpsOrigin && !req.secure) {
+			// Override read-only req.secure property to enable secure session cookies
+			Object.defineProperty(req, "secure", {
+				value: true,
+				writable: false,
+				configurable: true,
+			});
+		}
+	}
 	next();
 });
 
-// Session setup - detect secure mode by checking if CLIENT_ORIGIN is HTTPS
-// Force secure cookies to false for HTTP Beanstalk deployment
-const isSecureEnv = false; // Set to true when using HTTPS load balancer
+// Request logging middleware
+app.use((req, res, next) => {
+	if (req.path !== "/health") {
+		console.log(`[REQUEST] ${req.method} ${req.path}`);
+	}
+	next();
+});
+
+// Session setup: configure secure cookies for HTTPS environments
+const isSecureEnv = clientOrigin.startsWith("https://");
+
+const sessionStore = new MongoStore({
+	mongoUrl: MONGO_URI,
+	touchAfter: 24 * 3600, // lazy session update interval (seconds)
+	mongoOptions: {
+		// Allow TLS connections without strict certificate validation
+		// (required for AWS DocumentDB)
+		tls: true,
+		tlsAllowInvalidCertificates: true,
+	},
+});
+
+// Monitor session store connection
+sessionStore.on?.("error", (err) =>
+	console.error("[Session Store] error:", err)
+);
+
 app.use(
 	session({
+		store: sessionStore,
 		secret: process.env.SESSION_SECRET || "tioca-session-secret-2026",
 		name: "tioca.sid", // Custom session cookie name
 		resave: false,
-		saveUninitialized: true, // Create session even if not modified (important for holds)
+		saveUninitialized: false, // Only create session when user modifies it
 		cookie: {
-			secure: isSecureEnv,
-			sameSite: isSecureEnv ? "none" : "lax",
+			secure: isSecureEnv, // https only in production
+			sameSite: isSecureEnv ? "none" : "lax", // "none" required for cross-site HTTPS cookies (CloudFront)
 			httpOnly: true,
 			maxAge: 24 * 60 * 60 * 1000, // 24 hours
 		},
@@ -69,14 +103,6 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
-
-// Debug middleware - log session info
-app.use((req, res, next) => {
-	console.log(
-		`[Session] ${req.method} ${req.path} - Session ID: ${req.sessionID}`
-	);
-	next();
-});
 
 // Health check endpoint for deployment verification
 app.get("/health", (req, res) => {
@@ -133,6 +159,21 @@ connect(MONGO_URI, mongoOptions)
 			console.log(`Server running on port ${PORT}`);
 		});
 	});
+
+// Centralized error handler (ensures JSON + logs)
+// Note: keep this after all routes
+app.use((err, req, res, _next) => {
+	console.error(
+		`[Error] ${req.method} ${req.originalUrl}:`,
+		err?.message,
+		err?.stack?.split("\n").slice(0, 3).join(" | ")
+	);
+	if (!res.headersSent) {
+		res
+			.status(err.status || 500)
+			.json({ message: err.message || "Server error" });
+	}
+});
 
 // Global error handlers to prevent the server from exiting unexpectedly
 process.on("unhandledRejection", (reason, p) => {
