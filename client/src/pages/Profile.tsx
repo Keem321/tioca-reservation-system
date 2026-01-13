@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect, useRef } from "react";
+import { useState } from "react";
 import Navbar from "../components/landing/Navbar";
 import {
 	useGetProfileQuery,
@@ -37,7 +37,9 @@ export default function Profile() {
 		newPassword: "",
 		confirmPassword: "",
 	});
-	const hasInitialized = useRef(false);
+
+	// Get rooms data for capacity validation
+	const { data: rooms = [] } = useGetRoomsQuery();
 
 	// Reservation modification state
 	const [editingReservation, setEditingReservation] =
@@ -77,22 +79,21 @@ export default function Profile() {
 	const [cancelReservation, { isLoading: isCancelling }] =
 		useCancelReservationMutation();
 
-	// Get rooms data for capacity validation
-	const { data: rooms = [] } = useGetRoomsQuery();
-
-	// Initialize edit form when profile loads
-	useLayoutEffect(() => {
-		if (profile && editFormData.name === "" && !hasInitialized.current) {
-			hasInitialized.current = true;
+	// Initialize edit form when entering edit mode
+	const handleEnterEditMode = () => {
+		if (profile) {
 			setEditFormData({
 				name: profile.name || "",
 				email: profile.email || "",
 				currencyPreference: profile.currencyPreference || "USD",
 			});
 		}
-	}, [profile, editFormData.name]);
+		setIsEditing(true);
+	};
 
-	const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleEditChange = (
+		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+	) => {
 		const { name, value } = e.target;
 		setEditFormData((prev) => ({ ...prev, [name]: value }));
 	};
@@ -280,7 +281,7 @@ export default function Profile() {
 								</div>
 								<div className="profile-actions">
 									<button
-										onClick={() => setIsEditing(true)}
+										onClick={handleEnterEditMode}
 										className="btn-edit btn-primary"
 									>
 										Edit Profile

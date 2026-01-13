@@ -125,7 +125,6 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 				"[SessionTimeout] User not authenticated, cleaning up timers"
 			);
 			cleanupTimers();
-			setShowWarning(false);
 			return;
 		}
 
@@ -219,7 +218,7 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 		const broadcastActivity = () => {
 			try {
 				localStorage.setItem("sessionActivity", Date.now().toString());
-			} catch (e) {
+			} catch {
 				// Ignore localStorage errors
 			}
 		};
@@ -230,8 +229,10 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 		}
 	}, [isAuthenticated, showWarning]);
 
+	const effectiveShowWarning = isAuthenticated && showWarning;
+
 	return {
-		showWarning,
+		showWarning: effectiveShowWarning,
 		remainingSeconds,
 		resetActivity,
 	};

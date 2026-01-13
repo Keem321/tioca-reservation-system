@@ -1,35 +1,10 @@
+import { useCallback, useMemo, useState } from "react";
 import {
-	createContext,
-	useCallback,
-	useContext,
-	useMemo,
-	useState,
-} from "react";
-
-type ToastType = "success" | "error" | "info" | "warning";
-
-interface Toast {
-	id: number;
-	type: ToastType;
-	message: string;
-	duration?: number; // ms
-}
-
-interface ToastContextValue {
-	show: (message: string, type?: ToastType, duration?: number) => void;
-	success: (message: string, duration?: number) => void;
-	error: (message: string, duration?: number) => void;
-	info: (message: string, duration?: number) => void;
-	warning: (message: string, duration?: number) => void;
-}
-
-const ToastContext = createContext<ToastContextValue | null>(null);
-
-export function useToast() {
-	const ctx = useContext(ToastContext);
-	if (!ctx) throw new Error("useToast must be used within ToastProvider");
-	return ctx;
-}
+	ToastContext,
+	type Toast,
+	type ToastContextValue,
+	type ToastType,
+} from "./useToast";
 
 export default function ToastProvider({
 	children,

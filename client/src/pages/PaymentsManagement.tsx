@@ -12,7 +12,7 @@ import {
 import { paymentsApi } from "../features/paymentsApi";
 import Navbar from "../components/landing/Navbar";
 import "./PaymentsManagement.css";
-import { useToast } from "../components/ToastProvider";
+import { useToast } from "../components/useToast";
 
 type Tab = "reports" | "management";
 
