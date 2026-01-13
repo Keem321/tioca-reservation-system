@@ -1,5 +1,6 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import type { Room, RoomFormData } from "../types/room";
+import { createBaseQueryWithReauth } from "../utils/baseQueryWithReauth";
 
 /**
  * roomsApi - RTK Query API Slice for Rooms
@@ -14,10 +15,7 @@ import type { Room, RoomFormData } from "../types/room";
 
 export const roomsApi = createApi({
 	reducerPath: "roomsApi",
-	baseQuery: fetchBaseQuery({
-		baseUrl: `${import.meta.env.VITE_API_URL || ""}/api/rooms`,
-		credentials: "include",
-	}),
+	baseQuery: createBaseQueryWithReauth(`${import.meta.env.VITE_API_URL || ""}/api/rooms`),
 	tagTypes: ["Room"],
 	endpoints: (builder) => ({
 		// Get all rooms
