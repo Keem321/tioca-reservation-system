@@ -43,7 +43,7 @@ function App() {
 
 	// Session timeout hook - only active when user is authenticated
 	const isAuthenticated = user !== null;
-	const { showWarning, remainingSeconds, resetActivity } =
+	const { showWarning, remainingSeconds, resetActivity, isLoggedOut } =
 		useSessionTimeout(isAuthenticated);
 
 	// Debug: Log when authentication status changes
@@ -85,6 +85,7 @@ function App() {
 					<SessionTimeoutWarning
 						remainingSeconds={remainingSeconds}
 						onStayLoggedIn={resetActivity}
+						isLoggedOut={isLoggedOut}
 					/>
 				)}
 
