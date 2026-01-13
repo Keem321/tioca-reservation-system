@@ -31,10 +31,10 @@ authRouter.get("/google/callback", (req, res, next) => {
 			// Explicitly save session before redirecting
 			req.session.save((saveErr) => {
 				if (saveErr) return next(saveErr);
-        
-        // Initialize session activity tracking after session is saved
-			  req.user = user;
-			  initializeSessionActivity(req);
+
+				// Initialize session activity tracking after session is saved
+				req.user = user;
+				initializeSessionActivity(req);
 				const clientHome =
 					process.env.CLIENT_HOME_URL || "http://localhost:5173";
 				const redirectPath = req.query.redirect || "/";
@@ -115,13 +115,13 @@ authRouter.post("/login", (req, res, next) => {
 		}
 		req.login(user, (loginErr) => {
 			if (loginErr) return next(loginErr);
-			
+
 			// Explicitly save session to store before responding
 			req.session.save((saveErr) => {
 				if (saveErr) return next(saveErr);
-        
-        // Initialize session activity tracking after session is saved
-			  initializeSessionActivity(req);
+
+				// Initialize session activity tracking after session is saved
+				initializeSessionActivity(req);
 				const safeUser = {
 					id: user._id,
 					email: user.email,
