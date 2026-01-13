@@ -11,6 +11,7 @@ import userRouter from "./user.routes.js";
 import paymentRouter from "./payment.routes.js";
 import holdRouter from "./hold.routes.js";
 import authRouter from "./auth.js";
+import { sessionActivityMiddleware } from "../middleware/sessionActivity.js";
 
 // middleware MUST import strategies to register them with passport
 import "../passport-strategies/googleStrategy.js";
@@ -18,6 +19,11 @@ import "../passport-strategies/localStrategy.js";
 
 // API router (for /api/*)
 const apiRouter = Router();
+
+// Apply session activity tracking middleware to all API routes
+// This enforces server-side inactivity timeout for authenticated users
+apiRouter.use(sessionActivityMiddleware);
+
 apiRouter.use("/rooms", roomRouter);
 apiRouter.use("/reservations", reservationRouter);
 apiRouter.use("/user", userRouter);

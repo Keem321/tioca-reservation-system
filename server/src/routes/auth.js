@@ -2,6 +2,7 @@ import passport from "passport";
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
+import { initializeSessionActivity } from "../middleware/sessionActivity.js";
 
 const authRouter = Router();
 
@@ -26,6 +27,10 @@ authRouter.get("/google/callback", (req, res, next) => {
 				req.session = {};
 			}
 			req.session.passport = { user: user.id };
+
+			// Initialize session activity tracking
+			req.user = user;
+			initializeSessionActivity(req);
 
 			console.log(`OAuth callback: attached user ${user.id} to session`);
 			const clientHome = process.env.CLIENT_HOME_URL || "http://localhost:5173";
@@ -106,6 +111,10 @@ authRouter.post("/login", (req, res, next) => {
 		}
 		req.login(user, (loginErr) => {
 			if (loginErr) return next(loginErr);
+			
+			// Initialize session activity tracking
+			initializeSessionActivity(req);
+			
 			const safeUser = {
 				id: user._id,
 				email: user.email,

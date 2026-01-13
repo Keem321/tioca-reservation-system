@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createBaseQueryWithReauth } from "../utils/baseQueryWithReauth";
 import type {
 	CreatePaymentIntentRequest,
 	PaymentIntentResponse,
@@ -81,10 +82,7 @@ interface PaymentFilter {
 
 export const paymentsApi = createApi({
 	reducerPath: "paymentsApi",
-	baseQuery: fetchBaseQuery({
-		baseUrl: `${import.meta.env.VITE_API_URL || ""}/api/payments`,
-		credentials: "include",
-	}),
+	baseQuery: createBaseQueryWithReauth(`${import.meta.env.VITE_API_URL || ""}/api/payments`),
 	tagTypes: ["Payment", "PaymentStats", "RevenueReport", "Reservation"],
 	endpoints: (builder) => ({
 		// Create a payment intent for a reservation

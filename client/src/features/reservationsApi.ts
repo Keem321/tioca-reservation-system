@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createBaseQueryWithReauth } from "../utils/baseQueryWithReauth";
 import type { Reservation, ReservationFormData } from "../types/reservation";
 
 /**
@@ -10,10 +11,7 @@ import type { Reservation, ReservationFormData } from "../types/reservation";
 
 export const reservationsApi = createApi({
 	reducerPath: "reservationsApi",
-	baseQuery: fetchBaseQuery({
-		baseUrl: `${import.meta.env.VITE_API_URL || ""}/api/reservations`,
-		credentials: "include",
-	}),
+	baseQuery: createBaseQueryWithReauth(`${import.meta.env.VITE_API_URL || ""}/api/reservations`),
 	tagTypes: ["Reservation"],
 	endpoints: (builder) => ({
 		// Get all reservations with optional filters

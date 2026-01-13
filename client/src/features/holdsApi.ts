@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createBaseQueryWithReauth } from "../utils/baseQueryWithReauth";
 
 /**
  * holdsApi - RTK Query API Slice for Room Holds
@@ -41,10 +42,7 @@ export interface ExtendHoldRequest {
 
 export const holdsApi = createApi({
 	reducerPath: "holdsApi",
-	baseQuery: fetchBaseQuery({
-		baseUrl: "/api/holds",
-		credentials: "include", // Important for session cookies
-	}),
+	baseQuery: createBaseQueryWithReauth("/api/holds"),
 	tagTypes: ["Hold"],
 	endpoints: (builder) => ({
 		// Create a new hold

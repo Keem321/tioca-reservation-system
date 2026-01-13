@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createBaseQueryWithReauth } from "../utils/baseQueryWithReauth";
 import type { User } from "../features/authSlice";
 import type { Reservation } from "../types/reservation";
 
@@ -21,10 +22,7 @@ export interface PasswordChangeData {
  */
 export const userApi = createApi({
 	reducerPath: "userApi",
-	baseQuery: fetchBaseQuery({
-		baseUrl: `${import.meta.env.VITE_API_URL || ""}/api/user`,
-		credentials: "include",
-	}),
+	baseQuery: createBaseQueryWithReauth(`${import.meta.env.VITE_API_URL || ""}/api/user`),
 	tagTypes: ["Profile", "ActiveReservations"],
 	endpoints: (builder) => ({
 		// Get current user's profile
