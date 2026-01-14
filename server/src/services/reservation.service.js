@@ -229,8 +229,8 @@ class ReservationService {
 					}
 				}
 			}
-      
-      // Generate unique confirmation code
+
+			// Generate unique confirmation code
 			let confirmationCode;
 			let isUnique = false;
 			while (!isUnique) {
@@ -257,24 +257,11 @@ class ReservationService {
 				numberOfNights,
 				totalPrice: pricingData.totalPrice,
 			};
-      
-      // Generate unique confirmation code
-			let confirmationCode;
-			let isUnique = false;
-			while (!isUnique) {
-				confirmationCode = this.generateConfirmationCode();
-				const existing = await ReservationRepository.findByConfirmationCode(
-					confirmationCode
-				);
-				if (!existing) {
-					isUnique = true;
-				}
-			}
-      
-      // Add confirmation code to payload
+
+			// Add confirmation code to payload
 			reservationPayload.confirmationCode = confirmationCode;
 
-      // Create reservation
+			// Create reservation
 			const reservation = await ReservationRepository.create(
 				reservationPayload
 			);
