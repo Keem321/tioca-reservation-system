@@ -117,6 +117,32 @@
 	margin-bottom: 0.5rem;
 }
 
+.payment-form__payment-request {
+	/* The PaymentRequestButton element handles its own styling */
+	min-height: 40px;
+}
+
+.payment-form__divider {
+	display: flex;
+	align-items: center;
+	text-align: center;
+	margin: 0.5rem 0;
+}
+
+.payment-form__divider::before,
+.payment-form__divider::after {
+	content: "";
+	flex: 1;
+	border-bottom: 1px solid rgba(44, 22, 7, 0.15);
+}
+
+.payment-form__divider span {
+	padding: 0 1rem;
+	color: var(--color-text-secondary);
+	font-size: 0.875rem;
+	font-weight: 500;
+}
+
 .payment-form__card-element {
 	padding: 0.875rem 1rem;
 	border: 1px solid rgba(44, 22, 7, 0.15);
