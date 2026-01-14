@@ -227,15 +227,14 @@ const BookingConfirmation: React.FC = () => {
 			// Don't release hold here - it will be released after payment or on unmount of payment page
 			navigate("/payment");
 		} catch (err) {
-			const error = err instanceof Error ? err : new Error("Unknown error");
-			const apiError = err as { data?: { error?: string }; message?: string };
-			console.error("Failed to create reservation:", error);
-			// Show user-friendly error message
-			const errorMessage =
-				apiError?.data?.error ||
-				error.message ||
-				"Failed to create reservation. Please try again.";
-			setTimeError(errorMessage);
+			const apiError = err as { data?: { error?: string }; status?: number };
+			console.error("Failed to create reservation:", {
+				status: apiError.status,
+				error: apiError.data?.error,
+				fullError: err,
+			});
+			// Error will be displayed via the mutation's error state
+			// Don't use setTimeError here to avoid duplicate error messages
 		}
 	};
 
@@ -267,7 +266,7 @@ const BookingConfirmation: React.FC = () => {
 	const nights = Math.ceil(
 		(checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
 	);
-	const totalPrice = room.pricePerNight * nights;
+	const totalPrice = (room.offering?.basePrice || 0) * nights;
 	const roomImage = getRoomImage(room.quality, room.floor);
 	const roomLabel = getRoomDisplayLabel(room.quality, room.floor);
 	const roomDescription = getRoomQualityDescription(room.quality);
@@ -539,7 +538,7 @@ const BookingConfirmation: React.FC = () => {
 								<div className="detail-item">
 									<span className="detail-label">Price per Night:</span>
 									<span className="detail-value">
-										${room.pricePerNight.toFixed(2)}
+										${(room.offering?.basePrice || 0).toFixed(2)}
 									</span>
 								</div>
 								<div className="detail-item">

@@ -16,8 +16,8 @@ import type { AppDispatch } from "../store";
  * @returns Object with showWarning, remainingSeconds, and resetActivity
  */
 
-const INACTIVITY_TIMEOUT = 30 * 1000; // 10 minutes in milliseconds
-const WARNING_DURATION = 10 * 1000; // 3 minutes in milliseconds
+const INACTIVITY_TIMEOUT = 30 * 1000; // 30 seconds for testing (10 minutes for production: 10 * 60 * 1000)
+const WARNING_DURATION = 10 * 1000; // 10 seconds for testing (3 minutes for production: 3 * 60 * 1000)
 
 // Activity events to monitor
 const ACTIVITY_EVENTS = [
@@ -292,7 +292,8 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 		}
 	}, [isAuthenticated, showWarning]);
 
-	const effectiveShowWarning = isAuthenticated && showWarning;
+	// Keep modal visible if user is authenticated OR if they were just logged out due to inactivity
+	const effectiveShowWarning = (isAuthenticated || isLoggedOut) && showWarning;
 
 	return {
 		showWarning: effectiveShowWarning,
