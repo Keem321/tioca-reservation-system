@@ -25,6 +25,13 @@ const Booking: React.FC = () => {
 	);
 	const [shouldSearch, setShouldSearch] = useState(false);
 
+	// Automatically trigger search if all required fields are present
+	React.useEffect(() => {
+		if (checkIn && checkOut && checkIn < checkOut && zone) {
+			setShouldSearch(true);
+		}
+	}, [checkIn, checkOut, zone]);
+
 	type RecommendedRoom = Room & {
 		availabilityInfo?: {
 			availablePercent: number;
