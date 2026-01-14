@@ -125,7 +125,8 @@ export default function RoomManagement() {
 							windowEnd
 						)
 				)
-				.map((r) => (typeof r.roomId === "string" ? r.roomId : r.roomId._id))
+				.map((r) => (typeof r.roomId === "string" ? r.roomId : r.roomId?._id))
+				.filter((id): id is string => id !== null && id !== undefined)
 		);
 	}, [reservations, windowStart, windowEnd, activeStatuses]);
 

@@ -106,14 +106,14 @@ function App() {
 						element={
 							<ProtectedRoute requiredRole="manager">
 								<RoomManagement />
-								<Route
-									path="/manage/offerings"
-									element={
-										<ProtectedRoute requiredRole="manager">
-											<OfferingManagement />
-										</ProtectedRoute>
-									}
-								/>
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/manage/offerings"
+						element={
+							<ProtectedRoute requiredRole="manager">
+								<OfferingManagement />
 							</ProtectedRoute>
 						}
 					/>
