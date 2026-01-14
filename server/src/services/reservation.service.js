@@ -148,24 +148,33 @@ class ReservationService {
 					throw new Error("Hold has already been converted to a reservation");
 				}
 
-				// Verify hold dates match reservation dates (compare date parts only, not times)
-				const holdCheckInDate = new Date(hold.checkInDate)
-					.toISOString()
-					.split("T")[0];
-				const holdCheckOutDate = new Date(hold.checkOutDate)
-					.toISOString()
-					.split("T")[0];
-				const reservationCheckInDate = checkIn.toISOString().split("T")[0];
-				const reservationCheckOutDate = checkOut.toISOString().split("T")[0];
-
-				if (
-					holdCheckInDate !== reservationCheckInDate ||
-					holdCheckOutDate !== reservationCheckOutDate
-				) {
-					throw new Error(
-						`Reservation dates do not match the hold. Hold: ${holdCheckInDate} to ${holdCheckOutDate}, Reservation: ${reservationCheckInDate} to ${reservationCheckOutDate}`
-					);
+			// Verify hold dates match reservation dates (compare date parts only, not times)
+			// Extract date parts from the original strings to avoid timezone conversion issues
+			const getDatePart = (dateValue) => {
+				// If it's a Date object, convert to ISO string
+				if (dateValue instanceof Date) {
+					return dateValue.toISOString().split("T")[0];
 				}
+				// If it's a string, extract the date part (YYYY-MM-DD)
+				if (typeof dateValue === "string") {
+					return dateValue.split("T")[0];
+				}
+				return dateValue;
+			};
+
+			const holdCheckInDate = getDatePart(hold.checkInDate);
+			const holdCheckOutDate = getDatePart(hold.checkOutDate);
+			const reservationCheckInDate = getDatePart(checkInDate); // Use original string
+			const reservationCheckOutDate = getDatePart(checkOutDate); // Use original string
+
+			if (
+				holdCheckInDate !== reservationCheckInDate ||
+				holdCheckOutDate !== reservationCheckOutDate
+			) {
+				throw new Error(
+					`Reservation dates do not match the hold. Hold: ${holdCheckInDate} to ${holdCheckOutDate}, Reservation: ${reservationCheckInDate} to ${reservationCheckOutDate}`
+				);
+			}
 
 				// Verify hold room matches reservation room
 				const holdRoomId = hold.roomId._id

@@ -96,6 +96,9 @@ export async function getReservationById(req, res) {
  */
 export async function createReservation(req, res) {
 	try {
+		console.log("[Reservation] Request cookies:", req.headers.cookie || "NO COOKIES");
+		console.log("[Reservation] Session ID:", req.sessionID);
+
 		// Include session ID from the request
 		const reservationData = {
 			...req.body,
