@@ -563,7 +563,7 @@ const Payment: React.FC = () => {
 							<div className="summary-item">
 								<span className="summary-label">Room:</span>
 								<span className="summary-value">
-									{typeof reservation.roomId === "object"
+									{typeof reservation.roomId === "object" && reservation.roomId?.podId
 										? `Pod ${reservation.roomId.podId} - ${reservation.roomId.quality}`
 										: "Room"}
 								</span>

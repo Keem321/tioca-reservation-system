@@ -632,7 +632,7 @@ export default function RoomManagement() {
 											.filter((r) =>
 												typeof r.roomId === "string"
 													? r.roomId === room._id
-													: r.roomId._id === room._id
+													: r.roomId && r.roomId._id === room._id
 											)
 											.filter((r) =>
 												overlaps(

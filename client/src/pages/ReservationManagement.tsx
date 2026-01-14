@@ -510,7 +510,7 @@ export default function ReservationManagement() {
 										<option value="">Select Room</option>
 										{getAvailableRooms().map((room: Room) => (
 											<option key={room._id} value={room._id}>
-												Pod {room.podId} - {room.quality} ({room.floor})
+												{room.podId ? `Pod ${room.podId}` : "Room"} - {room.quality} ({room.floor})
 												{room.offering?.basePrice
 													? ` • ${formatPricePerNight(
 															room.offering.basePrice,
@@ -766,7 +766,9 @@ export default function ReservationManagement() {
 										const roomDisplay =
 											typeof reservation.roomId === "string"
 												? reservation.roomId
-												: `Pod ${reservation.roomId.podId} (${reservation.roomId.quality})`;
+												: reservation.roomId && reservation.roomId.podId
+												? `Pod ${reservation.roomId.podId} (${reservation.roomId.quality})`
+												: "Unknown Room";
 										const isChecked = selectedReservations.has(reservation._id);
 										const canCheckIn = reservation.status === "confirmed";
 										const canCheckOut = reservation.status === "checked-in";

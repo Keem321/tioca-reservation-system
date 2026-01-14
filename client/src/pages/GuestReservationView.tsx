@@ -125,12 +125,11 @@ const GuestReservationView: React.FC = () => {
 
 	// Get room info
 	const getRoomInfo = () => {
-		if (typeof reservation.roomId === "object" && reservation.roomId) {
+		if (typeof reservation.roomId === "object" && reservation.roomId && reservation.roomId.podId) {
 			return {
 				podId: reservation.roomId.podId,
 				quality: reservation.roomId.quality,
 				floor: reservation.roomId.floor,
-				pricePerNight: reservation.roomId.pricePerNight,
 			};
 		}
 		return null;

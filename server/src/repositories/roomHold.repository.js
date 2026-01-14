@@ -18,7 +18,7 @@ class RoomHoldRepository {
 	 */
 	async findById(id) {
 		return await RoomHold.findById(id)
-			.populate("roomId", "podId quality floor pricePerNight")
+			.populate("roomId", "podId quality floor")
 			.populate("userId", "name email");
 	}
 
@@ -68,7 +68,7 @@ class RoomHoldRepository {
 		}
 
 		return await RoomHold.find(query)
-			.populate("roomId", "podId quality floor pricePerNight")
+			.populate("roomId", "podId quality floor")
 			.sort({ createdAt: -1 });
 	}
 
@@ -83,7 +83,7 @@ class RoomHoldRepository {
 			id,
 			{ holdExpiry: newExpiry },
 			{ new: true }
-		).populate("roomId", "podId quality floor pricePerNight");
+		).populate("roomId", "podId quality floor");
 	}
 
 	/**
@@ -98,7 +98,7 @@ class RoomHoldRepository {
 			id,
 			{ stage, holdExpiry: newExpiry },
 			{ new: true }
-		).populate("roomId", "podId quality floor pricePerNight");
+		).populate("roomId", "podId quality floor");
 	}
 
 	/**
