@@ -49,7 +49,7 @@ const PaymentSuccess: React.FC = () => {
 	// Get room information
 	const getRoomInfo = () => {
 		if (!reservation) return null;
-		if (typeof reservation.roomId === "object" && reservation.roomId) {
+		if (typeof reservation.roomId === "object" && reservation.roomId && reservation.roomId.podId) {
 			return {
 				podId: reservation.roomId.podId,
 				quality: reservation.roomId.quality,

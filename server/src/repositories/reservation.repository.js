@@ -9,7 +9,7 @@ class ReservationRepository {
 	async findByConfirmationCode(confirmationCode) {
 		return await Reservation.findOne({ confirmationCode }).populate(
 			"roomId",
-			"podId quality floor pricePerNight"
+			"podId quality floor"
 		);
 	}
 
@@ -23,7 +23,7 @@ class ReservationRepository {
 		const { podIdFilter, ...dbFilter } = filter;
 
 		let query = Reservation.find(dbFilter)
-			.populate("roomId", "podId quality floor pricePerNight")
+			.populate("roomId", "podId quality floor")
 			.populate("userId", "name email")
 			.sort({ createdAt: -1 });
 
@@ -69,7 +69,7 @@ class ReservationRepository {
 	 */
 	async findById(id) {
 		return await Reservation.findById(id)
-			.populate("roomId", "podId quality floor pricePerNight amenities")
+			.populate("roomId", "podId quality floor amenities")
 			.populate("userId", "name email");
 	}
 
@@ -94,7 +94,7 @@ class ReservationRepository {
 			new: true,
 			runValidators: true,
 		})
-			.populate("roomId", "podId quality floor pricePerNight")
+			.populate("roomId", "podId quality floor")
 			.populate("userId", "name email");
 	}
 
