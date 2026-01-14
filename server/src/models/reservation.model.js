@@ -44,6 +44,10 @@ const reservationSchema = new Schema(
 		stripePaymentIntentId: { type: String },
 		stripeChargeId: { type: String },
 		stripeCustomerId: { type: String },
+		// Email confirmation fields
+		confirmationCode: { type: String, unique: true, sparse: true },
+		confirmationEmailSentAt: { type: Date },
+		lastAccessedAt: { type: Date },
 		specialRequests: { type: String },
 		cancellationReason: { type: String },
 		cancelledAt: { type: Date },

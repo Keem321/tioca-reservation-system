@@ -15,7 +15,38 @@ import {
 	updateReservationStatus,
 	getAvailableSlots,
 } from "../controllers/reservation.controller.js";
+import {
+	requestReservationAccess,
+	requestReservationAccessByEmail,
+	verifyToken,
+	verifyCode,
+	lookupReservation,
+	lookupReservationByCode,
+} from "../controllers/reservationVerification.controller.js";
+import { cancelGuestReservation } from "../controllers/guestReservation.controller.js";
 import { requireRole, requireAuth } from "../middleware/roleAuth.js";
+
+// Guest reservation verification routes (public)
+// Request access to reservation (sends verification email)
+reservationRouter.post("/request-access", requestReservationAccess);
+
+// Request access by email only (no confirmation code needed)
+reservationRouter.post("/request-access-by-email", requestReservationAccessByEmail);
+
+// Verify token from email link
+reservationRouter.get("/verify/:token", verifyToken);
+
+// Verify 6-digit code
+reservationRouter.post("/verify-code", verifyCode);
+
+// Simple lookup by confirmation code only
+reservationRouter.post("/lookup-by-code", lookupReservationByCode);
+
+// Simple lookup by confirmation code and email (legacy - kept for compatibility)
+reservationRouter.post("/lookup", lookupReservation);
+
+// Cancel guest reservation (public - no auth required)
+reservationRouter.post("/guest/:id/cancel", cancelGuestReservation);
 
 // Get all reservations (manager only)
 reservationRouter.get(

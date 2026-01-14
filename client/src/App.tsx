@@ -16,6 +16,9 @@ import RoomManagement from "./pages/RoomManagement";
 import ReservationManagement from "./pages/ReservationManagement";
 import PaymentsManagement from "./pages/PaymentsManagement";
 import OfferingManagement from "./pages/OfferingManagement";
+import ReservationLookup from "./pages/ReservationLookup";
+import GuestReservationView from "./pages/GuestReservationView";
+import ReservationVerify from "./pages/ReservationVerify";
 import SessionTimeoutTest from "./pages/SessionTimeoutTest";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SessionTimeoutWarning from "./components/SessionTimeoutWarning";
@@ -44,7 +47,7 @@ function App() {
 
 	// Session timeout hook - only active when user is authenticated
 	const isAuthenticated = user !== null;
-	const { showWarning, remainingSeconds, resetActivity } =
+	const { showWarning, remainingSeconds, resetActivity, isLoggedOut } =
 		useSessionTimeout(isAuthenticated);
 
 	// Debug: Log when authentication status changes
@@ -78,6 +81,7 @@ function App() {
 					<SessionTimeoutWarning
 						remainingSeconds={remainingSeconds}
 						onStayLoggedIn={resetActivity}
+						isLoggedOut={isLoggedOut}
 					/>
 				)}
 
@@ -93,6 +97,17 @@ function App() {
 						path="/session-timeout-test"
 						element={<SessionTimeoutTest />}
 					/>
+					{/* Guest reservation routes (public) */}
+					<Route path="/reservations/lookup" element={<ReservationLookup />} />
+					<Route
+						path="/reservations/verify/:token"
+						element={<ReservationVerify />}
+					/>
+					<Route
+						path="/reservations/guest/view"
+						element={<GuestReservationView />}
+					/>
+					{/* Protected routes */}
 					<Route
 						path="/profile"
 						element={

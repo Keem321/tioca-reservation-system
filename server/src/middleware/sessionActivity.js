@@ -9,11 +9,12 @@
  * still enforce the inactivity policy.
  *
  * Timeline:
- * - 10 minutes of inactivity → session is destroyed, 401 returned
+ * - Frontend warns at 30s inactivity, then 10s warning = 40s total
+ * - Backend timeout must be LONGER than frontend total (45s)
  * - Each API request updates the lastActivity timestamp
  */
 
-const INACTIVITY_TIMEOUT = 30 * 1000; // 10 minutes in milliseconds
+const INACTIVITY_TIMEOUT = 45 * 1000; // 45 seconds - longer than frontend total (40s)
 
 /**
  * Middleware to track and enforce session activity timeout

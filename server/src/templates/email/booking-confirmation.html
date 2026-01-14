@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation - TIOCA Pod Hotel</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f1e8;
+            color: #3d3d3d;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        .header {
+            background: linear-gradient(135deg, #8b6f47 0%, #d4c5b9 100%);
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            color: #f5f1e8;
+            font-size: 16px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .confirmation-box {
+            background-color: #f5f1e8;
+            border: 2px solid #d4c5b9;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .confirmation-box h2 {
+            margin: 0 0 10px 0;
+            color: #8b6f47;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .confirmation-code {
+            font-size: 28px;
+            font-weight: 700;
+            color: #8b6f47;
+            letter-spacing: 2px;
+            margin: 10px 0;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section h3 {
+            color: #8b6f47;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #d4c5b9;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f5f1e8;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+        }
+        .detail-value {
+            color: #3d3d3d;
+            font-weight: 500;
+        }
+        .price-breakdown {
+            background-color: #f5f1e8;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+        .total-row {
+            border-top: 2px solid #8b6f47;
+            margin-top: 10px;
+            padding-top: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #8b6f47;
+        }
+        .button {
+            display: inline-block;
+            background-color: #8b6f47;
+            color: #ffffff !important;
+            padding: 14px 32px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            margin: 10px 5px;
+            text-align: center;
+        }
+        .button:hover {
+            background-color: #6d5738;
+        }
+        .next-steps {
+            background-color: #f5f1e8;
+            border-left: 4px solid #8b6f47;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .next-steps h3 {
+            margin-top: 0;
+            color: #8b6f47;
+            font-size: 18px;
+        }
+        .next-steps ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .next-steps li {
+            margin: 8px 0;
+            color: #3d3d3d;
+        }
+        .footer {
+            background-color: #8b6f47;
+            color: #f5f1e8;
+            padding: 30px 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+        .footer a {
+            color: #f5f1e8;
+            text-decoration: underline;
+        }
+        @media only screen and (max-width: 600px) {
+            .content {
+                padding: 20px 15px;
+            }
+            .confirmation-code {
+                font-size: 24px;
+            }
+            .button {
+                display: block;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>TIOCA</h1>
+            <p>Tapioca Pod Hotel, Japan</p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <p style="font-size: 18px; margin-bottom: 20px;">Dear {{guestName}},</p>
+            
+            <p style="font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
+                Thank you for choosing TIOCA! We're delighted to confirm your reservation. 
+                Your tranquil pod experience awaits you.
+            </p>
+
+            <!-- Confirmation Code -->
+            <div class="confirmation-box">
+                <h2>Confirmation Code</h2>
+                <div class="confirmation-code">{{confirmationCode}}</div>
+                <p style="margin: 10px 0 0 0; color: #666; font-size: 14px;">
+                    Use this code to manage your reservation
+                </p>
+            </div>
+
+            <!-- Booking Summary -->
+            <div class="section">
+                <h3>📋 Booking Summary</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Pod Type:</span>
+                    <span class="detail-value">{{podType}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Floor:</span>
+                    <span class="detail-value">{{floor}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Check-in:</span>
+                    <span class="detail-value">{{checkInDate}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Check-out:</span>
+                    <span class="detail-value">{{checkOutDate}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Guests:</span>
+                    <span class="detail-value">{{numberOfGuests}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Number of Nights:</span>
+                    <span class="detail-value">{{nights}}</span>
+                </div>
+            </div>
+
+            <!-- Guest Information -->
+            <div class="section">
+                <h3>👤 Guest Information</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Name:</span>
+                    <span class="detail-value">{{guestName}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Email:</span>
+                    <span class="detail-value">{{guestEmail}}</span>
+                </div>
+                {{#if guestPhone}}
+                <div class="detail-row">
+                    <span class="detail-label">Phone:</span>
+                    <span class="detail-value">{{guestPhone}}</span>
+                </div>
+                {{/if}}
+            </div>
+
+            <!-- Payment Summary -->
+            <div class="section">
+                <h3>💳 Payment Summary</h3>
+                <div class="price-breakdown">
+                    <div class="price-row">
+                        <span>{{podType}} × {{nights}} night{{#if multiplNights}}s{{/if}}</span>
+                        <span>¥{{subtotal}}</span>
+                    </div>
+                    <div class="price-row total-row">
+                        <span>Total Paid</span>
+                        <span>¥{{totalPrice}}</span>
+                    </div>
+                </div>
+                {{#if receiptUrl}}
+                <p style="margin-top: 15px; font-size: 14px;">
+                    <a href="{{receiptUrl}}" style="color: #8b6f47; text-decoration: underline;">
+                        View Receipt
+                    </a>
+                </p>
+                {{/if}}
+            </div>
+
+            <!-- What's Next -->
+            <div class="next-steps">
+                <h3>🎯 What's Next?</h3>
+                <ul>
+                    <li><strong>Check-in Time:</strong> 3:00 PM onwards</li>
+                    <li><strong>Check-out Time:</strong> 11:00 AM</li>
+                    <li>Contactless check-in available at our kiosk</li>
+                    <li>Please remove shoes before entering pod areas</li>
+                    <li>Quiet hours: 10:00 PM - 7:00 AM</li>
+                    <li>Lockers and shared facilities are available on your floor</li>
+                </ul>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{manageReservationUrl}}" class="button">Manage Reservation</a>
+                {{#if hasAccount}}
+                <a href="{{profileUrl}}" class="button">View in Profile</a>
+                {{/if}}
+            </div>
+
+            <!-- Cancellation Policy -->
+            <div class="section" style="font-size: 13px; color: #666;">
+                <h3>📜 Cancellation Policy</h3>
+                <p>
+                    Free cancellation up to 24 hours before check-in. 
+                    Cancellations made within 24 hours of check-in will incur a one-night charge.
+                </p>
+            </div>
+
+            <!-- Contact Info -->
+            <p style="margin-top: 30px; font-size: 14px; color: #666;">
+                Questions? Contact us at 
+                <a href="mailto:{{supportEmail}}" style="color: #8b6f47;">{{supportEmail}}</a>
+            </p>
+
+            <p style="margin-top: 30px; font-size: 16px;">
+                We look forward to welcoming you!<br>
+                <strong>The TIOCA Team</strong>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>TIOCA Pod Hotel</strong></p>
+            <p>Tapioca-Inspired Tranquility in the Heart of Japan</p>
+            <p style="margin-top: 15px; font-size: 12px;">
+                This is an automated email. Please do not reply directly to this message.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

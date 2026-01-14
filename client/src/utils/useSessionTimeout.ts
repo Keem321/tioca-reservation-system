@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useDispatch } from "react-redux";
-import { logout } from "../features/authSlice";
+import { logout, keepAlive } from "../features/authSlice";
 import type { AppDispatch } from "../store";
 
 /**
@@ -33,6 +33,7 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 	const dispatch = useDispatch<AppDispatch>();
 	const [showWarning, setShowWarning] = useState(false);
 	const [remainingSeconds, setRemainingSeconds] = useState(0);
+	const [isLoggedOut, setIsLoggedOut] = useState(false);
 
 	// Use refs to avoid stale closures
 	const inactivityTimerRef = useRef<number | null>(null);
@@ -40,6 +41,7 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 	const countdownIntervalRef = useRef<number | null>(null);
 	const lastActivityRef = useRef<number>(0);
 	const warningStartTimeRef = useRef<number | null>(null);
+	const isLoggedOutRef = useRef<boolean>(false);
 
 	// Cleanup all timers
 	const cleanupTimers = useCallback(() => {
@@ -60,9 +62,20 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 	// Handle logout when timer expires
 	const handleLogout = useCallback(async () => {
 		console.log("[SessionTimeout] 🚪 Logging out due to inactivity");
+		console.log("[SessionTimeout] Setting isLoggedOutRef.current = true");
+		console.log("[SessionTimeout] Setting showWarning = true (keep modal visible)");
+		console.log("[SessionTimeout] Setting isLoggedOut state = true");
+		
 		cleanupTimers();
-		setShowWarning(false);
+		
+		// Set logged out state (modal stays visible with "Logged Out" message)
+		isLoggedOutRef.current = true; // Set ref immediately to prevent race conditions
+		setShowWarning(true); // Keep modal visible
+		setIsLoggedOut(true);
+		
+		console.log("[SessionTimeout] Dispatching logout action...");
 		await dispatch(logout());
+		console.log("[SessionTimeout] Logout complete - modal should stay visible!");
 		// Navigation will be handled by ProtectedRoute when user state becomes null
 	}, [dispatch, cleanupTimers]);
 
@@ -98,35 +111,76 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 	}, [handleLogout]);
 
 	// Reset activity and all timers
-	const resetActivity = useCallback(() => {
+	const resetActivity = useCallback(async () => {
 		const now = Date.now();
 
+		// When called from "Stay Logged In" button, we want to reset immediately
+		// So we check if warning is showing, and if so, skip throttle check
+		const isWarningShowing = warningStartTimeRef.current !== null;
+
 		// Throttle: only reset if at least 1 second has passed since last activity
-		if (now - lastActivityRef.current < 1000) {
+		// UNLESS the warning is showing (button click should always work)
+		if (!isWarningShowing && now - lastActivityRef.current < 1000) {
 			return;
 		}
 
-		console.log("[SessionTimeout] Activity detected, resetting timers");
+		console.log(
+			"[SessionTimeout] 🔄 Resetting activity" +
+				(isWarningShowing ? " (Stay Logged In clicked)" : "")
+		);
 		lastActivityRef.current = now;
 		cleanupTimers();
 		setShowWarning(false);
 		warningStartTimeRef.current = null;
 
+		// Ping the server to refresh the session activity timestamp
+		try {
+			await dispatch(keepAlive()).unwrap();
+			console.log("[SessionTimeout] ✅ Server session refreshed successfully");
+		} catch (error) {
+			console.error(
+				"[SessionTimeout] ❌ Failed to refresh server session:",
+				error
+			);
+			// If keepalive fails, user is probably already logged out - trigger logout
+			handleLogout();
+			return;
+		}
+
 		// Start new inactivity timer
 		inactivityTimerRef.current = setTimeout(() => {
 			startWarning();
 		}, INACTIVITY_TIMEOUT);
-	}, [cleanupTimers, startWarning]);
+	}, [cleanupTimers, startWarning, dispatch, handleLogout]);
 
 	// Set up activity listeners (only when auth changes, not when showWarning changes)
 	useEffect(() => {
+		console.log("[SessionTimeout] ⚙️ Effect running - isAuthenticated:", isAuthenticated);
+		console.log("[SessionTimeout] ⚙️ isLoggedOutRef.current:", isLoggedOutRef.current);
+		
 		if (!isAuthenticated) {
+			// If we just logged out due to inactivity, keep the modal visible
+			// Check the ref (synchronous) to avoid race conditions with state
+			if (isLoggedOutRef.current) {
+				console.log(
+					"[SessionTimeout] ✅ User logged out due to inactivity - KEEPING MODAL VISIBLE"
+				);
+				return;
+			}
+
 			console.log(
-				"[SessionTimeout] User not authenticated, cleaning up timers"
+				"[SessionTimeout] ❌ User not authenticated (manual logout or other reason) - cleaning up"
 			);
 			cleanupTimers();
+			setShowWarning(false);
+			setIsLoggedOut(false);
+			isLoggedOutRef.current = false;
 			return;
 		}
+		
+		console.log("[SessionTimeout] User is authenticated - setting up activity tracking");
+		// Reset logged out state when authenticated
+		isLoggedOutRef.current = false;
 
 		console.log("[SessionTimeout] Initializing session timeout tracking");
 		// Initial timer setup
@@ -144,6 +198,15 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 
 			// Throttle: only process if at least 1 second has passed
 			if (currentTime - lastActivityRef.current < 1000) {
+				return;
+			}
+
+			// IMPORTANT: Ignore activity while warning modal is visible
+			// This prevents the modal from disappearing when user moves mouse to click "Stay Logged In"
+			if (warningStartTimeRef.current !== null) {
+				console.log(
+					"[SessionTimeout] Activity detected but warning is showing - ignoring"
+				);
 				return;
 			}
 
@@ -235,5 +298,6 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 		showWarning: effectiveShowWarning,
 		remainingSeconds,
 		resetActivity,
+		isLoggedOut,
 	};
 };
