@@ -54,7 +54,6 @@ const PaymentSuccess: React.FC = () => {
 				podId: reservation.roomId.podId,
 				quality: reservation.roomId.quality,
 				floor: reservation.roomId.floor,
-				pricePerNight: reservation.roomId.pricePerNight,
 			};
 		}
 		return null;
@@ -149,12 +148,6 @@ const PaymentSuccess: React.FC = () => {
 										<span className="detail-value">
 											{roomInfo.floor.charAt(0).toUpperCase() +
 												roomInfo.floor.slice(1)}
-										</span>
-									</div>
-									<div className="payment-success__detail-item">
-										<span className="detail-label">Price per Night:</span>
-										<span className="detail-value">
-											${roomInfo.pricePerNight.toFixed(2)}
 										</span>
 									</div>
 								</div>

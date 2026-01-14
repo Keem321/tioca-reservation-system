@@ -36,10 +36,10 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 	const [isLoggedOut, setIsLoggedOut] = useState(false);
 
 	// Use refs to avoid stale closures
-	const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
-	const warningTimerRef = useRef<NodeJS.Timeout | null>(null);
-	const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
-	const lastActivityRef = useRef<number>(Date.now());
+	const inactivityTimerRef = useRef<number | null>(null);
+	const warningTimerRef = useRef<number | null>(null);
+	const countdownIntervalRef = useRef<number | null>(null);
+	const lastActivityRef = useRef<number>(0);
 	const warningStartTimeRef = useRef<number | null>(null);
 	const isLoggedOutRef = useRef<boolean>(false);
 
@@ -281,7 +281,7 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 		const broadcastActivity = () => {
 			try {
 				localStorage.setItem("sessionActivity", Date.now().toString());
-			} catch (e) {
+			} catch {
 				// Ignore localStorage errors
 			}
 		};
@@ -292,8 +292,10 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 		}
 	}, [isAuthenticated, showWarning]);
 
+	const effectiveShowWarning = isAuthenticated && showWarning;
+
 	return {
-		showWarning,
+		showWarning: effectiveShowWarning,
 		remainingSeconds,
 		resetActivity,
 		isLoggedOut,

@@ -29,6 +29,9 @@ export interface PodDimensions {
 	height: number; // inches
 }
 
+// Import Offering type for populated offering data
+import type { Offering } from "./offering";
+
 /**
  * Room/Pod type definition for frontend usage
  */
@@ -38,7 +41,8 @@ export interface Room {
 	quality: PodQuality; // Quality level (classic, milk, golden, crystal, matcha)
 	floor: PodFloor; // Floor zone (women-only, men-only, couples, business)
 	capacity: number;
-	pricePerNight: number;
+	offeringId: string; // Reference to the Offering that defines pricing
+	offering?: Offering; // Populated offering data from backend (optional because it may not always be populated)
 	description?: string;
 	dimensions?: PodDimensions;
 	amenities?: string[];
@@ -55,7 +59,7 @@ export interface RoomFormData {
 	podId?: string; // Optional - will be auto-generated if not provided
 	quality: PodQuality;
 	floor: PodFloor; // Floor zone (determines which floor the pod is on)
-	pricePerNight: number;
+	offeringId: string; // Room offering ID
 	description?: string;
 	dimensions?: PodDimensions;
 	amenities?: string[];

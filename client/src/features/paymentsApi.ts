@@ -173,7 +173,7 @@ export const paymentsApi = createApi({
 			{
 				paymentId: string;
 				description?: string;
-				metadata?: Record<string, any>;
+				metadata?: Record<string, unknown>;
 				reason?: string;
 			}
 		>({
@@ -196,8 +196,8 @@ export const paymentsApi = createApi({
 				editedByName: string;
 				editedByEmail: string;
 				fieldName: string;
-				beforeValue: any;
-				afterValue: any;
+				beforeValue: unknown;
+				afterValue: unknown;
 				reason?: string;
 				createdAt: string;
 			}>,

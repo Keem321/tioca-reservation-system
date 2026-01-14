@@ -13,14 +13,22 @@ use("tioca-reservation-system");
 // Comment this out if you want to keep existing data
 db.rooms.deleteMany({});
 
-// Pricing by quality (JPY or your default currency units)
-const priceMap = {
-	classic: 3500,
-	milk: 4500,
-	golden: 6000,
-	crystal: 8500,
-	matcha: 6500, // Women-only exclusive (golden-equivalent with small premium)
-};
+// Get offering IDs by quality - fetch from existing offerings
+const offerings = db.offerings.find({ type: "room" }).toArray();
+const offeringMap = {};
+offerings.forEach((offering) => {
+	offeringMap[offering.quality] = offering._id;
+});
+
+// Verify all required offerings exist
+const requiredQualities = ["classic", "milk", "golden", "crystal", "matcha"];
+for (const quality of requiredQualities) {
+	if (!offeringMap[quality]) {
+		throw new Error(
+			`Missing offering for quality: ${quality}. Please run playground-offerings.mongodb.js first.`
+		);
+	}
+}
 
 function createRoomsForFloor({ floorKey, floorDigit, distributions }) {
 	const rooms = [];
@@ -37,7 +45,7 @@ function createRoomsForFloor({ floorKey, floorDigit, distributions }) {
 				podId,
 				quality, // classic|milk|golden|crystal|matcha
 				floor: floorKey, // women-only|men-only|couples|business
-				pricePerNight: priceMap[quality],
+				offeringId: offeringMap[quality], // Reference to offering with pricing
 				description: `${label} on ${floorKey} floor`
 					.replace("women-only", "Women-Only")
 					.replace("men-only", "Men-Only")

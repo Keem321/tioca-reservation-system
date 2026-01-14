@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import Navbar from "../components/landing/Navbar";
 import {
 	useGetProfileQuery,
@@ -11,6 +11,7 @@ import {
 	useCancelReservationMutation,
 } from "../features/reservationsApi";
 import { useGetRoomsQuery } from "../features/roomsApi";
+import { formatMoney, getDefaultCurrency } from "../utils/money";
 import type { Reservation } from "../types/reservation";
 import "./Profile.css";
 
@@ -29,13 +30,16 @@ export default function Profile() {
 	const [editFormData, setEditFormData] = useState<{
 		name: string;
 		email: string;
-	}>({ name: "", email: "" });
+		currencyPreference: string;
+	}>({ name: "", email: "", currencyPreference: "USD" });
 	const [passwordFormData, setPasswordFormData] = useState({
 		currentPassword: "",
 		newPassword: "",
 		confirmPassword: "",
 	});
-	const hasInitialized = useRef(false);
+
+	// Get rooms data for capacity validation
+	const { data: rooms = [] } = useGetRoomsQuery();
 
 	// Reservation modification state
 	const [editingReservation, setEditingReservation] =
@@ -64,6 +68,8 @@ export default function Profile() {
 		refetch: refetchReservations,
 	} = useGetActiveReservationsQuery();
 
+	const currency = getDefaultCurrency(profile?.currencyPreference || "USD");
+
 	// Mutations
 	const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
 	const [changePassword, { isLoading: isChangingPassword }] =
@@ -73,21 +79,21 @@ export default function Profile() {
 	const [cancelReservation, { isLoading: isCancelling }] =
 		useCancelReservationMutation();
 
-	// Get rooms data for capacity validation
-	const { data: rooms = [] } = useGetRoomsQuery();
-
-	// Initialize edit form when profile loads - only once
-	useEffect(() => {
-		if (profile && !hasInitialized.current) {
+	// Initialize edit form when entering edit mode
+	const handleEnterEditMode = () => {
+		if (profile) {
 			setEditFormData({
 				name: profile.name || "",
 				email: profile.email || "",
+				currencyPreference: profile.currencyPreference || "USD",
 			});
-			hasInitialized.current = true;
 		}
-	}, [profile]);
+		setIsEditing(true);
+	};
 
-	const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleEditChange = (
+		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+	) => {
 		const { name, value } = e.target;
 		setEditFormData((prev) => ({ ...prev, [name]: value }));
 	};
@@ -269,9 +275,13 @@ export default function Profile() {
 										{profile?.provider === "google" ? "Google OAuth" : "Local"}
 									</span>
 								</div>
+								<div className="profile-field">
+									<label>Currency Preference:</label>
+									<span>{currency}</span>
+								</div>
 								<div className="profile-actions">
 									<button
-										onClick={() => setIsEditing(true)}
+										onClick={handleEnterEditMode}
 										className="btn-edit btn-primary"
 									>
 										Edit Profile
@@ -307,6 +317,18 @@ export default function Profile() {
 										onChange={handleEditChange}
 										required
 									/>
+								</label>
+
+								<label>
+									Currency Preference:
+									<select
+										name="currencyPreference"
+										value={editFormData.currencyPreference}
+										onChange={handleEditChange}
+									>
+										<option value="USD">USD ($)</option>
+										<option value="JPY">JPY (¥)</option>
+									</select>
 								</label>
 
 								<div className="form-actions">
@@ -446,7 +468,7 @@ export default function Profile() {
 											</div>
 											<div className="detail-row">
 												<label>Total Price:</label>
-												<span>${res.totalPrice}</span>
+												<span>{formatMoney(res.totalPrice, currency)}</span>
 											</div>
 										</div>
 										{res.specialRequests && (

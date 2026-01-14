@@ -10,6 +10,7 @@ export interface User {
 	name?: string;
 	provider?: string;
 	role?: string;
+	currencyPreference?: string;
 }
 
 export interface AuthState {

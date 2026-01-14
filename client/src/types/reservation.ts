@@ -1,4 +1,14 @@
 /**
+ * Reservation amenity selection
+ */
+export interface ReservationAmenity {
+	offeringId: string;
+	name: string;
+	price: number; // Price in cents
+	priceType: "per-night" | "flat";
+}
+
+/**
  * Reservation type definition for frontend usage.
  */
 export interface Reservation {
@@ -10,7 +20,6 @@ export interface Reservation {
 				podId: string;
 				quality: string;
 				floor: string;
-				pricePerNight: number;
 		  };
 	userId?: string | { _id: string; name: string; email: string };
 	guestName: string;
@@ -19,7 +28,11 @@ export interface Reservation {
 	checkInDate: string;
 	checkOutDate: string;
 	numberOfGuests: number;
-	totalPrice: number;
+	offeringId?: string; // Room offering ID (populated from backend)
+	baseRoomPrice: number; // Price per night in cents
+	selectedAmenities: ReservationAmenity[];
+	numberOfNights: number;
+	totalPrice: number; // Total in cents
 	status: "pending" | "confirmed" | "checked-in" | "checked-out" | "cancelled";
 	paymentStatus: "unpaid" | "partial" | "paid" | "refunded";
 	specialRequests?: string;
@@ -41,7 +54,9 @@ export interface ReservationFormData {
 	checkInDate: string;
 	checkOutDate: string;
 	numberOfGuests: number;
-	totalPrice: number;
+	offeringId: string; // Room offering ID
+	selectedAmenities: string[]; // Array of amenity offering IDs
+	totalPrice: number; // Calculated total in cents
 	status?: "pending" | "confirmed" | "checked-in" | "checked-out" | "cancelled";
 	paymentStatus?: "unpaid" | "partial" | "paid" | "refunded";
 	specialRequests?: string;

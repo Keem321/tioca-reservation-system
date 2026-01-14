@@ -1,6 +1,7 @@
 import ReservationRepository from "../repositories/reservation.repository.js";
 import RoomRepository from "../repositories/room.repository.js";
 import RoomHoldRepository from "../repositories/roomHold.repository.js";
+import PricingService from "./pricing.service.js";
 import mongoose from "mongoose";
 import crypto from "crypto";
 
@@ -47,6 +48,9 @@ class ReservationService {
 	/**
 	 * Create a new reservation
 	 * @param {Object} reservationData - Reservation data (includes holdId and sessionId if from a hold)
+	 *   - roomId, userId, guestName, guestEmail, checkInDate, checkOutDate, numberOfGuests
+	 *   - offeringId (room offering ID), selectedAmenities (array of offering IDs)
+	 *   - holdId, sessionId (optional)
 	 * @returns {Promise<Object>}
 	 */
 	async createReservation(reservationData) {
@@ -58,7 +62,8 @@ class ReservationService {
 			checkInDate,
 			checkOutDate,
 			numberOfGuests,
-			totalPrice,
+			offeringId,
+			selectedAmenities = [],
 			holdId,
 			sessionId,
 		} = reservationData;
@@ -71,7 +76,7 @@ class ReservationService {
 			!checkInDate ||
 			!checkOutDate ||
 			!numberOfGuests ||
-			totalPrice === undefined
+			!offeringId
 		) {
 			throw new Error("Missing required fields");
 		}
@@ -194,7 +199,38 @@ class ReservationService {
 				throw new Error("Room is currently being booked by another user");
 			}
 
-			// Generate unique confirmation code
+			// Calculate number of nights
+			const numberOfNights = Math.ceil(
+				(checkOut - checkIn) / (1000 * 60 * 60 * 24)
+			);
+
+			// Calculate pricing using pricing service
+			const pricingData = await PricingService.calculateReservationPrice(
+				offeringId,
+				numberOfNights,
+				selectedAmenities
+			);
+
+			// Build amenities data for storage
+			const amenitiesData = [];
+			if (selectedAmenities.length > 0) {
+				const amenities = await PricingService.getAmenityOfferings();
+				for (const amenityId of selectedAmenities) {
+					const amenity = amenities.find(
+						(a) => a._id.toString() === amenityId.toString()
+					);
+					if (amenity) {
+						amenitiesData.push({
+							offeringId: amenity._id,
+							name: amenity.name,
+							price: amenity.basePrice,
+							priceType: amenity.priceType,
+						});
+					}
+				}
+			}
+      
+      // Generate unique confirmation code
 			let confirmationCode;
 			let isUnique = false;
 			while (!isUnique) {
@@ -207,19 +243,44 @@ class ReservationService {
 				}
 			}
 
-			// Add confirmation code to reservation data
-			const reservationWithCode = {
-				...reservationData,
-				confirmationCode,
+			// Create reservation with new structure
+			const reservationPayload = {
+				roomId,
+				userId,
+				guestName,
+				guestEmail,
+				checkInDate,
+				checkOutDate,
+				numberOfGuests,
+				baseRoomPrice: pricingData.basePrice / numberOfNights, // Store per-night rate
+				selectedAmenities: amenitiesData,
+				numberOfNights,
+				totalPrice: pricingData.totalPrice,
 			};
+      
+      // Generate unique confirmation code
+			let confirmationCode;
+			let isUnique = false;
+			while (!isUnique) {
+				confirmationCode = this.generateConfirmationCode();
+				const existing = await ReservationRepository.findByConfirmationCode(
+					confirmationCode
+				);
+				if (!existing) {
+					isUnique = true;
+				}
+			}
+      
+      // Add confirmation code to payload
+			reservationPayload.confirmationCode = confirmationCode;
 
-			// Create reservation
+      // Create reservation
 			const reservation = await ReservationRepository.create(
-				reservationWithCode
+				reservationPayload
 			);
 
-			// Populate room details before returning
-			await reservation.populate("roomId", "podId quality floor pricePerNight");
+			// Populate room and offering details before returning
+			await reservation.populate("roomId", "podId quality floor");
 
 			// If hold exists, mark it as converted
 			if (holdId) {

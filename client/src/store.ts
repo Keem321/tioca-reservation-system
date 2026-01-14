@@ -4,6 +4,7 @@ import { reservationsApi } from "./features/reservationsApi";
 import { userApi } from "./features/userApi";
 import { paymentsApi } from "./features/paymentsApi";
 import { holdsApi } from "./features/holdsApi";
+import { offeringsApi } from "./features/offeringsApi";
 import bookingReducer from "./features/bookingSlice";
 import authReducer from "./features/authSlice";
 import { setupListeners } from "@reduxjs/toolkit/query";
@@ -29,6 +30,7 @@ export const store = configureStore({
 		[userApi.reducerPath]: userApi.reducer,
 		[paymentsApi.reducerPath]: paymentsApi.reducer,
 		[holdsApi.reducerPath]: holdsApi.reducer,
+		[offeringsApi.reducerPath]: offeringsApi.reducer,
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware().concat([
@@ -37,6 +39,7 @@ export const store = configureStore({
 			userApi.middleware,
 			paymentsApi.middleware,
 			holdsApi.middleware,
+			offeringsApi.middleware,
 		]),
 });
 

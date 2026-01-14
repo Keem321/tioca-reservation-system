@@ -1,0 +1,508 @@
+/* Offering Management Page Styles */
+
+.offering-management {
+	min-height: 100vh;
+	background-color: #f5f5f5;
+	padding: 2rem 1rem;
+}
+
+.offering-management__container {
+	max-width: 1400px;
+	margin: 0 auto;
+}
+
+.offering-management__header {
+	margin-bottom: 2rem;
+}
+
+.offering-management__header h1 {
+	font-size: 2.5rem;
+	margin-bottom: 0.5rem;
+	color: #333;
+}
+
+.offering-management__header p {
+	color: #666;
+	font-size: 1.1rem;
+}
+
+/* Tabs */
+.offering-management__tabs {
+	display: flex;
+	gap: 0.5rem;
+	margin-bottom: 2rem;
+	border-bottom: 2px solid #e0e0e0;
+}
+
+.offering-management__tabs .tab {
+	padding: 1rem 2rem;
+	background: none;
+	border: none;
+	border-bottom: 3px solid transparent;
+	font-size: 1rem;
+	font-weight: 500;
+	color: #666;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.offering-management__tabs .tab:hover {
+	color: #333;
+	background-color: #f9f9f9;
+}
+
+.offering-management__tabs .tab.active {
+	color: #2c3e50;
+	border-bottom-color: #2c3e50;
+	background-color: white;
+}
+
+/* Actions */
+.offering-management__actions {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 2rem;
+}
+
+.btn-create {
+	padding: 0.75rem 1.5rem;
+	font-size: 1rem;
+	font-weight: 600;
+	border-radius: 8px;
+	border: none;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.btn-primary {
+	background-color: #2c3e50;
+	color: white;
+}
+
+.btn-primary:hover {
+	background-color: #1a252f;
+	transform: translateY(-2px);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Offerings Grid */
+.offerings-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+	gap: 1.5rem;
+}
+
+.no-offerings {
+	text-align: center;
+	padding: 3rem;
+	background: white;
+	border-radius: 12px;
+	color: #666;
+	font-size: 1.1rem;
+}
+
+/* Offering Card */
+.offering-card {
+	background: white;
+	border-radius: 12px;
+	padding: 1.5rem;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	transition: all 0.3s ease;
+	border: 2px solid transparent;
+}
+
+.offering-card:hover {
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+	transform: translateY(-2px);
+}
+
+.offering-card.inactive {
+	opacity: 0.6;
+	border-color: #ccc;
+}
+
+.offering-card__header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 1rem;
+	padding-bottom: 1rem;
+	border-bottom: 1px solid #e0e0e0;
+}
+
+.offering-card__header h3 {
+	font-size: 1.25rem;
+	color: #333;
+	margin: 0;
+	flex: 1;
+}
+
+.offering-card__badges {
+	display: flex;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+.badge {
+	padding: 0.25rem 0.75rem;
+	border-radius: 12px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.badge-tag {
+	background-color: #e3f2fd;
+	color: #1976d2;
+}
+
+.badge-active {
+	background-color: #e8f5e9;
+	color: #4caf50;
+}
+
+.badge-inactive {
+	background-color: #ffebee;
+	color: #f44336;
+}
+
+.offering-card__content {
+	margin-bottom: 1.5rem;
+}
+
+.offering-card__content > p {
+	color: #666;
+	margin-bottom: 1rem;
+	line-height: 1.6;
+}
+
+.offering-detail {
+	margin: 0.75rem 0;
+	font-size: 0.95rem;
+}
+
+.offering-detail strong {
+	color: #333;
+	display: inline-block;
+	min-width: 100px;
+}
+
+.feature-list {
+	margin: 0.5rem 0 0 1rem;
+	padding: 0;
+	list-style: disc;
+}
+
+.feature-list li {
+	margin: 0.25rem 0;
+	color: #666;
+	font-size: 0.9rem;
+}
+
+.offering-card__actions {
+	display: flex;
+	gap: 0.75rem;
+}
+
+.offering-card__actions button {
+	flex: 1;
+	padding: 0.5rem 1rem;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.btn-edit {
+	background-color: #f5f5f5;
+	color: #333;
+}
+
+.btn-edit:hover {
+	background-color: #e0e0e0;
+}
+
+.btn-secondary {
+	background-color: #607d8b;
+	color: white;
+}
+
+.btn-secondary:hover {
+	background-color: #455a64;
+}
+
+.btn-delete {
+	background-color: #f44336;
+	color: white;
+}
+
+.btn-delete:hover {
+	background-color: #d32f2f;
+}
+
+.btn-danger {
+	background-color: #f44336;
+	color: white;
+}
+
+.btn-danger:hover {
+	background-color: #d32f2f;
+}
+
+.btn-danger:disabled {
+	background-color: #ccc;
+	cursor: not-allowed;
+}
+
+/* Modal */
+.modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.6);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+	padding: 1rem;
+}
+
+.modal-content {
+	background: white;
+	border-radius: 16px;
+	width: 100%;
+	max-width: 600px;
+	max-height: 90vh;
+	overflow-y: auto;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1.5rem;
+	border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-header h2 {
+	margin: 0;
+	font-size: 1.5rem;
+	color: #333;
+}
+
+.modal-close {
+	background: none;
+	border: none;
+	font-size: 2rem;
+	color: #999;
+	cursor: pointer;
+	padding: 0;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+	background-color: #f5f5f5;
+	color: #333;
+}
+
+.modal-form {
+	display: flex;
+	flex-direction: column;
+}
+
+.modal-body {
+	padding: 1.5rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+
+.modal-body label {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	font-weight: 500;
+	color: #333;
+}
+
+.modal-body input,
+.modal-body select,
+.modal-body textarea {
+	padding: 0.75rem;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	font-size: 1rem;
+	font-family: inherit;
+	transition: border-color 0.2s ease;
+}
+
+.modal-body input:focus,
+.modal-body select:focus,
+.modal-body textarea:focus {
+	outline: none;
+	border-color: #2c3e50;
+}
+
+.modal-body input:disabled,
+.modal-body select:disabled {
+	background-color: #f5f5f5;
+	cursor: not-allowed;
+}
+
+/* Features Section */
+.features-section {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.feature-input-group {
+	display: flex;
+	gap: 0.5rem;
+}
+
+.feature-input-group input {
+	flex: 1;
+}
+
+.btn-add-feature {
+	padding: 0.75rem 1.5rem;
+	background-color: #2c3e50;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.btn-add-feature:hover {
+	background-color: #1a252f;
+}
+
+.feature-list-edit {
+	list-style: none;
+	padding: 0;
+	margin: 0.5rem 0 0 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.feature-list-edit li {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.5rem;
+	background-color: #f5f5f5;
+	border-radius: 6px;
+}
+
+.btn-remove-feature {
+	background: none;
+	border: none;
+	color: #f44336;
+	font-size: 1.5rem;
+	cursor: pointer;
+	padding: 0;
+	width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	transition: all 0.2s ease;
+}
+
+.btn-remove-feature:hover {
+	background-color: #ffebee;
+}
+
+.checkbox-label {
+	flex-direction: row !important;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.checkbox-label input[type="checkbox"] {
+	width: auto;
+	margin: 0;
+}
+
+.modal-footer {
+	display: flex;
+	gap: 1rem;
+	padding: 1.5rem;
+	border-top: 1px solid #e0e0e0;
+	background-color: #f9f9f9;
+}
+
+.btn-save {
+	flex: 1;
+	padding: 0.75rem 1.5rem;
+	border: none;
+	border-radius: 6px;
+	font-size: 1rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.btn-save:disabled {
+	background-color: #ccc;
+	cursor: not-allowed;
+}
+
+.btn-cancel {
+	padding: 0.75rem 1.5rem;
+	background: none;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	font-size: 1rem;
+	font-weight: 500;
+	color: #666;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+	background-color: #f5f5f5;
+	border-color: #999;
+	color: #333;
+}
+
+.btn-ghost {
+	background: none;
+	border: 1px solid #ddd;
+	color: #666;
+}
+
+.btn-ghost:hover {
+	background-color: #f5f5f5;
+	border-color: #999;
+	color: #333;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	.offerings-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.modal-content {
+		max-width: 100%;
+		margin: 1rem;
+	}
+}

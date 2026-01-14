@@ -133,10 +133,11 @@ const BookingConfirmation: React.FC = () => {
 					dispatch(setHoldId(hold._id));
 					createdHoldId = hold._id;
 				}
-			} catch (err: any) {
+			} catch (err) {
 				if (mounted) {
+					const error = err as { data?: { error?: string } };
 					const errorMessage =
-						err?.data?.error ||
+						error?.data?.error ||
 						"Failed to reserve this room. It may no longer be available.";
 					setHoldError(errorMessage);
 				}
@@ -198,13 +199,14 @@ const BookingConfirmation: React.FC = () => {
 		const nights = Math.ceil(
 			(checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
 		);
-		const totalPrice = room.pricePerNight * nights;
+		const totalPrice = (room.offering?.basePrice || 0) * nights;
 
 		const checkInDateTime = combineDateTime(checkIn, checkInTime);
 		const checkOutDateTime = combineDateTime(checkOut, checkOutTime);
 
 		const reservationData: ReservationFormData = {
 			roomId: room._id,
+			offeringId: room.offering?._id || room.offeringId || "",
 			userId: user?.id,
 			guestName,
 			guestEmail,
@@ -212,6 +214,7 @@ const BookingConfirmation: React.FC = () => {
 			checkInDate: checkInDateTime,
 			checkOutDate: checkOutDateTime,
 			numberOfGuests: guests,
+			selectedAmenities: [],
 			totalPrice,
 			status: "pending",
 			paymentStatus: "unpaid",
@@ -223,12 +226,14 @@ const BookingConfirmation: React.FC = () => {
 			dispatch(setPendingReservation(reservation));
 			// Don't release hold here - it will be released after payment or on unmount of payment page
 			navigate("/payment");
-		} catch (err: any) {
-			console.error("Failed to create reservation:", err);
+		} catch (err) {
+			const error = err instanceof Error ? err : new Error("Unknown error");
+			const apiError = err as { data?: { error?: string }; message?: string };
+			console.error("Failed to create reservation:", error);
 			// Show user-friendly error message
 			const errorMessage =
-				err?.data?.error ||
-				err?.message ||
+				apiError?.data?.error ||
+				error.message ||
 				"Failed to create reservation. Please try again.";
 			setTimeError(errorMessage);
 		}

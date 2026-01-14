@@ -15,6 +15,7 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import RoomManagement from "./pages/RoomManagement";
 import ReservationManagement from "./pages/ReservationManagement";
 import PaymentsManagement from "./pages/PaymentsManagement";
+import OfferingManagement from "./pages/OfferingManagement";
 import ReservationLookup from "./pages/ReservationLookup";
 import GuestReservationView from "./pages/GuestReservationView";
 import ReservationVerify from "./pages/ReservationVerify";
@@ -75,14 +76,6 @@ function App() {
 	return (
 		<Router>
 			<div className="App">
-				{/* Debug: Always show modal state in console */}
-				{console.log(
-					"[App Render] showWarning =",
-					showWarning,
-					"remainingSeconds =",
-					remainingSeconds
-				)}
-
 				{/* Session timeout warning modal */}
 				{showWarning && (
 					<SessionTimeoutWarning
@@ -128,6 +121,14 @@ function App() {
 						element={
 							<ProtectedRoute requiredRole="manager">
 								<RoomManagement />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/manage/offerings"
+						element={
+							<ProtectedRoute requiredRole="manager">
+								<OfferingManagement />
 							</ProtectedRoute>
 						}
 					/>

@@ -4,7 +4,7 @@ import PaymentRepository from "../repositories/payment.repository.js";
 /**
  * Create a payment intent for a reservation
  * @route POST /api/payments/create-intent
- * @param {import('express').Request} req - Express request object
+ * @param {import('express').Request} req - Express request object with reservationId, amount (in cents), currency
  * @param {import('express').Response} res - Express response object
  * @returns {void}
  */
@@ -14,14 +14,14 @@ export async function createPaymentIntent(req, res) {
 
 		if (!reservationId || !amount) {
 			return res.status(400).json({
-				error: "reservationId and amount are required",
+				error: "reservationId and amount (in cents) are required",
 			});
 		}
 
-		// Validate amount is a positive number
-		if (typeof amount !== "number" || amount <= 0) {
+		// Validate amount is a positive integer (cents)
+		if (!Number.isInteger(amount) || amount <= 0) {
 			return res.status(400).json({
-				error: "Amount must be a positive number",
+				error: "Amount must be a positive integer representing cents",
 			});
 		}
 
@@ -70,7 +70,7 @@ export async function confirmPayment(req, res) {
 /**
  * Process refund for a reservation
  * @route POST /api/payments/refund
- * @param {import('express').Request} req - Express request object
+ * @param {import('express').Request} req - Express request object with reservationId and optional amount (in cents)
  * @param {import('express').Response} res - Express response object
  * @returns {void}
  */
@@ -84,13 +84,15 @@ export async function processRefund(req, res) {
 			});
 		}
 
-		// Convert amount to cents if provided
-		const amountInCents = amount ? Math.round(amount * 100) : null;
+		// Amount should already be in cents from frontend
+		// If amount is provided, validate it's a positive integer
+		if (amount !== undefined && (!Number.isInteger(amount) || amount <= 0)) {
+			return res.status(400).json({
+				error: "Amount must be a positive integer representing cents",
+			});
+		}
 
-		const result = await PaymentService.processRefund(
-			reservationId,
-			amountInCents
-		);
+		const result = await PaymentService.processRefund(reservationId, amount);
 
 		res.json(result);
 	} catch (err) {

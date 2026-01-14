@@ -89,7 +89,7 @@ class RoomRepository {
 		}
 
 		// Get all rooms matching the basic filters
-		const rooms = await Room.find(filter).sort({ pricePerNight: 1 });
+		const rooms = await Room.find(filter).sort({ podId: 1 });
 
 		// Find all overlapping reservations for the date range
 		// A reservation overlaps if it's not cancelled and the dates intersect

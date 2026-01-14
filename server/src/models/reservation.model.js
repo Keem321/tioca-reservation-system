@@ -10,7 +10,26 @@ const reservationSchema = new Schema(
 		checkInDate: { type: Date, required: true },
 		checkOutDate: { type: Date, required: true },
 		numberOfGuests: { type: Number, required: true, min: 1 },
-		totalPrice: { type: Number, required: true, min: 0 },
+
+		// Pricing information (stored in cents)
+		baseRoomPrice: { type: Number, required: true, min: 0 }, // Base price for room offering per night (in cents)
+		selectedAmenities: [
+			{
+				offeringId: {
+					type: Schema.Types.ObjectId,
+					ref: "Offering",
+				},
+				name: { type: String },
+				price: { type: Number, min: 0 }, // Price in cents
+				priceType: {
+					type: String,
+					enum: ["per-night", "flat"],
+				},
+			},
+		],
+		numberOfNights: { type: Number, required: true, min: 1 },
+		totalPrice: { type: Number, required: true, min: 0 }, // Total in cents
+
 		status: {
 			type: String,
 			enum: ["pending", "confirmed", "checked-in", "checked-out", "cancelled"],

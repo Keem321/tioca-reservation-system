@@ -6,6 +6,7 @@ import type { Reservation } from "../types/reservation";
 export interface ProfileUpdateData {
 	name?: string;
 	email?: string;
+	currencyPreference?: string;
 }
 
 export interface PasswordChangeData {

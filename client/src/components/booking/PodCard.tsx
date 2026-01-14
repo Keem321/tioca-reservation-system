@@ -9,6 +9,7 @@ import {
 	getRoomQualityDescription,
 	getRoomDimensions,
 } from "../../utils/roomImages";
+import { formatMoney } from "../../utils/money";
 import "./PodCard.css";
 
 /**
@@ -34,7 +35,9 @@ const PodCard: React.FC<PodCardProps> = ({
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
-	const totalPrice = pod.pricePerNight * nights;
+	// Get price from offering (in cents)
+	const pricePerNight = pod.offering?.basePrice || 0;
+	const totalPrice = pricePerNight * nights;
 	const displayLabel = getRoomDisplayLabel(pod.quality, pod.floor);
 	const roomImage = getRoomImage(pod.quality, pod.floor);
 	const description = getRoomQualityDescription(pod.quality);
@@ -82,10 +85,14 @@ const PodCard: React.FC<PodCardProps> = ({
 			</div>
 			<div className="pod-card__pricing">
 				<div className="pod-card__price-info">
-					<div className="pod-card__price">${pod.pricePerNight}</div>
+					<div className="pod-card__price">
+						{formatMoney(pricePerNight, "USD")}
+					</div>
 					<div className="pod-card__price-label">per night</div>
 					{nights > 1 && (
-						<div className="pod-card__total-price">${totalPrice} total</div>
+						<div className="pod-card__total-price">
+							{formatMoney(totalPrice, "USD")} total
+						</div>
 					)}
 				</div>
 				<button onClick={handleBookNow} className="pod-card__button">

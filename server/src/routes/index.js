@@ -10,6 +10,7 @@ import reservationRouter from "./reservation.routes.js";
 import userRouter from "./user.routes.js";
 import paymentRouter from "./payment.routes.js";
 import holdRouter from "./hold.routes.js";
+import offeringRouter from "./offering.routes.js";
 import authRouter from "./auth.js";
 import { sessionActivityMiddleware } from "../middleware/sessionActivity.js";
 
@@ -29,6 +30,7 @@ apiRouter.use("/reservations", reservationRouter);
 apiRouter.use("/user", userRouter);
 apiRouter.use("/payments", paymentRouter);
 apiRouter.use("/holds", holdRouter);
+apiRouter.use("/offerings", offeringRouter);
 apiRouter.use("/auth", authRouter); // Auth routes now under /api/auth
 
 // Public router (for non-API routes like health check)
