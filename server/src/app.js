@@ -24,19 +24,51 @@ const MONGO_URI =
 // Middleware
 // Allow cross-origin requests from the client and include credentials (cookies)
 const clientOrigin = process.env.CLIENT_ORIGIN || "http://localhost:5173";
-console.log(`[CORS] Configured with origin: ${clientOrigin}`);
+// Also allow HTTPS for local mkcert testing, ngrok tunnels, and production
+const allowedOrigins = [
+	clientOrigin, 
+	"http://localhost:5173", 
+	"https://localhost:5173"
+];
+
+// Also allow ngrok domains for testing (they end in .ngrok-free.dev or .ngrok.io)
+const isNgrokDomain = (origin) => {
+	return origin && (origin.includes('.ngrok-free.dev') || origin.includes('.ngrok.io'));
+};
+
+console.log(`[CORS] Configured with origins:`, allowedOrigins);
 
 app.use(
 	cors({
-		origin: clientOrigin,
+		origin: (origin, callback) => {
+			// Allow requests with no origin (like mobile apps, curl, or Postman)
+			if (!origin) return callback(null, true);
+			
+			// Allow configured origins or ngrok domains
+			if (allowedOrigins.indexOf(origin) !== -1 || isNgrokDomain(origin)) {
+				callback(null, true);
+			} else {
+				callback(new Error(`Origin ${origin} not allowed by CORS`));
+			}
+		},
 		credentials: true,
-		allowedHeaders: ["Content-Type", "Authorization"],
+		allowedHeaders: ["Content-Type", "Authorization", "Access-Control-Request-Private-Network"],
 		exposedHeaders: ["set-cookie"],
 		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 	})
 );
 
 app.use(json());
+
+// Handle Chrome's Private Network Access for ngrok → localhost
+// This is required when accessing localhost from a public domain (like ngrok)
+app.use((req, res, next) => {
+	// Check if this is a preflight request asking for private network access
+	if (req.headers['access-control-request-private-network']) {
+		res.setHeader('Access-Control-Allow-Private-Network', 'true');
+	}
+	next();
+});
 
 // Trust the entire proxy chain (CloudFront -> ALB -> Nginx) so req.secure is accurate
 app.set("trust proxy", true);
@@ -69,6 +101,7 @@ app.use((req, res, next) => {
 
 // Session setup: configure secure cookies for HTTPS environments
 const isSecureEnv = clientOrigin.startsWith("https://");
+const isLocalhost = clientOrigin.includes("localhost");
 
 // Conditionally apply TLS settings for AWS DocumentDB (not localhost)
 const useDocDBTls =
@@ -101,8 +134,10 @@ app.use(
 		resave: false,
 		saveUninitialized: false, // Only create session when user modifies it
 		cookie: {
-			secure: isSecureEnv, // https only in production
-			sameSite: isSecureEnv ? "none" : "lax", // "none" required for cross-site HTTPS cookies (CloudFront)
+			// For localhost HTTPS with self-signed cert, don't require secure flag
+			// In production with valid HTTPS, require secure flag
+			secure: isSecureEnv && !isLocalhost,
+			sameSite: "lax", // Use lax for localhost, prevents cross-site issues
 			httpOnly: true,
 			maxAge: 24 * 60 * 60 * 1000, // 24 hours
 		},

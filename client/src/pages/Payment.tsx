@@ -5,6 +5,7 @@ import type { StripeElementsOptions } from "@stripe/stripe-js";
 import {
 	Elements,
 	CardElement,
+	PaymentRequestButtonElement,
 	useStripe,
 	useElements,
 } from "@stripe/react-stripe-js";
@@ -48,6 +49,7 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 		clientSecret: string;
 		paymentIntentId: string;
 	} | null>(null);
+	const [paymentRequest, setPaymentRequest] = useState<any>(null);
 	const [createPaymentIntent, { isLoading: isCreatingIntent }] =
 		useCreatePaymentIntentMutation();
 	const [confirmPayment, { isLoading: isConfirming }] =
@@ -107,6 +109,106 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 			createIntent();
 		}
 	}, [reservation._id, amountInCents, createPaymentIntent, paymentIntentData]);
+
+	// Set up Payment Request Button (Google Pay / Apple Pay)
+	useEffect(() => {
+		if (!stripe || !paymentIntentData) {
+			return;
+		}
+
+		const pr = stripe.paymentRequest({
+			country: "US",
+			currency: "usd",
+			total: {
+				label: "Hotel Reservation",
+				amount: amountInCents,
+			},
+			requestPayerName: true,
+			requestPayerEmail: true,
+		});
+
+		// Check if Payment Request is available (Google Pay / Apple Pay)
+		pr.canMakePayment().then((result) => {
+			if (result) {
+				setPaymentRequest(pr);
+			}
+		});
+
+		// Handle payment method submission
+		pr.on("paymentmethod", async (ev) => {
+			setIsProcessing(true);
+			setError(null);
+
+			try {
+				// Confirm payment with Stripe using the payment method from Google/Apple Pay
+				const { error: confirmError, paymentIntent } =
+					await stripe.confirmCardPayment(
+						paymentIntentData.clientSecret,
+						{
+							payment_method: ev.paymentMethod.id,
+						},
+						{ handleActions: false }
+					);
+
+				if (confirmError) {
+					ev.complete("fail");
+					setError(confirmError.message || "Payment failed");
+					setIsProcessing(false);
+					return;
+				}
+
+				ev.complete("success");
+
+				if (paymentIntent?.status === "requires_action") {
+					// Handle 3D Secure if needed
+					const { error: actionError } = await stripe.confirmCardPayment(
+						paymentIntentData.clientSecret
+					);
+					if (actionError) {
+						setError(actionError.message || "Authentication failed");
+						setIsProcessing(false);
+						return;
+					}
+				}
+
+				// Confirm payment on backend
+				const confirmResult = await confirmPayment({
+					reservationId: reservation._id,
+					paymentIntentId: paymentIntentData.paymentIntentId,
+				}).unwrap();
+
+				if (confirmResult.success) {
+					navigate("/payment/success", {
+						state: { reservation: confirmResult.reservation },
+						replace: true,
+					});
+					setTimeout(() => {
+						dispatch(resetBooking());
+					}, 100);
+				} else {
+					setError(confirmResult.message || "Payment confirmation failed");
+					setIsProcessing(false);
+				}
+			} catch (err) {
+				ev.complete("fail");
+				const error = err as { data?: { error?: string }; message?: string };
+				setError(
+					error?.data?.error ||
+						error?.message ||
+						"An error occurred during payment processing"
+				);
+				setIsProcessing(false);
+			}
+		});
+	}, [
+		stripe,
+		paymentIntentData,
+		amountInCents,
+		reservation._id,
+		confirmPayment,
+		navigate,
+		dispatch,
+	]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -252,6 +354,23 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 
 	return (
 		<form onSubmit={handleSubmit} className="payment-form">
+			{/* Google Pay / Apple Pay Button */}
+			{paymentRequest && (
+				<div className="payment-form__section">
+					<label className="payment-form__label">Express Checkout</label>
+					<div className="payment-form__payment-request">
+						<PaymentRequestButtonElement options={{ paymentRequest }} />
+					</div>
+				</div>
+			)}
+
+			{/* Divider if payment request is available */}
+			{paymentRequest && (
+				<div className="payment-form__divider">
+					<span>Or pay with card</span>
+				</div>
+			)}
+
 			<div className="payment-form__section">
 				<label className="payment-form__label">Card Details</label>
 				<div className="payment-form__card-element">
