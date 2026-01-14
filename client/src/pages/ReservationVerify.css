@@ -1,0 +1,183 @@
+.reservation-verify {
+	min-height: 100vh;
+	background: linear-gradient(135deg, #f5f1e8 0%, #d4c5b9 100%);
+	padding: 100px 20px 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.reservation-verify__container {
+	max-width: 600px;
+	margin: 0 auto;
+	background: white;
+	border-radius: 12px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+	padding: 60px 40px;
+}
+
+.verification-status {
+	text-align: center;
+}
+
+.verification-status h2 {
+	color: #3d3d3d;
+	font-size: 28px;
+	margin-bottom: 15px;
+	font-weight: 600;
+}
+
+.verification-status p {
+	color: #666;
+	font-size: 16px;
+	margin: 10px 0;
+	line-height: 1.6;
+}
+
+/* Verifying State */
+.verification-status.verifying {
+	color: #8b6f47;
+}
+
+.spinner {
+	width: 60px;
+	height: 60px;
+	border: 6px solid #f5f1e8;
+	border-top-color: #8b6f47;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+	margin: 0 auto 30px;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Success State */
+.verification-status.success .success-icon {
+	font-size: 80px;
+	margin-bottom: 20px;
+	animation: scaleIn 0.5s ease-out;
+}
+
+@keyframes scaleIn {
+	from {
+		transform: scale(0);
+		opacity: 0;
+	}
+	to {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+.verification-status.success h2 {
+	color: #28a745;
+}
+
+/* Error State */
+.verification-status.error .error-icon {
+	font-size: 80px;
+	margin-bottom: 20px;
+	animation: shake 0.5s ease-out;
+}
+
+@keyframes shake {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	25% {
+		transform: translateX(-10px);
+	}
+	75% {
+		transform: translateX(10px);
+	}
+}
+
+.verification-status.error h2 {
+	color: #dc3545;
+}
+
+.error-message {
+	background-color: #fff3cd;
+	border: 1px solid #ffc107;
+	border-radius: 6px;
+	padding: 15px;
+	margin: 20px 0;
+	color: #856404;
+	font-weight: 500;
+}
+
+.error-actions {
+	margin-top: 30px;
+}
+
+.error-actions p {
+	margin-bottom: 20px;
+	font-size: 14px;
+}
+
+.btn {
+	padding: 14px 28px;
+	border: none;
+	border-radius: 6px;
+	font-size: 16px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	margin: 5px;
+}
+
+.btn-primary {
+	background-color: #8b6f47;
+	color: white;
+}
+
+.btn-primary:hover {
+	background-color: #6d5738;
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(139, 111, 71, 0.3);
+}
+
+.btn-secondary {
+	background-color: white;
+	color: #8b6f47;
+	border: 2px solid #8b6f47;
+}
+
+.btn-secondary:hover {
+	background-color: #f5f1e8;
+}
+
+@media (max-width: 768px) {
+	.reservation-verify {
+		padding: 80px 15px 30px;
+	}
+
+	.reservation-verify__container {
+		padding: 40px 25px;
+	}
+
+	.verification-status h2 {
+		font-size: 24px;
+	}
+
+	.spinner {
+		width: 50px;
+		height: 50px;
+	}
+
+	.success-icon,
+	.error-icon {
+		font-size: 60px !important;
+	}
+
+	.btn {
+		display: block;
+		width: 100%;
+		margin: 10px 0;
+	}
+}

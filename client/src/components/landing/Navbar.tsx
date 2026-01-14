@@ -164,15 +164,15 @@ const Navbar: React.FC = () => {
 									Sign In
 								</button>
 							)}
-							<button
-								onClick={() => {
-									navigate("/dashboard");
-									setAccountMenuOpen(false);
-								}}
-								className="navbar__dropdown-item"
-							>
-								Check Reservation
-							</button>
+						<button
+							onClick={() => {
+								navigate("/reservations/lookup");
+								setAccountMenuOpen(false);
+							}}
+							className="navbar__dropdown-item"
+						>
+							Check Reservation
+						</button>
 						</div>
 					)}
 				</div>

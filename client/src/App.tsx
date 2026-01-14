@@ -15,6 +15,9 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import RoomManagement from "./pages/RoomManagement";
 import ReservationManagement from "./pages/ReservationManagement";
 import PaymentsManagement from "./pages/PaymentsManagement";
+import ReservationLookup from "./pages/ReservationLookup";
+import GuestReservationView from "./pages/GuestReservationView";
+import ReservationVerify from "./pages/ReservationVerify";
 import SessionTimeoutTest from "./pages/SessionTimeoutTest";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SessionTimeoutWarning from "./components/SessionTimeoutWarning";
@@ -101,6 +104,17 @@ function App() {
 						path="/session-timeout-test"
 						element={<SessionTimeoutTest />}
 					/>
+					{/* Guest reservation routes (public) */}
+					<Route path="/reservations/lookup" element={<ReservationLookup />} />
+					<Route
+						path="/reservations/verify/:token"
+						element={<ReservationVerify />}
+					/>
+					<Route
+						path="/reservations/guest/view"
+						element={<GuestReservationView />}
+					/>
+					{/* Protected routes */}
 					<Route
 						path="/profile"
 						element={
