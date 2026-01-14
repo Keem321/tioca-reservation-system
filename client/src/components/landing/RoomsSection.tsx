@@ -21,6 +21,9 @@ const RoomsSection: React.FC = () => {
 		navigate("/booking");
 	};
 
+	// Qualities that have twin variants available on couples floor
+	const twinAvailableQualities = new Set(["classic", "milk", "golden"]);
+
 	return (
 		<section id="rooms" className="rooms-section">
 			<div className="rooms-section__container">
@@ -56,6 +59,11 @@ const RoomsSection: React.FC = () => {
 										{offering.tag}
 									</span>
 								)}
+								{twinAvailableQualities.has(offering.quality) && (
+									<span className="rooms-section__card-tag rooms-section__card-tag--twin">
+										Twin Available
+									</span>
+								)}
 							</div>
 							<div className="rooms-section__card-content">
 								<div className="rooms-section__card-header">
@@ -80,7 +88,9 @@ const RoomsSection: React.FC = () => {
 									<div className="rooms-section__card-capacity">
 										<span className="rooms-section__capacity-icon">👤</span>
 										<span className="rooms-section__capacity-text">
-											{offering.capacity}
+											{twinAvailableQualities.has(offering.quality)
+												? `${offering.capacity} / Twin: 2 guests`
+												: offering.capacity}
 										</span>
 									</div>
 								)}

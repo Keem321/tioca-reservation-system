@@ -95,6 +95,13 @@
 	backdrop-filter: blur(10px);
 }
 
+.rooms-section__card-tag--twin {
+	top: 12px;
+	right: 12px;
+	background-color: rgba(188, 143, 103, 0.9);
+	color: white;
+}
+
 .rooms-section__card-content {
 	padding: 1.5rem;
 }
