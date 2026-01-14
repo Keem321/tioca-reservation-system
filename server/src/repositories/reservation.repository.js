@@ -2,6 +2,18 @@ import Reservation from "../models/reservation.model.js";
 
 class ReservationRepository {
 	/**
+	 * Find reservation by confirmation code
+	 * @param {string} confirmationCode - Confirmation code
+	 * @returns {Promise<Object|null>}
+	 */
+	async findByConfirmationCode(confirmationCode) {
+		return await Reservation.findOne({ confirmationCode }).populate(
+			"roomId",
+			"podId quality floor pricePerNight"
+		);
+	}
+
+	/**
 	 * Get all reservations with optional filtering
 	 * @param {Object} filter - Filter criteria (status, checkInDate, guestEmail, podIdFilter)
 	 * @returns {Promise<Array>}

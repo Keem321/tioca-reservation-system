@@ -1,0 +1,376 @@
+.guest-reservation-view {
+	min-height: 100vh;
+	background: linear-gradient(135deg, #f5f1e8 0%, #d4c5b9 100%);
+	padding: 100px 20px 40px;
+}
+
+.guest-reservation-view__container {
+	max-width: 900px;
+	margin: 0 auto;
+	background: white;
+	border-radius: 12px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+	padding: 40px;
+}
+
+.guest-reservation-view__header {
+	text-align: center;
+	margin-bottom: 30px;
+	padding-bottom: 20px;
+	border-bottom: 2px solid #d4c5b9;
+}
+
+.guest-reservation-view__header h1 {
+	color: #8b6f47;
+	font-size: 32px;
+	margin-bottom: 15px;
+	font-weight: 600;
+}
+
+.confirmation-code {
+	font-size: 18px;
+	color: #3d3d3d;
+	margin-bottom: 15px;
+}
+
+.confirmation-code strong {
+	color: #8b6f47;
+}
+
+.status-badge {
+	display: inline-block;
+	padding: 8px 16px;
+	border-radius: 20px;
+	font-size: 14px;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+.status-pending {
+	background-color: #fff3cd;
+	color: #856404;
+}
+
+.status-confirmed {
+	background-color: #d4edda;
+	color: #155724;
+}
+
+.status-checkedin {
+	background-color: #d1ecf1;
+	color: #0c5460;
+}
+
+.status-checkedout {
+	background-color: #e2e3e5;
+	color: #383d41;
+}
+
+.status-cancelled {
+	background-color: #f8d7da;
+	color: #721c24;
+}
+
+.reservation-details {
+	margin-bottom: 30px;
+}
+
+.detail-section {
+	background-color: #f9f9f9;
+	border-radius: 8px;
+	padding: 25px;
+	margin-bottom: 20px;
+}
+
+.detail-section h2 {
+	color: #8b6f47;
+	font-size: 20px;
+	font-weight: 600;
+	margin-top: 0;
+	margin-bottom: 20px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.detail-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	gap: 15px;
+}
+
+.detail-item {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+}
+
+.detail-label {
+	font-weight: 600;
+	color: #666;
+	font-size: 14px;
+}
+
+.detail-value {
+	color: #3d3d3d;
+	font-size: 16px;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.payment-breakdown {
+	background-color: white;
+	border-radius: 8px;
+	padding: 20px;
+}
+
+.payment-row {
+	display: flex;
+	justify-content: space-between;
+	padding: 10px 0;
+	font-size: 16px;
+}
+
+.payment-row.total {
+	border-top: 2px solid #8b6f47;
+	margin-top: 10px;
+	padding-top: 15px;
+	font-size: 20px;
+	font-weight: 700;
+	color: #8b6f47;
+}
+
+.payment-status {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 15px;
+	padding-top: 15px;
+	border-top: 1px solid #e0e0e0;
+}
+
+.payment-status-badge {
+	padding: 6px 12px;
+	border-radius: 4px;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.payment-paid {
+	background-color: #28a745;
+	color: white;
+}
+
+.payment-unpaid {
+	background-color: #ffc107;
+	color: #333;
+}
+
+.payment-partial {
+	background-color: #17a2b8;
+	color: white;
+}
+
+.payment-refunded {
+	background-color: #6c757d;
+	color: white;
+}
+
+.special-requests {
+	background-color: white;
+	padding: 15px;
+	border-radius: 6px;
+	border-left: 4px solid #8b6f47;
+	margin: 0;
+	color: #3d3d3d;
+	line-height: 1.6;
+}
+
+.important-info {
+	background-color: #f5f1e8;
+	border-radius: 8px;
+	padding: 20px;
+	margin-bottom: 20px;
+}
+
+.important-info h3 {
+	color: #8b6f47;
+	font-size: 18px;
+	margin-top: 0;
+	margin-bottom: 15px;
+}
+
+.important-info ul {
+	margin: 0;
+	padding-left: 20px;
+	color: #3d3d3d;
+}
+
+.important-info li {
+	margin-bottom: 8px;
+	line-height: 1.5;
+}
+
+.cancellation-policy {
+	background-color: #fff3cd;
+	border: 1px solid #ffc107;
+	border-radius: 8px;
+	padding: 20px;
+	margin-bottom: 30px;
+}
+
+.cancellation-policy h3 {
+	color: #856404;
+	font-size: 18px;
+	margin-top: 0;
+	margin-bottom: 10px;
+}
+
+.cancellation-policy p {
+	margin: 10px 0;
+	color: #856404;
+	line-height: 1.6;
+}
+
+.help-text {
+	font-size: 14px;
+}
+
+.help-text a {
+	color: #8b6f47;
+	text-decoration: underline;
+}
+
+.help-text a:hover {
+	color: #6d5738;
+}
+
+.management-actions {
+	background-color: #f9f9f9;
+	border-radius: 8px;
+	padding: 25px;
+	margin-bottom: 30px;
+	border: 2px solid #d4c5b9;
+}
+
+.management-actions h3 {
+	color: #8b6f47;
+	font-size: 18px;
+	margin-top: 0;
+	margin-bottom: 15px;
+}
+
+.management-buttons {
+	display: flex;
+	gap: 15px;
+	margin-bottom: 15px;
+}
+
+.btn-modify {
+	background-color: #17a2b8;
+	color: white;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.btn-modify:hover:not(:disabled) {
+	background-color: #138496;
+}
+
+.btn-cancel {
+	background-color: #dc3545;
+	color: white;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.btn-cancel:hover:not(:disabled) {
+	background-color: #c82333;
+}
+
+.management-note {
+	font-size: 13px;
+	color: #666;
+	margin: 0;
+	font-style: italic;
+}
+
+.action-buttons {
+	display: flex;
+	gap: 15px;
+	justify-content: center;
+	margin-top: 30px;
+}
+
+.btn {
+	padding: 14px 28px;
+	border: none;
+	border-radius: 6px;
+	font-size: 16px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.btn-primary {
+	background-color: #8b6f47;
+	color: white;
+}
+
+.btn-primary:hover {
+	background-color: #6d5738;
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(139, 111, 71, 0.3);
+}
+
+.btn-secondary {
+	background-color: white;
+	color: #8b6f47;
+	border: 2px solid #8b6f47;
+}
+
+.btn-secondary:hover {
+	background-color: #f5f1e8;
+}
+
+@media (max-width: 768px) {
+	.guest-reservation-view {
+		padding: 80px 15px 30px;
+	}
+
+	.guest-reservation-view__container {
+		padding: 25px 20px;
+	}
+
+	.guest-reservation-view__header h1 {
+		font-size: 26px;
+	}
+
+	.confirmation-code {
+		font-size: 16px;
+	}
+
+	.detail-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.action-buttons {
+		flex-direction: column;
+	}
+
+	.btn {
+		width: 100%;
+	}
+
+	.management-buttons {
+		flex-direction: column;
+	}
+
+	.btn-modify,
+	.btn-cancel {
+		justify-content: center;
+	}
+}

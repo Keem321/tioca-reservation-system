@@ -2,8 +2,21 @@ import ReservationRepository from "../repositories/reservation.repository.js";
 import RoomRepository from "../repositories/room.repository.js";
 import RoomHoldRepository from "../repositories/roomHold.repository.js";
 import mongoose from "mongoose";
+import crypto from "crypto";
 
 class ReservationService {
+	/**
+	 * Generate unique confirmation code
+	 * @returns {string} - Format: TIOCA-XXXXXX (6 random alphanumeric chars)
+	 */
+	generateConfirmationCode() {
+		const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Excluding ambiguous chars
+		let code = "TIOCA-";
+		for (let i = 0; i < 6; i++) {
+			code += chars.charAt(Math.floor(Math.random() * chars.length));
+		}
+		return code;
+	}
 	/**
 	 * Get all reservations with optional filters
 	 * @param {Object} filters - Optional filters (status, date range, etc.)
@@ -181,8 +194,29 @@ class ReservationService {
 				throw new Error("Room is currently being booked by another user");
 			}
 
+			// Generate unique confirmation code
+			let confirmationCode;
+			let isUnique = false;
+			while (!isUnique) {
+				confirmationCode = this.generateConfirmationCode();
+				const existing = await ReservationRepository.findByConfirmationCode(
+					confirmationCode
+				);
+				if (!existing) {
+					isUnique = true;
+				}
+			}
+
+			// Add confirmation code to reservation data
+			const reservationWithCode = {
+				...reservationData,
+				confirmationCode,
+			};
+
 			// Create reservation
-			const reservation = await ReservationRepository.create(reservationData);
+			const reservation = await ReservationRepository.create(
+				reservationWithCode
+			);
 
 			// Populate room details before returning
 			await reservation.populate("roomId", "podId quality floor pricePerNight");

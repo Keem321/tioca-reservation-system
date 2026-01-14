@@ -30,6 +30,7 @@ import Stripe from "stripe";
 import ReservationRepository from "../repositories/reservation.repository.js";
 import PaymentRepository from "../repositories/payment.repository.js";
 import PaymentEditRepository from "../repositories/paymentEdit.repository.js";
+import EmailService from "./email.service.js";
 
 // Initialize Stripe with secret key from environment variables
 // Check for both STRIPE_SECRET_KEY and STRIPE_SECRET (for backwards compatibility)
@@ -209,6 +210,26 @@ class PaymentService {
 					stripeChargeId: chargeId,
 				}
 			);
+
+			// Send booking confirmation email
+			try {
+				// Populate room details if needed
+				const reservationWithRoom = await ReservationRepository.findById(
+					reservationId
+				);
+				await EmailService.sendBookingConfirmation(
+					reservationWithRoom,
+					payment
+				);
+
+				// Update confirmationEmailSentAt timestamp
+				await ReservationRepository.update(reservationId, {
+					confirmationEmailSentAt: new Date(),
+				});
+			} catch (emailError) {
+				console.error("Failed to send confirmation email:", emailError);
+				// Don't fail the payment if email fails
+			}
 
 			return {
 				success: true,
