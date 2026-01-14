@@ -48,14 +48,10 @@ const emailVerificationTokenSchema = new Schema(
 
 // Indexes for efficient querying
 emailVerificationTokenSchema.index({ email: 1 });
-emailVerificationTokenSchema.index({ token: 1 });
 emailVerificationTokenSchema.index({ reservationId: 1 });
-emailVerificationTokenSchema.index({ expiresAt: 1 }); // For cleanup of expired tokens
 
 // Automatically delete expired tokens (MongoDB TTL index)
-emailVerificationTokenSchema.index(
-	{ expiresAt: 1 },
-	{ expireAfterSeconds: 0 }
-);
+// Note: This also creates an index on expiresAt
+emailVerificationTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 export default model("EmailVerificationToken", emailVerificationTokenSchema);

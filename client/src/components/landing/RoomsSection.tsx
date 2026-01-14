@@ -205,12 +205,6 @@ const RoomsSection: React.FC = () => {
 									<div className="rooms-section__twin-feature">
 										<span className="rooms-section__twin-feature-icon">✓</span>
 										<span className="rooms-section__twin-feature-text">
-											For 2 guests
-										</span>
-									</div>
-									<div className="rooms-section__twin-feature">
-										<span className="rooms-section__twin-feature-icon">✓</span>
-										<span className="rooms-section__twin-feature-text">
 											Enhanced comfort
 										</span>
 									</div>
