@@ -14,7 +14,7 @@
  * - Each API request updates the lastActivity timestamp
  */
 
-const INACTIVITY_TIMEOUT = 45 * 1000; // 45 seconds - longer than frontend total (40s)
+const INACTIVITY_TIMEOUT = 45 * 1000; // 45 seconds for testing (15 minutes for production: 15 * 60 * 1000)
 
 /**
  * Middleware to track and enforce session activity timeout

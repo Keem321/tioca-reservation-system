@@ -13,6 +13,8 @@ export async function createHold(req, res) {
 		const sessionId = req.sessionID;
 		const userId = req.user?._id || req.user?.id;
 
+		console.log("[Hold] Request cookies:", req.headers.cookie || "NO COOKIES");
+
 		if (!sessionId) {
 			console.error("[Hold] No session found in request");
 			return res.status(400).json({ error: "No session found" });
@@ -24,6 +26,7 @@ export async function createHold(req, res) {
 			checkOutDate,
 			sessionId,
 			stage: stage || "confirmation",
+			isGuest: !userId,
 		});
 
 		const hold = await RoomHoldService.createHold({
@@ -36,6 +39,32 @@ export async function createHold(req, res) {
 		});
 
 		console.log("[Hold] Hold created successfully:", hold._id);
+
+		// For guest users (no userId), explicitly save the session to ensure
+		// it persists across requests (prevents session mismatch errors)
+		if (!userId && req.session) {
+			// Mark session as initialized by setting a property
+			// This ensures it gets saved even with saveUninitialized: false
+			req.session.guestBooking = true;
+			req.session.lastHoldId = hold._id.toString();
+
+			// Wait for session to be saved before responding
+			await new Promise((resolve, reject) => {
+				req.session.save((saveErr) => {
+					if (saveErr) {
+						console.error("[Hold] Error saving session:", saveErr);
+						reject(saveErr);
+					} else {
+						console.log(
+							"[Hold] Session saved for guest user:",
+							req.sessionID
+						);
+						resolve();
+					}
+				});
+			});
+		}
+
 		res.status(201).json(hold);
 	} catch (err) {
 		console.error("[Hold] Error creating hold:", err.message);
