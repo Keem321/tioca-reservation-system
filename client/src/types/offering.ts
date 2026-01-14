@@ -16,6 +16,7 @@ export interface Offering {
 	imageUrl?: string; // Image URL for display
 	capacity?: string; // e.g., "1 guest" or "2 guests"
 	tag?: string; // Optional tag like "Women Only" or "First Class"
+	variant?: "single" | "twin"; // Room variant: single or twin (couples floor)
 	applicableFloors?: string[];
 	applicableQualities?: string[];
 	isActive: boolean;

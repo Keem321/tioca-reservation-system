@@ -6,6 +6,7 @@
 // Quality mapping:
 //   classic = Classic Pearl, milk = Milk Pearl, golden = Golden Pearl,
 //   crystal = Crystal Boba Suite, matcha = Matcha Pearl (women-only only)
+// Note: Twin rooms (couples floor) use Twin variant offerings with higher prices
 
 use("tioca-reservation-system");
 
@@ -13,24 +14,45 @@ use("tioca-reservation-system");
 // Comment this out if you want to keep existing data
 db.rooms.deleteMany({});
 
-// Get offering IDs by quality - fetch from existing offerings
+// Get offering IDs - map both single and twin variants
 const offerings = db.offerings.find({ type: "room" }).toArray();
-const offeringMap = {};
+const offeringMap = {}; // Map: quality -> single offering ID
+const twinOfferingMap = {}; // Map: quality -> twin offering ID
+
 offerings.forEach((offering) => {
-	offeringMap[offering.quality] = offering._id;
+	if (offering.variant === "twin") {
+		twinOfferingMap[offering.quality] = offering._id;
+	} else {
+		offeringMap[offering.quality] = offering._id;
+	}
 });
 
-// Verify all required offerings exist
+// Verify all required single offerings exist
 const requiredQualities = ["classic", "milk", "golden", "crystal", "matcha"];
 for (const quality of requiredQualities) {
 	if (!offeringMap[quality]) {
 		throw new Error(
-			`Missing offering for quality: ${quality}. Please run playground-offerings.mongodb.js first.`
+			`Missing single offering for quality: ${quality}. Please run playground-offerings.mongodb.js first.`
 		);
 	}
 }
 
-function createRoomsForFloor({ floorKey, floorDigit, distributions }) {
+// Verify all required twin offerings exist
+const twinQualities = ["classic", "milk", "golden"];
+for (const quality of twinQualities) {
+	if (!twinOfferingMap[quality]) {
+		throw new Error(
+			`Missing twin offering for quality: ${quality}. Please run playground-offerings.mongodb.js first.`
+		);
+	}
+}
+
+function createRoomsForFloor({
+	floorKey,
+	floorDigit,
+	distributions,
+	isTwinFloor = false,
+}) {
 	const rooms = [];
 	let seq = 1; // 1..25 per floor
 
@@ -41,11 +63,16 @@ function createRoomsForFloor({ floorKey, floorDigit, distributions }) {
 			const podNumber = floorDigit * 100 + seq; // 101..125, 201..225, etc.
 			const podId = String(podNumber);
 
+			// Use twin offering for couples floor, otherwise use single offering
+			const offeringId = isTwinFloor
+				? twinOfferingMap[quality]
+				: offeringMap[quality];
+
 			rooms.push({
 				podId,
 				quality, // classic|milk|golden|crystal|matcha
 				floor: floorKey, // women-only|men-only|couples|business
-				offeringId: offeringMap[quality], // Reference to offering with pricing
+				offeringId, // Reference to offering with pricing (single or twin variant)
 				description: `${label} on ${floorKey} floor`
 					.replace("women-only", "Women-Only")
 					.replace("men-only", "Men-Only")
@@ -106,10 +133,11 @@ const businessRooms = createRoomsForFloor({
 });
 
 // couples: 8 Twin Classic, 10 Twin Milk, 7 Twin Golden
-// Note: "Twin" is a display prefix; capacity=2 is inferred from floor=couples.
+// Note: These use twin variant offerings with isTwinFloor=true
 const couplesRooms = createRoomsForFloor({
 	floorKey: "couples",
 	floorDigit: 3,
+	isTwinFloor: true,
 	distributions: [
 		{ quality: "classic", count: 8, label: "Twin Classic Pearl" },
 		{ quality: "milk", count: 10, label: "Twin Milk Pearl" },

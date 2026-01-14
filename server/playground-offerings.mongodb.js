@@ -100,6 +100,64 @@ const ROOM_OFFERINGS = [
 		tag: "First Class",
 		isActive: true,
 	},
+	// Twin Room Offerings - Larger rooms for 2 guests on couples floor
+	{
+		name: "Twin Classic Pearl",
+		type: "room",
+		quality: "classic",
+		basePrice: 8500, // $85 per night - $20 upgrade from single
+		priceType: "per-night",
+		description: "Two-guest comfort capsule with enhanced space",
+		features: [
+			'80"L × 80"W × 40"H',
+			"Twin layout side-by-side",
+			"Perfect for couples and friends",
+			"Private two-person capsule",
+		],
+		imageUrl: "/images/capsules/classic-pearl.jpg",
+		capacity: "2 guests",
+		variant: "twin",
+		applicableFloors: ["couples"],
+		isActive: true,
+	},
+	{
+		name: "Twin Milk Pearl",
+		type: "room",
+		quality: "milk",
+		basePrice: 10000, // $100 per night - $25 upgrade from single
+		priceType: "per-night",
+		description: "Spacious two-guest premium capsule with extra comfort",
+		features: [
+			'84"L × 84"W × 45"H',
+			"Twin layout with premium spacing",
+			"Enhanced amenities for two",
+			"Extra workspace surface",
+		],
+		imageUrl: "/images/capsules/milk-pearl.jpg",
+		capacity: "2 guests",
+		variant: "twin",
+		applicableFloors: ["couples"],
+		isActive: true,
+	},
+	{
+		name: "Twin Golden Pearl",
+		type: "room",
+		quality: "golden",
+		basePrice: 12500, // $125 per night - $30 upgrade from single
+		priceType: "per-night",
+		description: "Luxurious two-guest premium capsule with spacious layout",
+		features: [
+			'86"L × 90"W × 50"H',
+			"Twin premium layout with upright seating",
+			"Separate storage areas for two guests",
+			"Premium amenities throughout",
+		],
+		imageUrl: "/images/capsules/golden-pearl.jpg",
+		capacity: "2 guests",
+		variant: "twin",
+		applicableFloors: ["couples"],
+		isActive: true,
+	},
 ];
 
 // Optional amenity offerings
