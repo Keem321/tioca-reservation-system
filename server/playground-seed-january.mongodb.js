@@ -45,7 +45,7 @@ const ROOM_OFFERINGS = [
 		name: "Classic Pearl",
 		type: "room",
 		quality: "classic",
-		basePrice: 6500, // $65/night
+		basePrice: 6499, // $64.99/night
 		priceType: "per-night",
 		description: "Essential comfort for the efficient traveler",
 		features: [
@@ -62,7 +62,7 @@ const ROOM_OFFERINGS = [
 		name: "Milk Pearl",
 		type: "room",
 		quality: "milk",
-		basePrice: 7500, // $75/night
+		basePrice: 7499, // $74.99/night
 		priceType: "per-night",
 		description: "Enhanced space with premium comfort",
 		features: [
@@ -79,7 +79,7 @@ const ROOM_OFFERINGS = [
 		name: "Golden Pearl",
 		type: "room",
 		quality: "golden",
-		basePrice: 9500, // $95/night
+		basePrice: 9499, // $94.99/night
 		priceType: "per-night",
 		description: "Spacious premium capsule experience",
 		features: [
@@ -96,7 +96,7 @@ const ROOM_OFFERINGS = [
 		name: "Matcha Pearl",
 		type: "room",
 		quality: "matcha",
-		basePrice: 9500, // $95/night
+		basePrice: 9499, // $94.99/night
 		priceType: "per-night",
 		description: "Exclusive women-only premium capsule",
 		features: [
@@ -115,7 +115,7 @@ const ROOM_OFFERINGS = [
 		name: "Crystal Boba Suite",
 		type: "room",
 		quality: "crystal",
-		basePrice: 15500, // $155/night
+		basePrice: 15499, // $154.99/night
 		priceType: "per-night",
 		description: "First-class private suite experience",
 		features: [
@@ -134,7 +134,7 @@ const ROOM_OFFERINGS = [
 		name: "Twin Classic Pearl",
 		type: "room",
 		quality: "classic",
-		basePrice: 8500, // $85/night
+		basePrice: 8499, // $84.99/night
 		priceType: "per-night",
 		description: "Two-guest comfort capsule with enhanced space",
 		features: [
@@ -153,7 +153,7 @@ const ROOM_OFFERINGS = [
 		name: "Twin Milk Pearl",
 		type: "room",
 		quality: "milk",
-		basePrice: 10000, // $100/night
+		basePrice: 9999, // $99.99/night
 		priceType: "per-night",
 		description: "Spacious two-guest premium capsule with extra comfort",
 		features: [
@@ -172,7 +172,7 @@ const ROOM_OFFERINGS = [
 		name: "Twin Golden Pearl",
 		type: "room",
 		quality: "golden",
-		basePrice: 12500, // $125/night
+		basePrice: 12499, // $124.99/night
 		priceType: "per-night",
 		description: "Luxurious two-guest premium capsule with spacious layout",
 		features: [
