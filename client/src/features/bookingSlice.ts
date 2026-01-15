@@ -94,4 +94,5 @@ export const {
 	setHoldId,
 	resetBooking,
 } = bookingSlice.actions;
+
 export default bookingSlice.reducer;

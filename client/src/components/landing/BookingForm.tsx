@@ -1,13 +1,15 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { useAppSelector } from "../../hooks";
 import { Calendar, Building } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { setCheckIn, setCheckOut, setZone } from "../../features/bookingSlice";
 import { useGetRoomsQuery } from "../../features/roomsApi";
 import { useGetReservationsQuery } from "../../features/reservationsApi";
-import type { RootState } from "../../store";
+// RootState type not needed due to typed selector hook
+import type { BookingState } from "../../features/bookingSlice";
 import type { Room, PodFloor } from "../../types/room";
 import type { Reservation } from "../../types/reservation";
 import "./BookingForm.css";
@@ -20,8 +22,8 @@ import "./BookingForm.css";
 const BookingForm: React.FC = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const { checkIn, checkOut, zone } = useSelector(
-		(state: RootState) => state.booking
+	const { checkIn, checkOut, zone } = useAppSelector(
+		(state) => state.booking as BookingState
 	);
 
 	const isValid = Boolean(checkIn && checkOut && checkIn < checkOut && zone);

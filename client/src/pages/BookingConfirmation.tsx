@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { useAppSelector } from "../hooks";
 import {
 	useCreateReservationMutation,
 	useGetAvailableSlotsQuery,
@@ -15,7 +16,8 @@ import {
 	setHoldId,
 } from "../features/bookingSlice";
 import { resetGroupBooking } from "../features/groupBookingSlice";
-import type { RootState } from "../store";
+// RootState type not needed directly due to typed selector hook
+import type { BookingState } from "../features/bookingSlice";
 import type { ReservationFormData } from "../types/reservation";
 import type { Room } from "../types/room";
 import Navbar from "../components/landing/Navbar";
@@ -57,19 +59,6 @@ interface GroupBookingTimeslot {
 	}>;
 }
 
-// Type for timeslot in group booking
-interface GroupBookingTimeslot {
-	id: string;
-	checkIn: string;
-	checkOut: string;
-	members: Array<{
-		id: string;
-		numberOfGuests?: number;
-		quality?: string;
-		floor?: string;
-	}>;
-}
-
 /**
  * BookingConfirmation Component
  *
@@ -81,10 +70,10 @@ const BookingConfirmation: React.FC = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const dispatch = useDispatch();
-	const { checkIn, checkOut, guests, selectedRoom, holdId } = useSelector(
-		(state: RootState) => state.booking
+	const { checkIn, checkOut, guests, selectedRoom, holdId } = useAppSelector(
+		(state) => state.booking as BookingState
 	);
-	const { user } = useSelector((state: RootState) => state.auth);
+	const { user } = useAppSelector((state) => state.auth);
 
 	// Check if this is a group booking from location state
 	const isGroupBooking = location.state?.isGroupBooking || false;
@@ -340,69 +329,213 @@ const BookingConfirmation: React.FC = () => {
 	]);
 
 	const handleProceedToPayment = async () => {
-		if (
-			!room ||
-			!checkIn ||
-			!checkOut ||
-			!guestName ||
-			!guestEmail ||
-			!checkInTime ||
-			!checkOutTime
-		) {
-			setTimeError("Please select check-in and check-out times.");
+		// For individual bookings
+		if (!isGroupBooking) {
+			if (
+				!room ||
+				!checkIn ||
+				!checkOut ||
+				!guestName ||
+				!guestEmail ||
+				!checkInTime ||
+				!checkOutTime
+			) {
+				setTimeError("Please select check-in and check-out times.");
+				return;
+			}
+
+			const isSameDayCheckout = checkIn === checkOut;
+			if (isSameDayCheckout && checkOutTime <= checkInTime) {
+				setTimeError("Check-out time must be after check-in time.");
+				return;
+			}
+
+			setTimeError("");
+
+			// Calculate total price (use local date parsing to avoid timezone shifts)
+			const checkInDate = toLocalDate(checkIn);
+			const checkOutDate = toLocalDate(checkOut);
+			const nights = Math.ceil(
+				(checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
+			);
+			const totalPrice = (room.offering?.basePrice || 0) * nights;
+
+			const checkInDateTime = combineDateTime(checkIn, checkInTime);
+			const checkOutDateTime = combineDateTime(checkOut, checkOutTime);
+
+			const reservationData: ReservationFormData = {
+				roomId: room._id,
+				offeringId: room.offering?._id || room.offeringId || "",
+				userId: user?.id,
+				guestName,
+				guestEmail,
+				guestPhone: guestPhone || undefined,
+				checkInDate: checkInDateTime,
+				checkOutDate: checkOutDateTime,
+				numberOfGuests: guests,
+				selectedAmenities: [],
+				totalPrice,
+				status: "pending",
+				paymentStatus: "unpaid",
+				holdId: holdId || undefined,
+			};
+
+			try {
+				const reservation = await createReservation(reservationData).unwrap();
+				dispatch(setPendingReservation(reservation));
+				navigate("/payment");
+			} catch (err) {
+				const apiError = err as { data?: { error?: string }; status?: number };
+				console.error("Failed to create reservation:", {
+					status: apiError.status,
+					error: apiError.data?.error,
+					fullError: err,
+				});
+			}
 			return;
 		}
 
-		const isSameDayCheckout = checkIn === checkOut;
-		if (isSameDayCheckout && checkOutTime <= checkInTime) {
-			setTimeError("Check-out time must be after check-in time.");
+		// For group bookings
+		if (!guestName || !guestEmail) {
+			setTimeError("Please provide primary guest name and email.");
+			return;
+		}
+
+		// Check all timeslots have times selected
+		const missingTimes = timeslots.some(
+			(ts: GroupBookingTimeslot) =>
+				!timeslotTimes[ts.id]?.checkInTime ||
+				!timeslotTimes[ts.id]?.checkOutTime
+		);
+		if (missingTimes) {
+			setTimeError(
+				"Please select arrival and departure times for all periods."
+			);
 			return;
 		}
 
 		setTimeError("");
-
-		// Calculate total price (use local date parsing to avoid timezone shifts)
-		const checkInDate = toLocalDate(checkIn);
-		const checkOutDate = toLocalDate(checkOut);
-		const nights = Math.ceil(
-			(checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
-		);
-		const totalPrice = (room.offering?.basePrice || 0) * nights;
-
-		const checkInDateTime = combineDateTime(checkIn, checkInTime);
-		const checkOutDateTime = combineDateTime(checkOut, checkOutTime);
-
-		const reservationData: ReservationFormData = {
-			roomId: room._id,
-			offeringId: room.offering?._id || room.offeringId || "",
-			userId: user?.id,
-			guestName,
-			guestEmail,
-			guestPhone: guestPhone || undefined,
-			checkInDate: checkInDateTime,
-			checkOutDate: checkOutDateTime,
-			numberOfGuests: guests,
-			selectedAmenities: [],
-			totalPrice,
-			status: "pending",
-			paymentStatus: "unpaid",
-			holdId: holdId || undefined, // Include hold ID for verification
-		};
+		setIsCreatingHold(true);
 
 		try {
-			const reservation = await createReservation(reservationData).unwrap();
+			// Collect all room IDs and calculate totals for group booking
+			const allRoomIds: string[] = [];
+			let totalGroupPrice = 0;
+			let totalGroupGuests = 0;
+			let earliestCheckIn: Date | null = null;
+			let latestCheckOut: Date | null = null;
+			let checkInTime = "";
+			let checkOutTime = "";
+
+			// Collect all rooms and calculate aggregated data
+			for (const timeslot of timeslots) {
+				const timeslotAssignments = groupResults!.primary.filter((assignment) =>
+					timeslot.members.some((m) => m.id === assignment.memberId)
+				);
+
+				// Get times for this timeslot
+				const times = timeslotTimes[timeslot.id];
+				if (!times) continue;
+
+				// Parse dates
+				const checkInStr = timeslot.checkIn?.split("T")[0] || timeslot.checkIn;
+				const checkOutStr =
+					timeslot.checkOut?.split("T")[0] || timeslot.checkOut;
+
+				// Track earliest check-in and latest check-out
+				const timeslotCheckIn = toLocalDate(checkInStr);
+				const timeslotCheckOut = toLocalDate(checkOutStr);
+
+				if (!earliestCheckIn || timeslotCheckIn < earliestCheckIn) {
+					earliestCheckIn = timeslotCheckIn;
+					checkInTime = times.checkInTime;
+				}
+				if (!latestCheckOut || timeslotCheckOut > latestCheckOut) {
+					latestCheckOut = timeslotCheckOut;
+					checkOutTime = times.checkOutTime;
+				}
+
+				// Calculate nights for pricing
+				const nights = Math.ceil(
+					(timeslotCheckOut.getTime() - timeslotCheckIn.getTime()) /
+						(1000 * 60 * 60 * 24)
+				);
+
+				for (const assignment of timeslotAssignments) {
+					const member = timeslot.members.find(
+						(m) => m.id === assignment.memberId
+					);
+					if (!member) continue;
+
+					// Add room ID
+					const room = assignment.room;
+					allRoomIds.push(room._id);
+
+					// Calculate price for this room
+					const roomPrice = (room.offering?.basePrice || 0) * nights;
+					totalGroupPrice += roomPrice;
+
+					// Add guests
+					totalGroupGuests += member.numberOfGuests || 1;
+				}
+			}
+
+			if (allRoomIds.length === 0 || !earliestCheckIn || !latestCheckOut) {
+				setTimeError("Failed to prepare group reservation. Please try again.");
+				setIsCreatingHold(false);
+				return;
+			}
+
+			// Create single reservation with all rooms
+			const earliestCheckInStr = earliestCheckIn.toISOString().split("T")[0];
+			const latestCheckOutStr = latestCheckOut.toISOString().split("T")[0];
+
+			const checkInDateTime = combineDateTime(earliestCheckInStr, checkInTime);
+			const checkOutDateTime = combineDateTime(latestCheckOutStr, checkOutTime);
+
+			// Get first room's offering for the reservation (all rooms should have compatible offerings)
+			const firstAssignment = groupResults!.primary[0];
+			const offeringId =
+				firstAssignment.room.offering?._id ||
+				firstAssignment.room.offeringId ||
+				"";
+
+			const groupReservationData: ReservationFormData = {
+				roomIds: allRoomIds, // Multiple rooms in one reservation
+				offeringId,
+				userId: user?.id,
+				guestName,
+				guestEmail,
+				guestPhone: guestPhone || undefined,
+				checkInDate: checkInDateTime,
+				checkOutDate: checkOutDateTime,
+				numberOfGuests: totalGroupGuests,
+				selectedAmenities: [],
+				totalPrice: totalGroupPrice,
+				status: "pending",
+				paymentStatus: "unpaid",
+			};
+
+			// Create single group reservation
+			const reservation = await createReservation(
+				groupReservationData
+			).unwrap();
+
+			// Store reservation and navigate to payment
 			dispatch(setPendingReservation(reservation));
-			// Don't release hold here - it will be released after payment or on unmount of payment page
 			navigate("/payment");
 		} catch (err) {
 			const apiError = err as { data?: { error?: string }; status?: number };
-			console.error("Failed to create reservation:", {
+			console.error("Failed to create group reservations:", {
 				status: apiError.status,
 				error: apiError.data?.error,
 				fullError: err,
 			});
-			// Error will be displayed via the mutation's error state
-			// Don't use setTimeError here to avoid duplicate error messages
+			setTimeError(
+				apiError?.data?.error ||
+					"Failed to create group reservations. Please try again."
+			);
+			setIsCreatingHold(false);
 		}
 	};
 
@@ -762,38 +895,7 @@ const BookingConfirmation: React.FC = () => {
 								Cancel
 							</button>
 							<button
-								onClick={() => {
-									// Validation for group booking
-									if (!guestName || !guestEmail) {
-										setTimeError(
-											"Please provide primary guest name and email."
-										);
-										return;
-									}
-
-									// Check all timeslots have times selected
-									const missingTimes = timeslots.some(
-										(ts: GroupBookingTimeslot) =>
-											!timeslotTimes[ts.id]?.checkInTime ||
-											!timeslotTimes[ts.id]?.checkOutTime
-									);
-									if (missingTimes) {
-										setTimeError(
-											"Please select arrival and departure times for all periods."
-										);
-										return;
-									}
-
-									setTimeError("");
-									// TODO: Create group reservation and proceed to payment
-									alert(
-										"Group booking reservation creation coming soon!\n\n" +
-											`Primary Guest: ${guestName}\n` +
-											`Email: ${guestEmail}\n` +
-											`Total Rooms: ${totalRooms}\n` +
-											`Total Guests: ${totalGuests}`
-									);
-								}}
+								onClick={handleProceedToPayment}
 								className="booking-confirmation__button booking-confirmation__button--primary"
 								disabled={
 									!guestName ||
