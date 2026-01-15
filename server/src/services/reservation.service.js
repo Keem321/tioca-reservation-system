@@ -126,7 +126,13 @@ class ReservationService {
 					throw new Error(`Room ${rid} not found`);
 				}
 				rooms.push(room);
-				totalCapacity += room.capacity;
+				// Calculate capacity: couples floor = 2, crystal on business floor = 2 (special suite), all others = 1
+				const roomCapacity =
+					room.floor === "couples" ||
+					(room.floor === "business" && room.quality === "crystal")
+						? 2
+						: 1;
+				totalCapacity += roomCapacity;
 			}
 
 			// Validate number of guests doesn't exceed total capacity
@@ -232,12 +238,42 @@ class ReservationService {
 				(checkOut - checkIn) / (1000 * 60 * 60 * 24)
 			);
 
-			// Calculate pricing using pricing service
-			const pricingData = await PricingService.calculateReservationPrice(
-				offeringId,
-				numberOfNights,
-				selectedAmenities
-			);
+			// For group bookings, calculate pricing for each room; for single, use the provided offeringId
+			let pricingData;
+			if (isGroupBooking) {
+				// Group booking: calculate price for each room and sum
+				let totalBasePrice = 0;
+				let totalAmenitiesPrice = 0;
+				const allPricingBreakdown = [];
+
+				for (const rid of roomsToBook) {
+					const room = rooms.find((r) => r._id.toString() === rid.toString());
+					const roomPricingData =
+						await PricingService.calculateReservationPrice(
+							room.offeringId,
+							numberOfNights,
+							selectedAmenities
+						);
+
+					totalBasePrice += roomPricingData.basePrice;
+					totalAmenitiesPrice += roomPricingData.amenitiesPrice;
+					allPricingBreakdown.push(roomPricingData);
+				}
+
+				pricingData = {
+					basePrice: totalBasePrice,
+					amenitiesPrice: totalAmenitiesPrice,
+					totalPrice: totalBasePrice + totalAmenitiesPrice,
+					breakdown: allPricingBreakdown,
+				};
+			} else {
+				// Single booking: calculate price for the single room
+				pricingData = await PricingService.calculateReservationPrice(
+					offeringId,
+					numberOfNights,
+					selectedAmenities
+				);
+			}
 
 			// Build amenities data for storage
 			const amenitiesData = [];

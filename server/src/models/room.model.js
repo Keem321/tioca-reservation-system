@@ -39,7 +39,11 @@ const roomSchema = new Schema(
 			default: "available",
 		},
 	},
-	{ timestamps: true }
+	{
+		timestamps: true,
+		toJSON: { virtuals: true },
+		toObject: { virtuals: true },
+	}
 );
 
 // podId must be globally unique

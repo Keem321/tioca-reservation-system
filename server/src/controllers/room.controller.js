@@ -184,7 +184,9 @@ export async function getRecommendedRooms(req, res) {
 export async function searchGroupBooking(req, res) {
 	try {
 		const { checkIn, checkOut, members, proximityByFloor } = req.body;
-		const sessionId = req.sessionID; // Exclude holds from current session
+		// Note: Do NOT exclude sessionId for group searches
+		// Group bookings should check against ALL holds, not just non-current-session holds
+		// This ensures rooms with active holds from any session are properly filtered out
 
 		if (!checkIn || !checkOut || !members || !Array.isArray(members)) {
 			return res.status(400).json({
@@ -203,7 +205,7 @@ export async function searchGroupBooking(req, res) {
 			checkOut,
 			members,
 			proximityByFloor || {},
-			sessionId
+			null // Pass null to exclude NO holds - all holds should be checked
 		);
 		res.json(result);
 	} catch (err) {

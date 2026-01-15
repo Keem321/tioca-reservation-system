@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../hooks";
+import { useToast } from "../components/useToast";
 import {
 	useCreateReservationMutation,
 	useGetAvailableSlotsQuery,
@@ -10,6 +11,7 @@ import {
 	useCreateHoldMutation,
 	useReleaseHoldMutation,
 } from "../features/holdsApi";
+import { useGetAmenityOfferingsQuery } from "../features/offeringsApi";
 import {
 	setPendingReservation,
 	resetBooking,
@@ -20,6 +22,7 @@ import { resetGroupBooking } from "../features/groupBookingSlice";
 import type { BookingState } from "../features/bookingSlice";
 import type { ReservationFormData } from "../types/reservation";
 import type { Room } from "../types/room";
+import type { AmenityOffering } from "../types/offering";
 import Navbar from "../components/landing/Navbar";
 import {
 	getRoomImage,
@@ -70,6 +73,7 @@ const BookingConfirmation: React.FC = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const dispatch = useDispatch();
+	const toast = useToast();
 	const { checkIn, checkOut, guests, selectedRoom, holdId } = useAppSelector(
 		(state) => state.booking as BookingState
 	);
@@ -120,11 +124,15 @@ const BookingConfirmation: React.FC = () => {
 		>
 	>({});
 
+	// Amenities selection state
+	const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+
 	const [timeError, setTimeError] = useState("");
 
 	// Hold state
 	const [holdError, setHoldError] = useState("");
 	const [isCreatingHold, setIsCreatingHold] = useState(false);
+	const [groupHoldIds, setGroupHoldIds] = useState<string[]>([]);
 
 	// Get room from location state or Redux (individual booking only)
 	const room = location.state?.room || selectedRoom;
@@ -144,6 +152,12 @@ const BookingConfirmation: React.FC = () => {
 			{ roomId: room?._id || "", date: checkOut || "" },
 			{ skip: !room || !checkOut }
 		);
+
+	// Fetch amenities
+	const { data: amenitiesData } = useGetAmenityOfferingsQuery(
+		{ activeOnly: true },
+		{ skip: isGroupBooking } // Only needed for individual bookings for now
+	);
 
 	// Helper to convert 24-hour time to 12-hour AM/PM format
 	const formatTimeAmPm = (time24: string): string => {
@@ -273,6 +287,7 @@ const BookingConfirmation: React.FC = () => {
 				if (mounted) {
 					dispatch(setHoldId(hold._id));
 					createdHoldId = hold._id;
+					toast.success(`${room.podId} is now reserved for you`);
 				}
 			} catch (err) {
 				if (mounted) {
@@ -281,6 +296,7 @@ const BookingConfirmation: React.FC = () => {
 						error?.data?.error ||
 						"Failed to reserve this room. It may no longer be available.";
 					setHoldError(errorMessage);
+					toast.error(errorMessage);
 				}
 			} finally {
 				if (mounted) {
@@ -304,6 +320,124 @@ const BookingConfirmation: React.FC = () => {
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []); // Run only on mount
+
+	// Create holds for all group rooms on mount
+	useEffect(() => {
+		let mounted = true;
+		const createdHoldIds: string[] = [];
+
+		const createGroupRoomHolds = async () => {
+			// Don't create if we don't have group data, already have holds, or component unmounted
+			if (
+				!isGroupBooking ||
+				!groupResults ||
+				groupHoldIds.length > 0 ||
+				!mounted
+			) {
+				return;
+			}
+
+			// Extract all unique room IDs from group results
+			const roomIds = groupResults.primary.map(
+				(assignment) => assignment.roomId
+			);
+
+			if (roomIds.length === 0) {
+				return;
+			}
+
+			// Extract earliest check-in and latest check-out across all timeslots
+			let earliestCheckIn: Date | null = null;
+			let latestCheckOut: Date | null = null;
+
+			for (const timeslot of timeslots) {
+				const checkInStr = timeslot.checkIn?.split("T")[0] || timeslot.checkIn;
+				const checkOutStr =
+					timeslot.checkOut?.split("T")[0] || timeslot.checkOut;
+
+				const timeslotCheckIn = toLocalDate(checkInStr);
+				const timeslotCheckOut = toLocalDate(checkOutStr);
+
+				if (!earliestCheckIn || timeslotCheckIn < earliestCheckIn) {
+					earliestCheckIn = timeslotCheckIn;
+				}
+				if (!latestCheckOut || timeslotCheckOut > latestCheckOut) {
+					latestCheckOut = timeslotCheckOut;
+				}
+			}
+
+			if (!earliestCheckIn || !latestCheckOut) {
+				return;
+			}
+
+			const earliestCheckInStr = earliestCheckIn.toISOString().split("T")[0];
+			const latestCheckOutStr = latestCheckOut.toISOString().split("T")[0];
+
+			setIsCreatingHold(true);
+			setHoldError("");
+
+			try {
+				// Create holds sequentially to ensure the browser applies the
+				// session cookie from the first response before subsequent requests.
+				// Parallel requests can create separate guest sessions, causing
+				// reservation conflicts later. Sequential creation guarantees a
+				// single consistent session for all holds.
+				const holdIds: string[] = [];
+				for (const roomId of roomIds) {
+					const hold = await createHold({
+						roomId,
+						checkInDate: earliestCheckInStr,
+						checkOutDate: latestCheckOutStr,
+						stage: "confirmation",
+					}).unwrap();
+					holdIds.push(hold._id);
+				}
+
+				if (mounted) {
+					setGroupHoldIds(holdIds);
+					createdHoldIds.push(...holdIds);
+					toast.success(
+						`Reserved ${roomIds.length} room${
+							roomIds.length > 1 ? "s" : ""
+						} for group booking`
+					);
+				}
+			} catch (err) {
+				if (mounted) {
+					const error = err as { data?: { error?: string } };
+					const errorMessage =
+						error?.data?.error ||
+						"Failed to reserve rooms. It may no longer be available.";
+					setHoldError(errorMessage);
+					toast.error(errorMessage);
+				}
+			} finally {
+				if (mounted) {
+					setIsCreatingHold(false);
+				}
+			}
+		};
+
+		createGroupRoomHolds();
+
+		// Cleanup: release holds when component unmounts
+		return () => {
+			mounted = false;
+			const holdsToRelease =
+				createdHoldIds.length > 0 ? createdHoldIds : groupHoldIds;
+			if (holdsToRelease.length > 0) {
+				Promise.all(
+					holdsToRelease.map((holdId) =>
+						releaseHold(holdId).catch((err) => {
+							console.error("Failed to release hold:", err);
+						})
+					)
+				);
+				setGroupHoldIds([]);
+			}
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isGroupBooking]); // Run only when isGroupBooking changes
 
 	// Redirect if no room selected or missing booking data
 	useEffect(() => {
@@ -358,7 +492,25 @@ const BookingConfirmation: React.FC = () => {
 			const nights = Math.ceil(
 				(checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
 			);
-			const totalPrice = (room.offering?.basePrice || 0) * nights;
+
+			// Calculate room price
+			let totalPrice = (room.offering?.basePrice || 0) * nights;
+
+			// Add amenity prices
+			if (selectedAmenities.length > 0 && amenitiesData) {
+				for (const amenityId of selectedAmenities) {
+					const amenity = amenitiesData.find(
+						(a: AmenityOffering) => a._id === amenityId
+					);
+					if (amenity) {
+						if (amenity.priceType === "per-night") {
+							totalPrice += amenity.basePrice * nights;
+						} else {
+							totalPrice += amenity.basePrice;
+						}
+					}
+				}
+			}
 
 			const checkInDateTime = combineDateTime(checkIn, checkInTime);
 			const checkOutDateTime = combineDateTime(checkOut, checkOutTime);
@@ -373,7 +525,7 @@ const BookingConfirmation: React.FC = () => {
 				checkInDate: checkInDateTime,
 				checkOutDate: checkOutDateTime,
 				numberOfGuests: guests,
-				selectedAmenities: [],
+				selectedAmenities: selectedAmenities,
 				totalPrice,
 				status: "pending",
 				paymentStatus: "unpaid",
@@ -411,6 +563,12 @@ const BookingConfirmation: React.FC = () => {
 			setTimeError(
 				"Please select arrival and departure times for all periods."
 			);
+			return;
+		}
+
+		// Check that holds were created successfully
+		if (groupHoldIds.length === 0) {
+			setTimeError("Rooms are not reserved. Please try again.");
 			return;
 		}
 
@@ -486,7 +644,7 @@ const BookingConfirmation: React.FC = () => {
 				return;
 			}
 
-			// Create single reservation with all rooms
+			// Create single group reservation
 			const earliestCheckInStr = earliestCheckIn.toISOString().split("T")[0];
 			const latestCheckOutStr = latestCheckOut.toISOString().split("T")[0];
 
@@ -521,20 +679,30 @@ const BookingConfirmation: React.FC = () => {
 				groupReservationData
 			).unwrap();
 
+			console.log("[BookingConfirmation] Group reservation created:", {
+				reservationId: reservation._id,
+				roomCount: reservation.roomIds?.length || 0,
+				totalPrice: reservation.totalPrice,
+				guestCount: reservation.numberOfGuests,
+				checkIn: reservation.checkInDate,
+				checkOut: reservation.checkOutDate,
+			});
+
 			// Store reservation and navigate to payment
 			dispatch(setPendingReservation(reservation));
 			navigate("/payment");
 		} catch (err) {
 			const apiError = err as { data?: { error?: string }; status?: number };
-			console.error("Failed to create group reservations:", {
+			console.error("Failed to create group reservation:", {
 				status: apiError.status,
 				error: apiError.data?.error,
 				fullError: err,
 			});
-			setTimeError(
+			const errorMessage =
 				apiError?.data?.error ||
-					"Failed to create group reservations. Please try again."
-			);
+				"Failed to create reservation. Please try again.";
+			setTimeError(errorMessage);
+			toast.error(errorMessage);
 			setIsCreatingHold(false);
 		}
 	};
@@ -1189,6 +1357,107 @@ const BookingConfirmation: React.FC = () => {
 								</div>
 							</div>
 
+							{/* Amenities Selection */}
+							{amenitiesData && amenitiesData.length > 0 && (
+								<div className="booking-confirmation__section">
+									<h2>Add Amenities (Optional)</h2>
+									<p
+										style={{
+											fontSize: "0.9rem",
+											color: "var(--color-text-secondary)",
+											marginBottom: "1rem",
+										}}
+									>
+										Enhance your stay with additional amenities
+									</p>
+									<div
+										style={{
+											display: "grid",
+											gridTemplateColumns:
+												"repeat(auto-fit, minmax(200px, 1fr))",
+											gap: "1rem",
+										}}
+									>
+										{amenitiesData.map((amenity: AmenityOffering) => (
+											<label
+												key={amenity._id}
+												style={{
+													display: "flex",
+													alignItems: "flex-start",
+													gap: "0.5rem",
+													padding: "1rem",
+													border: "1px solid #ddd",
+													borderRadius: "8px",
+													cursor: "pointer",
+													transition: "all 0.2s ease",
+													backgroundColor: selectedAmenities.includes(
+														amenity._id
+													)
+														? "rgba(168, 100, 52, 0.1)"
+														: "transparent",
+													borderColor: selectedAmenities.includes(amenity._id)
+														? "var(--color-primary)"
+														: "#ddd",
+												}}
+											>
+												<input
+													type="checkbox"
+													checked={selectedAmenities.includes(amenity._id)}
+													onChange={(e) => {
+														if (e.target.checked) {
+															setSelectedAmenities([
+																...selectedAmenities,
+																amenity._id,
+															]);
+														} else {
+															setSelectedAmenities(
+																selectedAmenities.filter(
+																	(id) => id !== amenity._id
+																)
+															);
+														}
+													}}
+													style={{ marginTop: "2px" }}
+												/>
+												<div>
+													<div
+														style={{
+															fontWeight: "600",
+															marginBottom: "0.25rem",
+														}}
+													>
+														{amenity.name}
+													</div>
+													{amenity.description && (
+														<div
+															style={{
+																fontSize: "0.85rem",
+																color: "var(--color-text-secondary)",
+																marginBottom: "0.5rem",
+															}}
+														>
+															{amenity.description}
+														</div>
+													)}
+													<div
+														style={{
+															fontSize: "0.9rem",
+															color: "var(--color-primary)",
+															fontWeight: "600",
+														}}
+													>
+														${(amenity.basePrice / 100).toFixed(2)}
+														{amenity.priceType === "per-night"
+															? " /night"
+															: " (flat)"}
+													</div>
+												</div>
+											</label>
+										))}
+									</div>
+								</div>
+							)}
+
 							{/* Price Breakdown */}
 							<div className="booking-confirmation__section">
 								<h2>Price Breakdown</h2>
@@ -1202,6 +1471,45 @@ const BookingConfirmation: React.FC = () => {
 									<span className="detail-label">Number of Nights:</span>
 									<span className="detail-value">{nights}</span>
 								</div>
+								{selectedAmenities.length > 0 && amenitiesData && (
+									<>
+										<div
+											style={{
+												borderTop: "1px solid #ddd",
+												margin: "1rem 0",
+												paddingTop: "1rem",
+											}}
+										>
+											<p style={{ fontWeight: "600", marginBottom: "0.5rem" }}>
+												Selected Amenities:
+											</p>
+											{selectedAmenities.map((amenityId) => {
+												const amenity = amenitiesData.find(
+													(a: AmenityOffering) => a._id === amenityId
+												);
+												if (!amenity) return null;
+												const amenityTotal =
+													amenity.priceType === "per-night"
+														? (amenity.basePrice * nights) / 100
+														: amenity.basePrice / 100;
+												return (
+													<div
+														key={amenityId}
+														className="detail-item"
+														style={{ fontSize: "0.95rem" }}
+													>
+														<span className="detail-label">
+															{amenity.name}:
+														</span>
+														<span className="detail-value">
+															${amenityTotal.toFixed(2)}
+														</span>
+													</div>
+												);
+											})}
+										</div>
+									</>
+								)}
 								<div className="detail-item detail-item--total">
 									<span className="detail-label">Total Price:</span>
 									<span className="detail-value">${totalPrice.toFixed(2)}</span>
