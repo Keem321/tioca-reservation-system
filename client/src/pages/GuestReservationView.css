@@ -132,6 +132,39 @@
 	font-size: 16px;
 }
 
+.payment-row.amenity-row {
+	padding: 12px 0;
+	border-bottom: 1px solid #f0f0f0;
+}
+
+.amenity-name {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.amenity-details {
+	display: block;
+	font-size: 13px;
+	color: #999;
+	font-weight: 400;
+}
+
+.payment-section-title {
+	font-weight: 600;
+	color: #666;
+	font-size: 14px;
+	margin: 12px 0 8px 0;
+	padding: 8px 0 0 0;
+	border-top: 1px solid #f0f0f0;
+}
+
+.payment-divider {
+	height: 1px;
+	background-color: #e0e0e0;
+	margin: 10px 0;
+}
+
 .payment-row.total {
 	border-top: 2px solid #8b6f47;
 	margin-top: 10px;

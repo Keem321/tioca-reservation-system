@@ -64,7 +64,7 @@ class PaymentService {
 			);
 		}
 
-		// Get reservation
+		// Get reservation with full details populated
 		const reservation = await ReservationRepository.findById(reservationId);
 		if (!reservation) {
 			throw new Error("Reservation not found");
@@ -117,7 +117,12 @@ class PaymentService {
 			stripePaymentIntentId: paymentIntent.id,
 		});
 
-		// Create Payment record in database
+		// Build detailed reservation snapshot for payment record
+		const reservationDetails = await this._buildReservationDetailsSnapshot(
+			reservation
+		);
+
+		// Create Payment record in database with detailed information
 		const payment = await PaymentRepository.create({
 			reservationId,
 			userId: reservation.userId || undefined,
@@ -127,12 +132,86 @@ class PaymentService {
 			stripePaymentIntentId: paymentIntent.id,
 			stripeCustomerId: customerId,
 			description: `Reservation payment for ${reservation.guestName}`,
+			reservationDetails,
 		});
 
 		return {
 			clientSecret: paymentIntent.client_secret,
 			paymentIntentId: paymentIntent.id,
 			paymentRecordId: payment._id,
+		};
+	}
+
+	/**
+	 * Build detailed reservation information snapshot for payment record
+	 * @param {Object} reservation - Reservation object with populated references
+	 * @returns {Promise<Object>} Detailed reservation information
+	 */
+	async _buildReservationDetailsSnapshot(reservation) {
+		// Extract room details
+		const rooms = [];
+		const roomIds =
+			reservation.roomIds || (reservation.roomId ? [reservation.roomId] : []);
+
+		for (const room of roomIds) {
+			if (room && typeof room === "object") {
+				rooms.push({
+					roomId: room._id,
+					podId: room.podId,
+					quality: room.quality,
+					floor: room.floor,
+					basePrice: reservation.baseRoomPrice, // Store the base price per night
+				});
+			}
+		}
+
+		// Extract amenities with calculated totals
+		const selectedAmenities = (reservation.selectedAmenities || []).map(
+			(amenity) => {
+				// Calculate total price for this amenity based on priceType
+				const totalPrice =
+					amenity.priceType === "per-night"
+						? amenity.price * reservation.numberOfNights
+						: amenity.price;
+
+				return {
+					offeringId: amenity.offeringId,
+					name: amenity.name,
+					price: amenity.price,
+					priceType: amenity.priceType,
+					totalPrice,
+				};
+			}
+		);
+
+		// Calculate price breakdown
+		const baseRoomTotal =
+			reservation.baseRoomPrice * reservation.numberOfNights;
+		const amenitiesTotal = selectedAmenities.reduce(
+			(sum, amenity) => sum + amenity.totalPrice,
+			0
+		);
+		const subtotal = baseRoomTotal + amenitiesTotal;
+
+		return {
+			checkInDate: reservation.checkInDate,
+			checkOutDate: reservation.checkOutDate,
+			numberOfNights: reservation.numberOfNights,
+			numberOfGuests: reservation.numberOfGuests,
+			guestName: reservation.guestName,
+			guestEmail: reservation.guestEmail,
+			guestPhone: reservation.guestPhone,
+			rooms,
+			selectedAmenities,
+			priceBreakdown: {
+				baseRoomTotal,
+				amenitiesTotal,
+				subtotal,
+				taxes: 0, // Add tax calculation here if applicable
+				discounts: 0, // Add discount tracking here if applicable
+				total: reservation.totalPrice,
+			},
+			specialRequests: reservation.specialRequests,
 		};
 	}
 

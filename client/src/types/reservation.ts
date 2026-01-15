@@ -14,6 +14,7 @@ export interface ReservationAmenity {
  */
 export interface Reservation {
 	_id: string;
+	confirmationCode?: string; // Confirmation code for guest lookup
 	roomId?:
 		| string
 		| { _id: string; podId: string; quality: string; floor: string }; // Single room (backward compat)

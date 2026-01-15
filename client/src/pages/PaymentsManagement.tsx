@@ -519,6 +519,179 @@ export default function PaymentsManagement() {
 															</span>
 														</div>
 													)}
+													{/* Reservation Details */}
+													{payment.reservationDetails && (
+														<div className="reservation-details-section">
+															<h3>Reservation Details</h3>
+
+															{/* Basic Info */}
+															<div className="details-subsection">
+																<h4>Stay Information</h4>
+																<div className="details-grid">
+																	<div className="detail-row">
+																		<label>Duration:</label>
+																		<span>
+																			{
+																				payment.reservationDetails
+																					.numberOfNights
+																			}{" "}
+																			night
+																			{payment.reservationDetails
+																				.numberOfNights > 1
+																				? "s"
+																				: ""}
+																		</span>
+																	</div>
+																	<div className="detail-row">
+																		<label>Guests:</label>
+																		<span>
+																			{
+																				payment.reservationDetails
+																					.numberOfGuests
+																			}
+																		</span>
+																	</div>
+																	<div className="detail-row">
+																		<label>Special Requests:</label>
+																		<span>
+																			{payment.reservationDetails
+																				.specialRequests || "-"}
+																		</span>
+																	</div>
+																</div>
+															</div>
+
+															{/* Rooms */}
+															{payment.reservationDetails.rooms &&
+																payment.reservationDetails.rooms.length > 0 && (
+																	<div className="details-subsection">
+																		<h4>Rooms Booked</h4>
+																		{payment.reservationDetails.rooms.map(
+																			(room, idx) => (
+																				<div key={idx} className="details-grid">
+																					<div className="detail-row">
+																						<label>Pod {idx + 1}:</label>
+																						<span>
+																							{room.podId} - {room.quality} (
+																							{room.floor})
+																						</span>
+																					</div>
+																					<div className="detail-row">
+																						<label>Price/Night:</label>
+																						<span>
+																							$
+																							{(room.basePrice / 100).toFixed(
+																								2
+																							)}
+																						</span>
+																					</div>
+																				</div>
+																			)
+																		)}
+																	</div>
+																)}
+
+															{/* Amenities */}
+															{payment.reservationDetails.selectedAmenities &&
+																payment.reservationDetails.selectedAmenities
+																	.length > 0 && (
+																	<div className="details-subsection">
+																		<h4>Amenities</h4>
+																		{payment.reservationDetails.selectedAmenities.map(
+																			(amenity, idx) => (
+																				<div key={idx} className="details-grid">
+																					<div className="detail-row">
+																						<label>{amenity.name}:</label>
+																						<span>
+																							$
+																							{(amenity.price / 100).toFixed(2)}{" "}
+																							({amenity.priceType})
+																							{amenity.priceType ===
+																								"per-night" &&
+																								` × ${
+																									payment.reservationDetails
+																										.numberOfNights
+																								} = $${(
+																									amenity.totalPrice / 100
+																								).toFixed(2)}`}
+																						</span>
+																					</div>
+																				</div>
+																			)
+																		)}
+																	</div>
+																)}
+
+															{/* Price Breakdown */}
+															{payment.reservationDetails.priceBreakdown && (
+																<div className="details-subsection">
+																	<h4>Price Breakdown</h4>
+																	<div className="details-grid">
+																		<div className="detail-row">
+																			<label>Room Total:</label>
+																			<span>
+																				$
+																				{(
+																					payment.reservationDetails
+																						.priceBreakdown.baseRoomTotal / 100
+																				).toFixed(2)}
+																			</span>
+																		</div>
+																		{payment.reservationDetails.priceBreakdown
+																			.amenitiesTotal > 0 && (
+																			<div className="detail-row">
+																				<label>Amenities Total:</label>
+																				<span>
+																					$
+																					{(
+																						payment.reservationDetails
+																							.priceBreakdown.amenitiesTotal /
+																						100
+																					).toFixed(2)}
+																				</span>
+																			</div>
+																		)}
+																		{payment.reservationDetails.priceBreakdown
+																			.taxes > 0 && (
+																			<div className="detail-row">
+																				<label>Taxes:</label>
+																				<span>
+																					$
+																					{(
+																						payment.reservationDetails
+																							.priceBreakdown.taxes / 100
+																					).toFixed(2)}
+																				</span>
+																			</div>
+																		)}
+																		{payment.reservationDetails.priceBreakdown
+																			.discounts > 0 && (
+																			<div className="detail-row">
+																				<label>Discounts:</label>
+																				<span>
+																					$
+																					{(
+																						payment.reservationDetails
+																							.priceBreakdown.discounts / 100
+																					).toFixed(2)}
+																				</span>
+																			</div>
+																		)}
+																		<div className="detail-row detail-row--total">
+																			<label>Total:</label>
+																			<span>
+																				$
+																				{(
+																					payment.reservationDetails
+																						.priceBreakdown.total / 100
+																				).toFixed(2)}
+																			</span>
+																		</div>
+																	</div>
+																</div>
+															)}
+														</div>
+													)}{" "}
 												</div>
 
 												{/* Edit Form */}

@@ -416,6 +416,18 @@
 	grid-column: 1 / -1;
 }
 
+.detail-row.detail-row--total {
+	padding-top: var(--spacing-md);
+	border-top: 2px solid var(--color-primary);
+	font-weight: 700;
+}
+
+.detail-row.detail-row--total label,
+.detail-row.detail-row--total span {
+	color: var(--color-primary);
+	font-size: 1rem;
+}
+
 .detail-row label {
 	font-weight: 600;
 	color: var(--color-text-secondary);
@@ -427,6 +439,43 @@
 .detail-row span {
 	color: var(--color-text-primary);
 	font-size: 0.875rem;
+}
+
+/* Reservation Details Section */
+.reservation-details-section {
+	margin-top: var(--spacing-xl);
+	padding-top: var(--spacing-xl);
+	border-top: 2px solid var(--color-border);
+}
+
+.reservation-details-section h3 {
+	color: var(--color-text-primary);
+	font-size: 1.25rem;
+	margin-bottom: var(--spacing-lg);
+	font-weight: 600;
+}
+
+.details-subsection {
+	margin-bottom: var(--spacing-lg);
+	padding: var(--spacing-lg);
+	background: var(--color-linen);
+	border-radius: var(--border-radius-md);
+}
+
+.details-subsection h4 {
+	color: var(--color-text-primary);
+	font-size: 1rem;
+	margin-bottom: var(--spacing-md);
+	font-weight: 600;
+	border-bottom: 1px solid var(--color-border);
+	padding-bottom: var(--spacing-sm);
+}
+
+.details-subsection .details-grid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: var(--spacing-md);
+	margin-bottom: 0;
 }
 
 .monospace {

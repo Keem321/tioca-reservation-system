@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Calendar, Users, MapPin, Mail, Phone, CreditCard, X, Edit } from "lucide-react";
+import {
+	Calendar,
+	Users,
+	MapPin,
+	Mail,
+	Phone,
+	CreditCard,
+	X,
+	Edit,
+} from "lucide-react";
 import Navbar from "../components/landing/Navbar";
 import type { Reservation } from "../types/reservation";
+import { formatMoney } from "../utils/money";
 import "./GuestReservationView.css";
 
 /**
  * GuestReservationView Component
- * 
+ *
  * Displays reservation details for guests without accounts
  * Similar to the authenticated user's reservation view
  */
@@ -20,7 +30,7 @@ const GuestReservationView: React.FC = () => {
 	useEffect(() => {
 		// Get reservation from location state
 		const res = location.state?.reservation as Reservation | undefined;
-		
+
 		if (!res) {
 			// Redirect to lookup if no reservation data
 			navigate("/reservations/lookup", { replace: true });
@@ -51,7 +61,9 @@ const GuestReservationView: React.FC = () => {
 
 		try {
 			const response = await fetch(
-				`${import.meta.env.VITE_API_URL || ""}/api/reservations/guest/${reservation._id}/cancel`,
+				`${import.meta.env.VITE_API_URL || ""}/api/reservations/guest/${
+					reservation._id
+				}/cancel`,
 				{
 					method: "POST",
 					headers: {
@@ -71,7 +83,7 @@ const GuestReservationView: React.FC = () => {
 			}
 
 			alert("Reservation cancelled successfully!");
-			
+
 			// Update local state
 			setReservation({
 				...reservation,
@@ -125,7 +137,11 @@ const GuestReservationView: React.FC = () => {
 
 	// Get room info
 	const getRoomInfo = () => {
-		if (typeof reservation.roomId === "object" && reservation.roomId && reservation.roomId.podId) {
+		if (
+			typeof reservation.roomId === "object" &&
+			reservation.roomId &&
+			reservation.roomId.podId
+		) {
 			return {
 				podId: reservation.roomId.podId,
 				quality: reservation.roomId.quality,
@@ -213,7 +229,9 @@ const GuestReservationView: React.FC = () => {
 									</div>
 									<div className="detail-item">
 										<span className="detail-label">Quality:</span>
-										<span className="detail-value">{roomInfo.quality} Pearl</span>
+										<span className="detail-value">
+											{roomInfo.quality} Pearl
+										</span>
 									</div>
 									<div className="detail-item">
 										<span className="detail-label">Floor:</span>
@@ -256,16 +274,54 @@ const GuestReservationView: React.FC = () => {
 								Payment Summary
 							</h2>
 							<div className="payment-breakdown">
+								{/* Base Room Cost */}
 								<div className="payment-row">
 									<span>
-										{roomInfo?.quality || "Pod"} × {nights} night{nights > 1 ? "s" : ""}
+										{roomInfo?.quality || "Pod"} × {nights} night
+										{nights > 1 ? "s" : ""}
 									</span>
-									<span>¥{reservation.totalPrice.toLocaleString()}</span>
+									<span>{formatMoney(reservation.baseRoomPrice * nights)}</span>
 								</div>
+
+								{/* Amenities */}
+								{reservation.selectedAmenities &&
+									reservation.selectedAmenities.length > 0 && (
+										<>
+											<div className="payment-section-title">Amenities:</div>
+											{reservation.selectedAmenities.map((amenity, idx) => {
+												const amenityTotal =
+													amenity.priceType === "per-night"
+														? amenity.price * nights
+														: amenity.price;
+												return (
+													<div key={idx} className="payment-row amenity-row">
+														<span className="amenity-name">
+															{amenity.name}
+															<span className="amenity-details">
+																{amenity.priceType === "per-night"
+																	? `${nights} night${
+																			nights > 1 ? "s" : ""
+																	  } @ ${formatMoney(amenity.price)}/night`
+																	: "Flat rate"}
+															</span>
+														</span>
+														<span>{formatMoney(amenityTotal)}</span>
+													</div>
+												);
+											})}
+										</>
+									)}
+
+								{/* Divider */}
+								<div className="payment-divider"></div>
+
+								{/* Total */}
 								<div className="payment-row total">
 									<span>Total Paid</span>
-									<span>¥{reservation.totalPrice.toLocaleString()}</span>
+									<span>{formatMoney(reservation.totalPrice)}</span>
 								</div>
+
+								{/* Payment Status */}
 								<div className="payment-status">
 									<span className="detail-label">Payment Status:</span>
 									<span
@@ -281,7 +337,9 @@ const GuestReservationView: React.FC = () => {
 						{reservation.specialRequests && (
 							<div className="detail-section">
 								<h2>Special Requests</h2>
-								<p className="special-requests">{reservation.specialRequests}</p>
+								<p className="special-requests">
+									{reservation.specialRequests}
+								</p>
 							</div>
 						)}
 					</div>
@@ -290,58 +348,55 @@ const GuestReservationView: React.FC = () => {
 					<div className="important-info">
 						<h3>Important Information</h3>
 						<ul>
-							<li><strong>Check-in Time:</strong> 3:00 PM onwards</li>
-							<li><strong>Check-out Time:</strong> 11:00 AM</li>
+							<li>
+								<strong>Check-in Time:</strong> 3:00 PM onwards
+							</li>
+							<li>
+								<strong>Check-out Time:</strong> 11:00 AM
+							</li>
 							<li>Contactless check-in available at our kiosk</li>
 							<li>Please remove shoes before entering pod areas</li>
-							<li><strong>Quiet Hours:</strong> 10:00 PM - 7:00 AM</li>
-							<li>Lockers and shared facilities available on your floor</li>
 						</ul>
+
+						<h3>Cancellation Policy</h3>
+						<p>
+							Free cancellation up to 24 hours before check-in. Cancellations
+							made within 24 hours of check-in will incur a one-night charge.
+						</p>
+						<p className="help-text">
+							To cancel or modify your reservation, please contact us at{" "}
+							<a href="mailto:support@tioca.com">support@tioca.com</a> with your
+							confirmation code.
+						</p>
 					</div>
-
-					{/* Cancellation Policy */}
-					{reservation.status !== "cancelled" && (
-						<div className="cancellation-policy">
-							<h3>Cancellation Policy</h3>
-							<p>
-								Free cancellation up to 24 hours before check-in. Cancellations
-								made within 24 hours of check-in will incur a one-night charge.
-							</p>
-							<p className="help-text">
-								To cancel or modify your reservation, please contact us at{" "}
-								<a href="mailto:support@tioca.com">support@tioca.com</a> with
-								your confirmation code.
-							</p>
-						</div>
-					)}
-
-					{/* Management Actions */}
-					{reservation.status !== "cancelled" && reservation.status !== "checked-out" && (
-						<div className="management-actions">
-							<h3>Manage This Reservation</h3>
-							<div className="management-buttons">
-								<button
-									onClick={handleModifyReservation}
-									className="btn btn-modify"
-									disabled={loading}
-								>
-									<Edit size={18} />
-									Request Modification
-								</button>
-								<button
-									onClick={handleCancelReservation}
-									className="btn btn-cancel"
-									disabled={loading}
-								>
-									<X size={18} />
-									{loading ? "Cancelling..." : "Cancel Reservation"}
-								</button>
+					{reservation.status !== "cancelled" &&
+						reservation.status !== "checked-out" && (
+							<div className="management-actions">
+								<h3>Manage This Reservation</h3>
+								<div className="management-buttons">
+									<button
+										onClick={handleModifyReservation}
+										className="btn btn-modify"
+										disabled={loading}
+									>
+										<Edit size={18} />
+										Request Modification
+									</button>
+									<button
+										onClick={handleCancelReservation}
+										className="btn btn-cancel"
+										disabled={loading}
+									>
+										<X size={18} />
+										{loading ? "Cancelling..." : "Cancel Reservation"}
+									</button>
+								</div>
+								<p className="management-note">
+									For modifications, we'll help you via email. For immediate
+									cancellation, use the button above.
+								</p>
 							</div>
-							<p className="management-note">
-								For modifications, we'll help you via email. For immediate cancellation, use the button above.
-							</p>
-						</div>
-					)}
+						)}
 
 					{/* Actions */}
 					<div className="action-buttons">

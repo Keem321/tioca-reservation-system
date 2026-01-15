@@ -93,6 +93,40 @@
 	font-size: 1.25rem;
 }
 
+.summary-divider {
+	height: 1px;
+	background-color: rgba(44, 22, 7, 0.1);
+	margin: 1rem 0;
+}
+
+.summary-section-title {
+	font-weight: 600;
+	color: var(--color-text-secondary);
+	font-size: 0.9rem;
+	margin: 0.75rem 0 0.5rem 0;
+	padding: 0.5rem 0 0 0;
+	border-top: 1px solid rgba(44, 22, 7, 0.08);
+}
+
+.summary-amenity-item {
+	padding: 0.5rem 0;
+	border-bottom: 1px solid rgba(44, 22, 7, 0.05) !important;
+}
+
+.amenity-label {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	flex: 1;
+}
+
+.amenity-details {
+	display: block;
+	font-size: 0.8rem;
+	color: var(--color-text-secondary);
+	font-weight: 400;
+}
+
 .payment-page__form-container {
 	display: flex;
 	flex-direction: column;

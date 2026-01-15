@@ -5,6 +5,7 @@ import { CheckCircle, Calendar, Users, CreditCard, MapPin } from "lucide-react";
 import Navbar from "../components/landing/Navbar";
 import type { Reservation } from "../types/reservation";
 import type { RootState } from "../store";
+import { formatMoney } from "../utils/money";
 import "./PaymentSuccess.css";
 
 /**
@@ -49,7 +50,11 @@ const PaymentSuccess: React.FC = () => {
 	// Get room information
 	const getRoomInfo = () => {
 		if (!reservation) return null;
-		if (typeof reservation.roomId === "object" && reservation.roomId && reservation.roomId.podId) {
+		if (
+			typeof reservation.roomId === "object" &&
+			reservation.roomId &&
+			reservation.roomId.podId
+		) {
 			return {
 				podId: reservation.roomId.podId,
 				quality: reservation.roomId.quality,
@@ -194,7 +199,7 @@ const PaymentSuccess: React.FC = () => {
 								<div className="payment-success__detail-item">
 									<span className="detail-label">Total Amount Paid:</span>
 									<span className="detail-value detail-value--total">
-										${reservation.totalPrice.toFixed(2)}
+										{formatMoney(reservation.totalPrice)}
 									</span>
 								</div>
 								<div className="payment-success__detail-item">
@@ -232,8 +237,13 @@ const PaymentSuccess: React.FC = () => {
 					<div className="payment-success__next-steps">
 						<h3>What's Next?</h3>
 						<ul>
-							<li>A confirmation email has been sent to {reservation.guestEmail}</li>
-							<li>Your confirmation code is <strong>{reservation.confirmationCode}</strong></li>
+							<li>
+								A confirmation email has been sent to {reservation.guestEmail}
+							</li>
+							<li>
+								Your confirmation code is{" "}
+								<strong>{reservation.confirmationCode}</strong>
+							</li>
 							<li>Save this code to manage your reservation later</li>
 							<li>
 								Check-in instructions will be sent closer to your arrival date

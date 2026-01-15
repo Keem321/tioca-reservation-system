@@ -19,6 +19,7 @@ import { resetBooking } from "../features/bookingSlice";
 import type { BookingState } from "../features/bookingSlice";
 import type { Reservation } from "../types/reservation";
 import Navbar from "../components/landing/Navbar";
+import { formatMoney } from "../utils/money";
 import "./Payment.css";
 
 // Initialize Stripe with publishable key
@@ -502,7 +503,7 @@ const Payment: React.FC = () => {
 
 	const elementsOptions: StripeElementsOptions = {
 		mode: "payment",
-		amount: Math.round(reservation.totalPrice * 100),
+		amount: Math.round(reservation.totalPrice), // totalPrice is already in cents
 		currency: "usd",
 	};
 
@@ -591,10 +592,79 @@ const Payment: React.FC = () => {
 								<span className="summary-label">Nights:</span>
 								<span className="summary-value">{nights}</span>
 							</div>
+
+							{/* Detailed Price Breakdown */}
+							<div className="summary-divider"></div>
+
+						{/* Per-room breakdown */}
+						{reservation.roomIds && reservation.roomIds.length > 0 ? (
+							<>
+								<div className="summary-section-title">Rooms:</div>
+								{reservation.roomIds.map((room, idx) => (
+									<div key={idx} className="summary-item">
+										<span className="summary-label">
+											{typeof room === "object"
+												? `Pod ${room.podId} (${room.quality})`
+												: "Room"}{" "}
+											× {nights} night{nights > 1 ? "s" : ""}
+										</span>
+										<span className="summary-value">
+											{formatMoney(reservation.baseRoomPrice * nights)}
+										</span>
+									</div>
+								))}
+							</>
+						) : (
+							<div className="summary-item">
+								<span className="summary-label">
+									{typeof reservation.roomId === "object"
+										? `Pod ${reservation.roomId.podId} (${reservation.roomId.quality})`
+										: "Room"}{" "}
+									× {nights} night{nights > 1 ? "s" : ""}
+								</span>
+								<span className="summary-value">
+									{formatMoney(reservation.baseRoomPrice * nights)}
+								</span>
+							</div>
+						)}
+								reservation.selectedAmenities.length > 0 && (
+									<>
+										<div className="summary-section-title">Amenities:</div>
+										{reservation.selectedAmenities.map((amenity, idx) => {
+											const amenityTotal =
+												amenity.priceType === "per-night"
+												? amenity.price * nights
+												: amenity.price;
+											return (
+												<div
+													key={idx}
+													className="summary-item summary-amenity-item"
+												>
+													<span className="summary-label amenity-label">
+														{amenity.name}
+														<span className="amenity-details">
+															{amenity.priceType === "per-night"
+																? `${nights} night${
+																		nights > 1 ? "s" : ""
+																  } @ ${formatMoney(amenity.price)}/night`
+																: "Flat rate"}
+														</span>
+													</span>
+													<span className="summary-value">
+														{formatMoney(amenityTotal)}
+													</span>
+												</div>
+											);
+										})}
+									</>
+								)}
+
+							<div className="summary-divider"></div>
+
 							<div className="summary-item summary-item--total">
 								<span className="summary-label">Total:</span>
 								<span className="summary-value">
-									${reservation.totalPrice.toFixed(2)}
+								{formatMoney(reservation.totalPrice)}
 								</span>
 							</div>
 						</div>
