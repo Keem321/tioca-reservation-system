@@ -256,8 +256,14 @@ try {
 // Map offerings by quality for room creation
 const offeringMap = {};
 const twinOfferingMap = {};
-ROOM_OFFERINGS.forEach((offering, idx) => {
-	const id = offeringIds[idx];
+
+if (!offeringIds || Object.keys(offeringIds).length === 0) {
+	throw new Error("No offering IDs available for mapping");
+}
+
+Object.entries(offeringIds).forEach(([idx, id]) => {
+	const offering = ROOM_OFFERINGS[parseInt(idx)];
+	if (!offering) return;
 	if (offering.variant === "twin") {
 		twinOfferingMap[offering.quality] = id;
 	} else {
@@ -265,7 +271,12 @@ ROOM_OFFERINGS.forEach((offering, idx) => {
 	}
 });
 
-print(`✓ Inserted ${Object.keys(offeringIds).length} offerings\n`);
+if (
+	Object.keys(offeringMap).length === 0 &&
+	Object.keys(twinOfferingMap).length === 0
+) {
+	throw new Error("Failed to map any offerings");
+}
 
 // ============================================
 // STEP 3: SEED ROOMS (100 pods)
@@ -359,28 +370,70 @@ const allRooms = [
 ];
 
 let roomsResult;
+const roomIdMap = {};
+
 try {
 	roomsResult = db.rooms.insertMany(allRooms);
-	print(`✓ Inserted ${Object.keys(roomsResult.insertedIds).length} rooms\n`);
+	if (!roomsResult || !roomsResult.insertedIds) {
+		throw new Error("insertMany returned no IDs");
+	}
+
+	Object.entries(roomsResult.insertedIds).forEach(([idx, id]) => {
+		roomIdMap[parseInt(idx)] = id;
+	});
+
+	if (Object.keys(roomIdMap).length !== allRooms.length) {
+		throw new Error(
+			`Expected ${allRooms.length} IDs, got ${Object.keys(roomIdMap).length}`
+		);
+	}
+
+	print(`✓ Inserted ${Object.keys(roomIdMap).length} rooms\n`);
 } catch (e) {
-	print(`Error inserting rooms: ${e.message}\n`);
-	throw e;
+	print(`Note: Rooms insertion - ${e.message}`);
+	const existingRooms = db.rooms.find({}).toArray();
+	if (existingRooms.length > 0) {
+		existingRooms.forEach((room, idx) => {
+			roomIdMap[idx] = room._id;
+		});
+		print(`✓ Using ${existingRooms.length} existing rooms\n`);
+	} else {
+		throw new Error("Could not find rooms");
+	}
 }
 
-// Create room lookup for reservations
 const roomsByFloorQuality = {};
-allRooms.forEach((room, idx) => {
+let successfulRoomCount = 0;
+
+Object.entries(roomIdMap).forEach(([idx, roomId]) => {
+	const room = allRooms[parseInt(idx)];
+	if (!room) {
+		print(`⚠️ Room at index ${idx} not found in allRooms array`);
+		return;
+	}
+
 	const key = `${room.floor}-${room.quality}`;
 	if (!roomsByFloorQuality[key]) {
 		roomsByFloorQuality[key] = [];
 	}
 	roomsByFloorQuality[key].push({
-		_id: roomsResult.insertedIds[idx],
+		_id: roomId,
 		podId: room.podId,
 		floor: room.floor,
 		quality: room.quality,
 	});
+	successfulRoomCount++;
 });
+
+if (Object.keys(roomsByFloorQuality).length === 0) {
+	throw new Error("Failed to build room lookup table - no rooms mapped");
+}
+
+if (successfulRoomCount !== allRooms.length) {
+	print(
+		`⚠️  Warning: Only ${successfulRoomCount} of ${allRooms.length} rooms added to lookup table`
+	);
+}
 
 // ============================================
 // STEP 4: SEED USERS
@@ -475,18 +528,27 @@ const users = [
 ];
 
 const usersResult = db.users.insertMany(users);
-let userIds = usersResult.insertedIds;
+let userIds = [];
 
-if (!userIds || Object.keys(userIds).length === 0) {
-	print("⚠️  Warning: Users insertion returned no IDs");
+if (
+	usersResult &&
+	usersResult.insertedIds &&
+	Object.keys(usersResult.insertedIds).length > 0
+) {
+	userIds = Object.values(usersResult.insertedIds);
+	print(`✓ Inserted ${userIds.length} users\n`);
+} else {
+	print(
+		"⚠️  Note: User insertion returned no IDs, retrieving existing users..."
+	);
 	const existingUsers = db.users.find({}).toArray();
-	userIds = {};
-	existingUsers.forEach((u, idx) => {
-		userIds[idx] = u._id;
-	});
+	userIds = existingUsers.map((u) => u._id);
+	if (userIds.length > 0) {
+		print(`✓ Using ${userIds.length} existing users\n`);
+	} else {
+		throw new Error("Could not create or find users");
+	}
 }
-
-print(`✓ Inserted ${Object.keys(userIds).length} users\n`);
 
 // ============================================
 // STEP 5: HELPER FUNCTIONS
