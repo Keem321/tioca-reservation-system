@@ -29,9 +29,14 @@ const Footer: React.FC = () => {
 				<div className="footer__section">
 					<h4 className="footer__heading">Contact</h4>
 					<p className="footer__text">
+						3-14-8 Kabukicho, Shinjuku-ku
+						<br />
+						Tokyo 160-0021, Japan
+						<br />
+						<br />
 						hello@tapioca.com
 						<br />
-						+1 (727) 123-4567
+						+81 (3) 1234-5678
 					</p>
 				</div>
 			</div>

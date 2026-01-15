@@ -1418,7 +1418,7 @@ const BookingConfirmation: React.FC = () => {
 								<div className="detail-item">
 									<span className="detail-label">Price per Night:</span>
 									<span className="detail-value">
-										${(room.offering?.basePrice || 0).toFixed(2)}
+										${((room.offering?.basePrice || 0) / 100).toFixed(2)}
 									</span>
 								</div>
 								<div className="detail-item">
@@ -1466,7 +1466,7 @@ const BookingConfirmation: React.FC = () => {
 								)}
 								<div className="detail-item detail-item--total">
 									<span className="detail-label">Total Price:</span>
-									<span className="detail-value">${totalPrice.toFixed(2)}</span>
+									<span className="detail-value">${(totalPrice / 100).toFixed(2)}</span>
 								</div>
 							</div>
 						</div>

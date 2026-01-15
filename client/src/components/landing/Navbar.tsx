@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../features/authSlice";
@@ -17,15 +17,50 @@ import "./Navbar.css";
  */
 const Navbar: React.FC = () => {
 	const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const location = useLocation();
 	const isBookingPage = location.pathname === "/booking";
 	const [managerMenuOpen, setManagerMenuOpen] = useState(false);
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
+	const accountMenuRef = useRef<HTMLDivElement>(null);
+	const managerMenuRef = useRef<HTMLDivElement>(null);
 
 	const user = useSelector((state: RootState) => state.auth.user);
 	const isLoggedIn = user !== null;
 	const isManagerOrAdmin = isManagerOrAbove(user?.role as UserRole);
+
+	// Close dropdowns when clicking outside or mouse leaves
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (
+				accountMenuRef.current &&
+				!accountMenuRef.current.contains(event.target as Node)
+			) {
+				setAccountMenuOpen(false);
+			}
+			if (
+				managerMenuRef.current &&
+				!managerMenuRef.current.contains(event.target as Node)
+			) {
+				setManagerMenuOpen(false);
+			}
+		};
+
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, []);
+
+	// Handle mouse enter/leave for account menu
+	const handleAccountMouseEnter = () => {
+		setAccountMenuOpen(true);
+	};
+
+	const handleAccountMouseLeave = () => {
+		setAccountMenuOpen(false);
+	};
 
 	const handleSignOut = async () => {
 		console.log("[Navbar] Signing out user...");
@@ -47,15 +82,20 @@ const Navbar: React.FC = () => {
 
 	return (
 		<nav className="navbar">
-			<button
-				type="button"
-				onClick={() => navigate("/")}
-				className="navbar__logo"
-			>
+			<Link to="/" className="navbar__logo">
 				Tapioca
+			</Link>
+
+			{/* Mobile menu toggle */}
+			<button
+				className="navbar__mobile-toggle"
+				onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+				aria-label="Toggle menu"
+			>
+				{mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
 			</button>
 
-			<div className="navbar__links">
+			<div className={`navbar__links ${mobileMenuOpen ? "navbar__links--open" : ""}`}>
 				{!isBookingPage ? (
 					<>
 						<a href="#rooms" className="navbar__link">
@@ -84,7 +124,7 @@ const Navbar: React.FC = () => {
 
 				{/* Management dropdown - show for managers and admins */}
 				{isManagerOrAdmin && (
-					<div className="navbar__manager">
+					<div className="navbar__manager" ref={managerMenuRef}>
 						<button
 							onClick={() => setManagerMenuOpen(!managerMenuOpen)}
 							className="navbar__manager-button"
@@ -141,7 +181,12 @@ const Navbar: React.FC = () => {
 					</div>
 				)}
 
-				<div className="navbar__account">
+				<div 
+					className="navbar__account" 
+					ref={accountMenuRef}
+					onMouseEnter={handleAccountMouseEnter}
+					onMouseLeave={handleAccountMouseLeave}
+				>
 					<button
 						onClick={() => setAccountMenuOpen(!accountMenuOpen)}
 						className="navbar__account-button"

@@ -493,3 +493,65 @@ table input[type="checkbox"] {
 	width: 18px;
 	height: 18px;
 }
+
+/* Mobile Responsive Design */
+@media (max-width: 768px) {
+	.reservation-management {
+		padding: var(--spacing-md) var(--spacing-sm);
+	}
+
+	.reservation-management h1 {
+		font-size: 1.75rem;
+	}
+
+	.filters {
+		padding: var(--spacing-md);
+	}
+
+	.filters__grid {
+		grid-template-columns: 1fr;
+	}
+
+	.filters__actions {
+		flex-direction: column;
+		gap: var(--spacing-sm);
+	}
+
+	.filters__actions button {
+		width: 100%;
+	}
+
+	.reservation-list {
+		padding: var(--spacing-md);
+		overflow-x: auto;
+	}
+
+	.reservation-list table {
+		min-width: 800px;
+	}
+
+	.reservation-list th,
+	.reservation-list td {
+		padding: var(--spacing-sm);
+		font-size: 0.875rem;
+	}
+
+	.actions {
+		flex-direction: column;
+		gap: var(--spacing-xs);
+	}
+
+	.actions button {
+		width: 100%;
+		font-size: 0.75rem;
+		padding: 4px 8px;
+	}
+
+	.stats-grid {
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.stat-card {
+		padding: var(--spacing-sm);
+	}
+}
