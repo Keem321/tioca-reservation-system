@@ -5,9 +5,11 @@
 	overflow: hidden;
 	box-shadow: 0 6px 18px rgba(44, 22, 7, 0.08);
 	display: grid;
-	grid-template-columns: 60% 40%;
+	grid-template-columns: 1fr auto;
 	gap: 0;
 	transition: transform 0.2s, box-shadow 0.2s;
+	height: fit-content;
+	width: 100%;
 }
 
 .pod-card:hover {
@@ -57,12 +59,33 @@
 	gap: 0.25rem;
 }
 
+.pod-card__header {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-bottom: 0.2rem;
+}
+
 .pod-card__title {
 	font-family: "Playfair Display", serif;
 	font-size: 1.25rem;
 	color: #2c1607;
 	font-weight: 600;
-	margin-bottom: 0.3rem;
+	margin: 0;
+	flex: 1;
+}
+
+.pod-card__recommendation-badge {
+	display: inline-block;
+	background-color: #fecf8f;
+	color: #7a4a1a;
+	font-size: 0.65rem;
+	font-weight: 700;
+	padding: 0.25rem 0.5rem;
+	border-radius: 8px;
+	white-space: nowrap;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
 }
 
 .pod-card__room-number {
@@ -70,6 +93,15 @@
 	color: #a86434;
 	font-weight: 600;
 	margin-bottom: 0.3rem;
+}
+
+.pod-card__availability-info {
+	font-size: 0.75rem;
+	color: #d9681f;
+	font-weight: 500;
+	margin-bottom: 0.2rem;
+	font-style: italic;
+	line-height: 1.2;
 }
 
 .pod-card__description {

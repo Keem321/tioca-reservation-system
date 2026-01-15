@@ -25,6 +25,14 @@ interface PodCardProps {
 	nights: number;
 	checkIn: string;
 	checkOut: string;
+	availabilityInfo?: {
+		availableDays: number;
+		totalDays: number;
+		availablePercent: number;
+		isAlternativeFloor: boolean;
+	};
+	recommendationReason?: string;
+	availabilityDescription?: string;
 }
 
 const PodCard: React.FC<PodCardProps> = ({
@@ -33,6 +41,8 @@ const PodCard: React.FC<PodCardProps> = ({
 	nights,
 	checkIn,
 	checkOut,
+	recommendationReason,
+	availabilityDescription,
 }) => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
@@ -80,12 +90,24 @@ const PodCard: React.FC<PodCardProps> = ({
 					/>
 				</div>
 				<div className="pod-card__content">
-					<h3 className="pod-card__title">{displayLabel}</h3>
+					<div className="pod-card__header">
+						<h3 className="pod-card__title">{displayLabel}</h3>
+						{recommendationReason && (
+							<span className="pod-card__recommendation-badge">
+								{recommendationReason}
+							</span>
+						)}
+					</div>
 					<p className="pod-card__room-number">
 						{assignablePool.length > 1
 							? `${assignablePool.length} rooms available`
-							: "Room assigned on booking"}
+							: `Room ${chosenRoom.podId || "assigned on booking"}`}
 					</p>
+					{availabilityDescription && (
+						<p className="pod-card__availability-info">
+							{availabilityDescription}
+						</p>
+					)}
 					<p className="pod-card__description">
 						{description} • {dimensions}
 					</p>

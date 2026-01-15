@@ -16,6 +16,10 @@
 	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
+.search-results__grid--recommendations {
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
 .search-results--empty {
 	text-align: center;
 	padding: 3rem;

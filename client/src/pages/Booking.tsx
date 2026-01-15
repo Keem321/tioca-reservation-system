@@ -237,21 +237,51 @@ const Booking: React.FC = () => {
 											These rooms are partially available or on alternative
 											floors
 										</p>
-										<div className="search-results__grid">
-											{recommendedGroups.map((group) => (
-												<div
-													key={`${group.representative.floor}-${group.representative.quality}`}
-													className="recommended-pod"
-												>
-													<PodCard
-														pod={group.representative}
-														assignableRooms={group.rooms}
-														nights={getNights()}
-														checkIn={checkIn}
-														checkOut={checkOut}
-													/>
-												</div>
-											))}
+										<div className="search-results__grid search-results__grid--recommendations">
+											{recommendedGroups.map((group) => {
+												const availInfo = (group.representative as any)
+													.availabilityInfo;
+												let badgeText = "";
+												let descriptionText = "";
+
+												if (availInfo) {
+													const unavailableDays =
+														availInfo.totalDays - availInfo.availableDays;
+													const availablePercent = availInfo.availablePercent;
+
+													if (availInfo.isAlternativeFloor) {
+														// For alternative floor: badge shows percentage, description shows which floor
+														badgeText = `${availablePercent}% available`;
+														if (unavailableDays > 0) {
+															descriptionText = `${unavailableDays} of ${availInfo.totalDays} days unavailable on alternative ${group.representative.floor} floor`;
+														} else {
+															descriptionText = `Available on alternative ${group.representative.floor} floor`;
+														}
+													} else {
+														// Same floor but partially available: badge shows days unavailable
+														badgeText = `${unavailableDays} of ${availInfo.totalDays} days`;
+														descriptionText = `${unavailableDays} of ${availInfo.totalDays} days unavailable`;
+													}
+												}
+
+												return (
+													<div
+														key={`${group.representative.floor}-${group.representative.quality}`}
+														className="recommended-pod"
+													>
+														<PodCard
+															pod={group.representative}
+															assignableRooms={group.rooms}
+															nights={getNights()}
+															checkIn={checkIn}
+															checkOut={checkOut}
+															availabilityInfo={availInfo}
+															recommendationReason={badgeText}
+															availabilityDescription={descriptionText}
+														/>
+													</div>
+												);
+											})}
 										</div>
 									</div>
 								)}
