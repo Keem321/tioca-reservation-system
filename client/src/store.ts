@@ -35,14 +35,28 @@ export const store = configureStore({
 		[offeringsApi.reducerPath]: offeringsApi.reducer,
 	},
 	middleware: (getDefaultMiddleware) =>
-		getDefaultMiddleware().concat([
-			roomsApi.middleware,
-			reservationsApi.middleware,
-			userApi.middleware,
-			paymentsApi.middleware,
-			holdsApi.middleware,
-			offeringsApi.middleware,
-		]),
+		getDefaultMiddleware()
+			.concat([
+				roomsApi.middleware,
+				reservationsApi.middleware,
+				userApi.middleware,
+				paymentsApi.middleware,
+				holdsApi.middleware,
+				offeringsApi.middleware,
+			])
+			.concat((api) => (next) => (action) => {
+				// Clear all RTK Query caches when user logs out
+				// This prevents showing cached data from previous user
+				if (logout.fulfilled.match(action)) {
+					api.dispatch(userApi.util.resetApiState());
+					api.dispatch(reservationsApi.util.resetApiState());
+					api.dispatch(paymentsApi.util.resetApiState());
+					api.dispatch(holdsApi.util.resetApiState());
+					api.dispatch(roomsApi.util.resetApiState());
+					api.dispatch(offeringsApi.util.resetApiState());
+				}
+				return next(action);
+			}),
 });
 
 // Enable refetchOnFocus/refetchOnReconnect behaviors for RTK Query

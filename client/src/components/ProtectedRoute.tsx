@@ -2,10 +2,11 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store";
+import { hasRequiredRole, type UserRole } from "../utils/roleUtils";
 
 interface ProtectedRouteProps {
 	children: React.ReactNode;
-	requiredRole?: string;
+	requiredRole?: UserRole | UserRole[];
 }
 
 /**
@@ -14,6 +15,7 @@ interface ProtectedRouteProps {
  * Restricts access to routes based on authentication and optionally role.
  * - Redirects unauthenticated users to /login
  * - Redirects users without required role to /
+ * - Supports role hierarchy (admin can access manager routes)
  */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 	children,
@@ -37,8 +39,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 		return <Navigate to="/login" replace />;
 	}
 
-	// Authenticated but doesn't have required role
-	if (requiredRole && user.role !== requiredRole) {
+	// Authenticated but doesn't have required role (with hierarchy support)
+	if (requiredRole && !hasRequiredRole(user.role as UserRole, requiredRole)) {
 		return <Navigate to="/" replace />;
 	}
 

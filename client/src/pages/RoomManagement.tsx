@@ -10,6 +10,7 @@ import {
 import { useGetReservationsQuery } from "../features/reservationsApi";
 import { useGetRoomOfferingsQuery } from "../features/offeringsApi";
 import type { Room, RoomFormData, PodQuality, PodFloor } from "../types/room";
+import RoleGuard from "../components/RoleGuard";
 import "./RoomManagement.css";
 
 /**
@@ -313,16 +314,19 @@ export default function RoomManagement() {
 						By Floor
 					</button>
 					<div className="spacer" />
-					<button onClick={() => setShowForm(!showForm)}>
-						{showForm ? "Cancel" : "Add New Room"}
-					</button>
+					<RoleGuard requiredRoles="admin">
+						<button onClick={() => setShowForm(!showForm)}>
+							{showForm ? "Cancel" : "Add New Room"}
+						</button>
+					</RoleGuard>
 				</div>
 
-				{/* Form */}
-				{showForm && (
-					<div className="room-form">
-						<h2>{editingRoom ? "Edit Pod" : "Create New Pod"}</h2>
-						<form onSubmit={handleSubmit}>
+				{/* Form - Admin only */}
+				<RoleGuard requiredRoles="admin">
+					{showForm && (
+						<div className="room-form">
+							<h2>{editingRoom ? "Edit Pod" : "Create New Pod"}</h2>
+							<form onSubmit={handleSubmit}>
 							<div className="form-grid">
 								<label>
 									Floor (Zone):
@@ -537,7 +541,8 @@ export default function RoomManagement() {
 							</div>
 						</form>
 					</div>
-				)}
+					)}
+				</RoleGuard>
 
 				{/* Filters shared (search, floor, status) */}
 				<div className="filters">
@@ -599,9 +604,11 @@ export default function RoomManagement() {
 						</div>
 					)}
 					<div className="spacer" />
-					<button onClick={() => setShowForm(!showForm)}>
-						{showForm ? "Cancel" : "Add New Room"}
-					</button>
+					<RoleGuard requiredRoles="admin">
+						<button onClick={() => setShowForm(!showForm)}>
+							{showForm ? "Cancel" : "Add New Room"}
+						</button>
+					</RoleGuard>
 				</div>
 
 				{/* Tab: Booked (Next Two Weeks) */}
@@ -632,7 +639,7 @@ export default function RoomManagement() {
 											.filter((r) =>
 												typeof r.roomId === "string"
 													? r.roomId === room._id
-													: r.roomId._id === room._id
+													: r.roomId && r.roomId._id === room._id
 											)
 											.filter((r) =>
 												overlaps(
@@ -665,7 +672,9 @@ export default function RoomManagement() {
 													{room.status}
 												</td>
 												<td className="actions">
-													<button onClick={() => handleEdit(room)}>Edit</button>
+													<RoleGuard requiredRoles="admin">
+														<button onClick={() => handleEdit(room)}>Edit</button>
+													</RoleGuard>
 												</td>
 											</tr>
 										);
@@ -739,13 +748,15 @@ export default function RoomManagement() {
 												</select>
 											</td>
 											<td className="actions">
-												<button onClick={() => handleEdit(room)}>Edit</button>
-												<button
-													onClick={() => handleDelete(room._id)}
-													className="delete"
-												>
-													Delete
-												</button>
+												<RoleGuard requiredRoles="admin">
+													<button onClick={() => handleEdit(room)}>Edit</button>
+													<button
+														onClick={() => handleDelete(room._id)}
+														className="delete"
+													>
+														Delete
+													</button>
+												</RoleGuard>
 											</td>
 										</tr>
 									))}

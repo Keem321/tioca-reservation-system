@@ -20,23 +20,25 @@ paymentRouter.post("/create-intent", createPaymentIntent);
 // Confirm payment (public - no auth required)
 paymentRouter.post("/confirm", confirmPayment);
 
-// Process refund (managers only)
+// Admin-only routes - payment modifications
+// Process refund (admin only)
 paymentRouter.post(
 	"/refund",
 	requireAuth,
-	requireRole("manager"),
+	requireRole("admin"),
 	processRefund
 );
 
-// Update payment (managers only)
+// Update payment (admin only)
 paymentRouter.patch(
 	"/:paymentId",
 	requireAuth,
-	requireRole("manager"),
+	requireRole("admin"),
 	updatePayment
 );
 
-// Get payment edit history (managers only)
+// Manager/Admin routes - viewing payment data
+// Get payment edit history (manager can view, admin can view)
 paymentRouter.get(
 	"/:paymentId/history",
 	requireAuth,
@@ -44,7 +46,7 @@ paymentRouter.get(
 	getPaymentHistory
 );
 
-// Get payment statistics (managers only)
+// Get payment statistics (manager can view, admin can view)
 paymentRouter.get(
 	"/stats",
 	requireAuth,
@@ -52,7 +54,7 @@ paymentRouter.get(
 	getPaymentStats
 );
 
-// Get revenue report (managers only)
+// Get revenue report (manager can view, admin can view)
 paymentRouter.get(
 	"/reports/revenue",
 	requireAuth,
@@ -60,10 +62,10 @@ paymentRouter.get(
 	getRevenueReport
 );
 
-// Get all payments (managers only)
+// Get all payments (manager can view, admin can view)
 paymentRouter.get("/", requireAuth, requireRole("manager"), getPayments);
 
-// Get single payment (managers only)
+// Get single payment (manager can view, admin can view)
 paymentRouter.get(
 	"/:paymentId",
 	requireAuth,
@@ -71,7 +73,7 @@ paymentRouter.get(
 	getPayment
 );
 
-// Get payment by reservation (managers only)
+// Get payment by reservation (manager can view, admin can view)
 paymentRouter.get(
 	"/reservation/:reservationId",
 	requireAuth,

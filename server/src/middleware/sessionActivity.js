@@ -52,10 +52,17 @@ export const sessionActivityMiddleware = (req, res, next) => {
 	if (req.session.lastActivity) {
 		const timeSinceLastActivity = now - req.session.lastActivity;
 
+		// Log activity check for debugging
+		console.log(
+			`[Session Activity] User ${req.user?.email || req.user?.id || "unknown"} - ` +
+			`Path: ${req.path} - Time since last activity: ${Math.floor(timeSinceLastActivity / 1000)}s ` +
+			`(timeout: ${INACTIVITY_TIMEOUT / 1000}s)`
+		);
+
 		// If inactive for more than 10 minutes, destroy session
 		if (timeSinceLastActivity > INACTIVITY_TIMEOUT) {
 			console.log(
-				`[Session Activity] User ${
+				`[Session Activity] ⏱️ User ${
 					req.user?.id || "unknown"
 				} session expired due to inactivity (${Math.floor(
 					timeSinceLastActivity / 1000
@@ -87,8 +94,23 @@ export const sessionActivityMiddleware = (req, res, next) => {
 	// Update last activity timestamp
 	req.session.lastActivity = now;
 
-	// Continue to next middleware
-	next();
+	// Explicitly save the session to prevent race conditions
+	// This ensures the updated lastActivity is persisted immediately
+	// before the next request can check it
+	req.session.save((err) => {
+		if (err) {
+			console.error("[Session Activity] ❌ Error saving session:", err);
+			// Continue anyway - session might still work
+		} else {
+			console.log(
+				`[Session Activity] ✅ Updated lastActivity for user ${
+					req.user?.email || req.user?.id || "unknown"
+				}`
+			);
+		}
+		// Continue to next middleware
+		next();
+	});
 };
 
 /**
@@ -105,5 +127,11 @@ export const initializeSessionActivity = (req) => {
 				req.user?.id || "unknown"
 			}`
 		);
+		// Explicitly save to ensure it's persisted
+		req.session.save((err) => {
+			if (err) {
+				console.error("[Session Activity] Error saving initial session:", err);
+			}
+		});
 	}
 };

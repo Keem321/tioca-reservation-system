@@ -1,7 +1,7 @@
 /**
  * Offering Routes
  * Public routes for viewing offerings
- * Admin routes for managing offerings
+ * Admin-only routes for managing offerings (CRUD operations)
  */
 
 import express from "express";
@@ -15,20 +15,25 @@ import {
 	deleteOffering,
 	toggleOfferingStatus,
 } from "../controllers/offering.controller.js";
+import { requireAuth, requireRole } from "../middleware/roleAuth.js";
 
 const router = express.Router();
 
-// Public routes
+// Public routes - anyone can view offerings
 router.get("/", getOfferings);
 router.get("/room-offerings", getRoomOfferings);
 router.get("/amenity-offerings", getAmenityOfferings);
 router.get("/:id", getOfferingById);
 
-// Admin routes (would need roleAuth middleware)
-// These should be protected by admin role check
-router.post("/", createOffering);
-router.put("/:id", updateOffering);
-router.delete("/:id", deleteOffering);
-router.patch("/:id/toggle-status", toggleOfferingStatus);
+// Admin-only routes - CRUD operations
+router.post("/", requireAuth, requireRole("admin"), createOffering);
+router.put("/:id", requireAuth, requireRole("admin"), updateOffering);
+router.delete("/:id", requireAuth, requireRole("admin"), deleteOffering);
+router.patch(
+	"/:id/toggle-status",
+	requireAuth,
+	requireRole("admin"),
+	toggleOfferingStatus
+);
 
 export default router;
