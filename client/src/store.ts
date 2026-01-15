@@ -1,4 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
+import { setupListeners } from "@reduxjs/toolkit/query";
+import type { Middleware } from "@reduxjs/toolkit";
 import { roomsApi } from "./features/roomsApi";
 import { reservationsApi } from "./features/reservationsApi";
 import { userApi } from "./features/userApi";
@@ -7,8 +9,7 @@ import { holdsApi } from "./features/holdsApi";
 import { offeringsApi } from "./features/offeringsApi";
 import bookingReducer from "./features/bookingSlice";
 import groupBookingReducer from "./features/groupBookingSlice";
-import authReducer from "./features/authSlice";
-import { setupListeners } from "@reduxjs/toolkit/query";
+import authReducer, { logout } from "./features/authSlice";
 
 /**
  * Redux Store Configuration
@@ -44,7 +45,7 @@ export const store = configureStore({
 				holdsApi.middleware,
 				offeringsApi.middleware,
 			])
-			.concat((api) => (next) => (action) => {
+			.concat(((api) => (next) => (action: unknown) => {
 				// Clear all RTK Query caches when user logs out
 				// This prevents showing cached data from previous user
 				if (logout.fulfilled.match(action)) {
@@ -56,7 +57,7 @@ export const store = configureStore({
 					api.dispatch(offeringsApi.util.resetApiState());
 				}
 				return next(action);
-			}),
+			}) as Middleware),
 });
 
 // Enable refetchOnFocus/refetchOnReconnect behaviors for RTK Query
