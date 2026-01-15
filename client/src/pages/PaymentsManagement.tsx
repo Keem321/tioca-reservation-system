@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../store";
+import type { PaymentRoomInfo, PaymentAmenityInfo } from "../types/payment";
 import {
 	useGetPaymentsQuery,
 	useGetPaymentStatsQuery,
@@ -567,7 +568,7 @@ export default function PaymentsManagement() {
 																	<div className="details-subsection">
 																		<h4>Rooms Booked</h4>
 																		{payment.reservationDetails.rooms.map(
-																			(room, idx) => (
+																			(room: PaymentRoomInfo, idx: number) => (
 																				<div key={idx} className="details-grid">
 																					<div className="detail-row">
 																						<label>Pod {idx + 1}:</label>
@@ -598,7 +599,10 @@ export default function PaymentsManagement() {
 																	<div className="details-subsection">
 																		<h4>Amenities</h4>
 																		{payment.reservationDetails.selectedAmenities.map(
-																			(amenity, idx) => (
+																			(
+																				amenity: PaymentAmenityInfo,
+																				idx: number
+																			) => (
 																				<div key={idx} className="details-grid">
 																					<div className="detail-row">
 																						<label>{amenity.name}:</label>
@@ -610,7 +614,7 @@ export default function PaymentsManagement() {
 																								"per-night" &&
 																								` × ${
 																									payment.reservationDetails
-																										.numberOfNights
+																										?.numberOfNights
 																								} = $${(
 																									amenity.totalPrice / 100
 																								).toFixed(2)}`}

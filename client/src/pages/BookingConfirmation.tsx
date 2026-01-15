@@ -1359,46 +1359,20 @@ const BookingConfirmation: React.FC = () => {
 
 							{/* Amenities Selection */}
 							{amenitiesData && amenitiesData.length > 0 && (
-								<div className="booking-confirmation__section">
+								<div className="booking-confirmation__section amenities-section">
 									<h2>Add Amenities (Optional)</h2>
-									<p
-										style={{
-											fontSize: "0.9rem",
-											color: "var(--color-text-secondary)",
-											marginBottom: "1rem",
-										}}
-									>
+									<p className="amenities-description">
 										Enhance your stay with additional amenities
 									</p>
-									<div
-										style={{
-											display: "grid",
-											gridTemplateColumns:
-												"repeat(auto-fit, minmax(200px, 1fr))",
-											gap: "1rem",
-										}}
-									>
+									<div className="amenities-grid">
 										{amenitiesData.map((amenity: AmenityOffering) => (
 											<label
 												key={amenity._id}
-												style={{
-													display: "flex",
-													alignItems: "flex-start",
-													gap: "0.5rem",
-													padding: "1rem",
-													border: "1px solid #ddd",
-													borderRadius: "8px",
-													cursor: "pointer",
-													transition: "all 0.2s ease",
-													backgroundColor: selectedAmenities.includes(
-														amenity._id
-													)
-														? "rgba(168, 100, 52, 0.1)"
-														: "transparent",
-													borderColor: selectedAmenities.includes(amenity._id)
-														? "var(--color-primary)"
-														: "#ddd",
-												}}
+												className={`amenity-card ${
+													selectedAmenities.includes(amenity._id)
+														? "selected"
+														: ""
+												}`}
 											>
 												<input
 													type="checkbox"
@@ -1417,35 +1391,15 @@ const BookingConfirmation: React.FC = () => {
 															);
 														}
 													}}
-													style={{ marginTop: "2px" }}
 												/>
-												<div>
-													<div
-														style={{
-															fontWeight: "600",
-															marginBottom: "0.25rem",
-														}}
-													>
-														{amenity.name}
-													</div>
+												<div className="amenity-info">
+													<div className="amenity-name">{amenity.name}</div>
 													{amenity.description && (
-														<div
-															style={{
-																fontSize: "0.85rem",
-																color: "var(--color-text-secondary)",
-																marginBottom: "0.5rem",
-															}}
-														>
+														<div className="amenity-description">
 															{amenity.description}
 														</div>
 													)}
-													<div
-														style={{
-															fontSize: "0.9rem",
-															color: "var(--color-primary)",
-															fontWeight: "600",
-														}}
-													>
+													<div className="amenity-price">
 														${(amenity.basePrice / 100).toFixed(2)}
 														{amenity.priceType === "per-night"
 															? " /night"

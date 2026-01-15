@@ -238,11 +238,11 @@ const PaymentSuccess: React.FC = () => {
 						<h3>What's Next?</h3>
 						<ul>
 							<li>
-								A confirmation email has been sent to {reservation.guestEmail}
+								A confirmation email has been sent to {reservation?.guestEmail}
 							</li>
 							<li>
 								Your confirmation code is{" "}
-								<strong>{reservation.confirmationCode}</strong>
+								<strong>{reservation?.confirmationCode}</strong>
 							</li>
 							<li>Save this code to manage your reservation later</li>
 							<li>
@@ -252,7 +252,7 @@ const PaymentSuccess: React.FC = () => {
 					</div>
 
 					<div className="payment-success__actions">
-						{reservation.userId ? (
+						{reservation?.userId ? (
 							<button
 								onClick={() => navigate("/profile")}
 								className="payment-success__button payment-success__button--primary"

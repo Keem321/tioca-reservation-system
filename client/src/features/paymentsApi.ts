@@ -5,6 +5,7 @@ import type {
 	PaymentIntentResponse,
 	ConfirmPaymentRequest,
 	ConfirmPaymentResponse,
+	PaymentReservationDetails,
 } from "../types/payment";
 
 // Additional types for payment reporting
@@ -35,6 +36,8 @@ interface Payment {
 	stripeChargeId?: string;
 	failureReason?: string;
 	receiptUrl?: string;
+	description?: string;
+	reservationDetails?: PaymentReservationDetails;
 	createdAt: string;
 	updatedAt: string;
 }

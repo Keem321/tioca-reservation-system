@@ -120,9 +120,14 @@
 
 .booking-confirmation__content {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-	gap: 2rem;
+	grid-template-columns: 1fr 1fr;
+	gap: 1.5rem;
 	margin-bottom: 2rem;
+}
+
+/* Make amenities span full width in the grid */
+.booking-confirmation__section.amenities-section {
+	grid-column: 1 / -1;
 }
 
 .booking-confirmation__section {
@@ -130,6 +135,19 @@
 	border: 1px solid rgba(44, 22, 7, 0.08);
 	border-radius: 12px;
 	padding: 1.5rem;
+	margin-bottom: 0;
+}
+
+/* Add spacing between standalone sections (not in grid) */
+.booking-confirmation__section:not(.amenities-section) {
+	margin-bottom: 1.5rem;
+}
+
+/* Ensure sections outside the content grid have proper spacing */
+.booking-confirmation
+	> .booking-confirmation__container
+	> .booking-confirmation__section {
+	margin-bottom: 2rem;
 }
 
 .booking-confirmation__section h2 {
@@ -139,6 +157,78 @@
 	margin-bottom: 1rem;
 	border-bottom: 2px solid var(--color-primary);
 	padding-bottom: 0.5rem;
+}
+
+/* Amenities Section Styling */
+.amenities-description {
+	font-size: 0.9rem;
+	color: var(--color-text-secondary);
+	margin-bottom: 1.25rem;
+	line-height: 1.5;
+}
+
+.amenities-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 1rem;
+}
+
+.amenity-card {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+	padding: 1rem;
+	border: 2px solid rgba(44, 22, 7, 0.12);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	background-color: #fff;
+}
+
+.amenity-card:hover {
+	border-color: var(--color-primary);
+	box-shadow: 0 2px 8px rgba(119, 71, 38, 0.1);
+	transform: translateY(-1px);
+}
+
+.amenity-card.selected {
+	background-color: rgba(188, 143, 103, 0.08);
+	border-color: var(--color-primary);
+	box-shadow: 0 2px 8px rgba(119, 71, 38, 0.15);
+}
+
+.amenity-card input[type="checkbox"] {
+	margin-top: 2px;
+	flex-shrink: 0;
+	cursor: pointer;
+	width: 18px;
+	height: 18px;
+	accent-color: var(--color-primary);
+}
+
+.amenity-info {
+	flex: 1;
+	min-width: 0;
+}
+
+.amenity-name {
+	font-weight: 600;
+	margin-bottom: 0.25rem;
+	color: var(--color-text-primary);
+	font-size: 0.95rem;
+}
+
+.amenity-description {
+	font-size: 0.8rem;
+	color: var(--color-text-secondary);
+	margin-bottom: 0.5rem;
+	line-height: 1.4;
+}
+
+.amenity-price {
+	font-size: 0.9rem;
+	color: var(--color-primary);
+	font-weight: 600;
 }
 
 /* Room image in booking confirmation */
@@ -262,5 +352,24 @@
 
 	.booking-confirmation__actions {
 		flex-direction: column;
+	}
+
+	/* Single column amenities on mobile */
+	.amenities-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.amenity-card {
+		padding: 0.875rem;
+	}
+}
+
+@media (max-width: 480px) {
+	.booking-confirmation__header h1 {
+		font-size: 1.75rem;
+	}
+
+	.amenity-description {
+		font-size: 0.75rem;
 	}
 }
