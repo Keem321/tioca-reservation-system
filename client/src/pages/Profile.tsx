@@ -180,7 +180,7 @@ export default function Profile() {
 			const roomId =
 				typeof editingReservation.roomId === "string"
 					? editingReservation.roomId
-					: editingReservation.roomId._id;
+					: editingReservation.roomId?._id;
 			const room = rooms.find((r) => r._id === roomId);
 			if (room && reservationFormData.numberOfGuests > room.capacity) {
 				alert(`Number of guests exceeds room capacity (${room.capacity})`);

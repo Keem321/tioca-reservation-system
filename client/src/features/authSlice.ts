@@ -45,27 +45,24 @@ export const checkAuth = createAsyncThunk("auth/checkAuth", async () => {
  * Async thunk to logout user
  * Calls the server logout endpoint and clears session
  */
-export const logout = createAsyncThunk(
-	"auth/logout",
-	async (_, { rejectWithValue }) => {
-		const apiUrl = import.meta.env.VITE_API_URL || "";
-		try {
-			const response = await fetch(`${apiUrl}/api/auth/logout`, {
-				method: "POST",
-				credentials: "include",
-			});
+export const logout = createAsyncThunk("auth/logout", async () => {
+	const apiUrl = import.meta.env.VITE_API_URL || "";
+	try {
+		const response = await fetch(`${apiUrl}/api/auth/logout`, {
+			method: "POST",
+			credentials: "include",
+		});
 
-			// Don't throw on non-ok responses - logout should succeed regardless
-			// The session is being destroyed on backend
-			console.log("[Auth] Logout response status:", response.status);
-			return { success: true };
-		} catch (error) {
-			console.error("[Auth] Logout error:", error);
-			// Still consider logout successful - user's intent is clear
-			return { success: true };
-		}
+		// Don't throw on non-ok responses - logout should succeed regardless
+		// The session is being destroyed on backend
+		console.log("[Auth] Logout response status:", response.status);
+		return { success: true };
+	} catch (error) {
+		console.error("[Auth] Logout error:", error);
+		// Still consider logout successful - user's intent is clear
+		return { success: true };
 	}
-);
+});
 
 /**
  * Async thunk to keep session alive

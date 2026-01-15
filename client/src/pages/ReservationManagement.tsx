@@ -238,7 +238,7 @@ export default function ReservationManagement() {
 			roomId:
 				typeof reservation.roomId === "string"
 					? reservation.roomId
-					: reservation.roomId._id,
+					: reservation.roomId?._id || "",
 			offeringId: reservation.offeringId || "",
 			selectedAmenities:
 				reservation.selectedAmenities?.map((a) => a.offeringId) || [],
@@ -510,7 +510,8 @@ export default function ReservationManagement() {
 										<option value="">Select Room</option>
 										{getAvailableRooms().map((room: Room) => (
 											<option key={room._id} value={room._id}>
-												{room.podId ? `Pod ${room.podId}` : "Room"} - {room.quality} ({room.floor})
+												{room.podId ? `Pod ${room.podId}` : "Room"} -{" "}
+												{room.quality} ({room.floor})
 												{room.offering?.basePrice
 													? ` • ${formatPricePerNight(
 															room.offering.basePrice,

@@ -32,9 +32,6 @@ const BookingForm: React.FC = () => {
 	);
 	const [loading, setLoading] = React.useState(false);
 
-	// Fetch rooms (for the floor selector, not used for availability)
-	const { data: roomsData } = useGetRoomsQuery(undefined, { skip: !isValid });
-
 	// Fetch availability from public endpoint when search is clicked
 	React.useEffect(() => {
 		if (!searched || !isValid) {
