@@ -8,6 +8,7 @@ import {
 	useDeleteOfferingMutation,
 } from "../features/offeringsApi";
 import type { Offering } from "../types/offering";
+import RoleGuard from "../components/RoleGuard";
 import "./OfferingManagement.css";
 
 /**
@@ -260,14 +261,16 @@ export default function OfferingManagement() {
 						</button>
 					</div>
 
-					{/* Action Bar */}
+					{/* Action Bar - Admin only */}
 					<div className="offering-management__actions">
-						<button
-							onClick={() => handleOpenForm()}
-							className="btn-create btn-primary"
-						>
-							+ Create {tab === "rooms" ? "Room" : "Amenity"} Offering
-						</button>
+						<RoleGuard requiredRoles="admin">
+							<button
+								onClick={() => handleOpenForm()}
+								className="btn-create btn-primary"
+							>
+								+ Create {tab === "rooms" ? "Room" : "Amenity"} Offering
+							</button>
+						</RoleGuard>
 					</div>
 
 					{/* Offerings List */}
@@ -346,19 +349,21 @@ export default function OfferingManagement() {
 									</div>
 
 									<div className="offering-card__actions">
-										<button
-											onClick={() => handleOpenForm(offering)}
-											className="btn-edit btn-secondary"
-										>
-											Edit
-										</button>
-										<button
-											onClick={() => handleDelete(offering._id)}
-											className="btn-delete btn-danger"
-											disabled={isDeleting}
-										>
-											Delete
-										</button>
+										<RoleGuard requiredRoles="admin">
+											<button
+												onClick={() => handleOpenForm(offering)}
+												className="btn-edit btn-secondary"
+											>
+												Edit
+											</button>
+											<button
+												onClick={() => handleDelete(offering._id)}
+												className="btn-delete btn-danger"
+												disabled={isDeleting}
+											>
+												Delete
+											</button>
+										</RoleGuard>
 									</div>
 								</div>
 							))}
@@ -366,9 +371,10 @@ export default function OfferingManagement() {
 					)}
 				</div>
 
-				{/* Form Modal */}
-				{showForm && (
-					<div className="modal-overlay" onClick={handleCloseForm}>
+				{/* Form Modal - Admin only */}
+				<RoleGuard requiredRoles="admin">
+					{showForm && (
+						<div className="modal-overlay" onClick={handleCloseForm}>
 						<div className="modal-content" onClick={(e) => e.stopPropagation()}>
 							<div className="modal-header">
 								<h2>
@@ -573,10 +579,11 @@ export default function OfferingManagement() {
 										Cancel
 									</button>
 								</div>
-							</form>
-						</div>
+						</form>
 					</div>
-				)}
+				</div>
+					)}
+				</RoleGuard>
 			</div>
 		</>
 	);

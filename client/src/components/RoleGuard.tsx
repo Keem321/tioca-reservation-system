@@ -1,15 +1,18 @@
 import type { ReactNode } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store";
+import { hasRequiredRole, type UserRole } from "../utils/roleUtils";
 
 interface RoleGuardProps {
-	requiredRoles: string | string[];
+	requiredRoles: UserRole | UserRole[];
 	children: ReactNode;
 	fallback?: ReactNode;
 }
 
 /**
  * RoleGuard component - conditionally renders children based on user's role
+ * Supports role hierarchy where admin can access manager content.
+ * 
  * Usage:
  *   <RoleGuard requiredRoles="manager">
  *     <ManagerPanel />
@@ -17,6 +20,10 @@ interface RoleGuardProps {
  *
  *   <RoleGuard requiredRoles={["manager", "admin"]} fallback={<AccessDenied />}>
  *     <ProtectedContent />
+ *   </RoleGuard>
+ * 
+ *   <RoleGuard requiredRoles="admin">
+ *     <DeleteButton />
  *   </RoleGuard>
  */
 export default function RoleGuard({
@@ -26,10 +33,8 @@ export default function RoleGuard({
 }: RoleGuardProps) {
 	const user = useSelector((state: RootState) => state.auth.user);
 
-	const roles = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
-
-	// Check if user has one of the required roles
-	const hasRole = user && roles.includes(user.role || "guest");
+	// Check if user has required role (with hierarchy support)
+	const hasRole = hasRequiredRole(user?.role as UserRole, requiredRoles);
 
 	return <>{hasRole ? children : fallback}</>;
 }
