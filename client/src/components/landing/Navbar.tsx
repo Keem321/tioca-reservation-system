@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../features/authSlice";
 import type { RootState, AppDispatch } from "../../store";
+import { isManagerOrAbove, type UserRole } from "../../utils/roleUtils";
 import "./Navbar.css";
 
 /**
@@ -24,7 +25,7 @@ const Navbar: React.FC = () => {
 
 	const user = useSelector((state: RootState) => state.auth.user);
 	const isLoggedIn = user !== null;
-	const isManager = user?.role === "manager";
+	const isManagerOrAdmin = isManagerOrAbove(user?.role as UserRole);
 
 	const handleSignOut = async () => {
 		await dispatch(logout());
@@ -69,14 +70,14 @@ const Navbar: React.FC = () => {
 					</>
 				)}
 
-				{/* Manager dropdown - only show for logged-in managers */}
-				{isManager && (
+				{/* Management dropdown - show for managers and admins */}
+				{isManagerOrAdmin && (
 					<div className="navbar__manager">
 						<button
 							onClick={() => setManagerMenuOpen(!managerMenuOpen)}
 							className="navbar__manager-button"
 						>
-							Manager
+							Management
 							<ChevronDown
 								size={16}
 								className={`navbar__chevron ${

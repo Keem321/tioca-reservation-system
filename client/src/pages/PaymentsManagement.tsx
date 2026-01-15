@@ -11,6 +11,7 @@ import {
 } from "../features/paymentsApi";
 import { paymentsApi } from "../features/paymentsApi";
 import Navbar from "../components/landing/Navbar";
+import RoleGuard from "../components/RoleGuard";
 import "./PaymentsManagement.css";
 import { useToast } from "../components/useToast";
 
@@ -384,14 +385,16 @@ export default function PaymentsManagement() {
 													</td>
 													<td>
 														{payment.status === "succeeded" && (
-															<button
-																onClick={() =>
-																	handleRefund(payment.reservationId._id)
-																}
-																className="btn-refund"
-															>
-																Refund
-															</button>
+															<RoleGuard requiredRoles="admin">
+																<button
+																	onClick={() =>
+																		handleRefund(payment.reservationId._id)
+																	}
+																	className="btn-refund"
+																>
+																	Refund
+																</button>
+															</RoleGuard>
 														)}
 													</td>
 												</tr>

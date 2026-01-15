@@ -24,21 +24,22 @@ roomRouter.get("/recommended", getRecommendedRooms);
 // Get a single room by ID (public)
 roomRouter.get("/:id", getRoomById);
 
-// Create a new room (manager only)
-roomRouter.post("/", requireAuth, requireRole("manager"), createRoom);
+// Admin-only routes - CRUD operations on rooms
+// Create a new room (admin only)
+roomRouter.post("/", requireAuth, requireRole("admin"), createRoom);
 
-// Update a room (manager only)
-roomRouter.put("/:id", requireAuth, requireRole("manager"), updateRoom);
+// Update a room (admin only)
+roomRouter.put("/:id", requireAuth, requireRole("admin"), updateRoom);
 
-// Update room status (manager only)
+// Update room status (admin only)
 roomRouter.patch(
 	"/:id/status",
 	requireAuth,
-	requireRole("manager"),
+	requireRole("admin"),
 	updateRoomStatus
 );
 
-// Delete a room (manager only)
-roomRouter.delete("/:id", requireAuth, requireRole("manager"), deleteRoom);
+// Delete a room (admin only)
+roomRouter.delete("/:id", requireAuth, requireRole("admin"), deleteRoom);
 
 export default roomRouter;
