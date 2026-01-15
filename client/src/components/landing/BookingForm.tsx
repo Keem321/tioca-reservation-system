@@ -6,7 +6,6 @@ import { Calendar, Building } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { setCheckIn, setCheckOut, setZone } from "../../features/bookingSlice";
-import { useGetRoomsQuery } from "../../features/roomsApi";
 // RootState type not needed due to typed selector hook
 import type { BookingState } from "../../features/bookingSlice";
 import type { PodFloor } from "../../types/room";
