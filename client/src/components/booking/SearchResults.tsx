@@ -9,8 +9,13 @@ import "./SearchResults.css";
  * Displays search results for available pods.
  */
 
+interface RoomGroup {
+	representative: Room;
+	rooms: Room[]; // All assignable rooms in this group
+}
+
 interface SearchResultsProps {
-	results: Room[];
+	results: RoomGroup[];
 	nights: number;
 	checkIn: string;
 	checkOut: string;
@@ -40,10 +45,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 				{nights > 0 && `(${nights} night${nights > 1 ? "s" : ""})`}
 			</h2>
 			<div className="search-results__grid">
-				{results.map((pod) => (
+				{results.map((group) => (
 					<PodCard
-						key={pod._id}
-						pod={pod}
+						key={`${group.representative.floor}-${group.representative.quality}`}
+						pod={group.representative}
+						assignableRooms={group.rooms}
 						nights={nights}
 						checkIn={checkIn}
 						checkOut={checkOut}

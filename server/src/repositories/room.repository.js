@@ -102,12 +102,21 @@ class RoomRepository {
 					checkOutDate: { $gt: checkInDate },
 				},
 			],
-		}).select("roomId");
+		}).select("roomId roomIds");
 
-		// Get set of booked room IDs from reservations
-		const bookedRoomIds = new Set(
-			overlappingReservations.map((res) => res.roomId.toString())
-		);
+		// Get set of booked room IDs from reservations (supports both single and group bookings)
+		const bookedRoomIds = new Set();
+		overlappingReservations.forEach((res) => {
+			// Support both old single roomId and new roomIds array
+			if (res.roomId) {
+				bookedRoomIds.add(res.roomId.toString());
+			}
+			if (res.roomIds && Array.isArray(res.roomIds)) {
+				res.roomIds.forEach((rid) => {
+					bookedRoomIds.add(rid.toString());
+				});
+			}
+		});
 
 		// Find all active holds (non-expired, non-converted) for the date range
 		const holdQuery = {

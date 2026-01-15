@@ -13,6 +13,39 @@ import { createBaseQueryWithReauth } from "../utils/baseQueryWithReauth";
  * - endpoints: Defines queries (GET) and mutations (POST, PUT, DELETE) for rooms.
  */
 
+// Types for group booking search
+export interface GroupMemberRequest {
+	id: string;
+	quality: string;
+	floor?: string;
+}
+
+export interface GroupSearchRequest {
+	checkIn: string;
+	checkOut: string;
+	members: GroupMemberRequest[];
+	proximityByFloor?: Record<string, boolean>;
+}
+
+export interface GroupRoomAssignment {
+	memberId: string;
+	roomId: string;
+	room: Room;
+	floor: string;
+	quality: string;
+	isProximate: boolean;
+}
+
+export interface GroupSearchResponse {
+	primary: GroupRoomAssignment[];
+	recommendations: Array<{
+		memberId: string;
+		quality: string;
+		preferredFloor?: string;
+		status: string;
+	}>;
+}
+
 export const roomsApi = createApi({
 	reducerPath: "roomsApi",
 	baseQuery: createBaseQueryWithReauth(
@@ -110,6 +143,18 @@ export const roomsApi = createApi({
 			},
 			providesTags: ["Room"],
 		}),
+		// Search for group booking combinations
+		searchGroupAvailableRooms: builder.mutation<
+			GroupSearchResponse,
+			GroupSearchRequest
+		>({
+			query: (body) => ({
+				url: "/group-search",
+				method: "POST",
+				body,
+			}),
+			invalidatesTags: ["Room"],
+		}),
 	}),
 });
 
@@ -122,4 +167,5 @@ export const {
 	useUpdateRoomStatusMutation,
 	useSearchAvailableRoomsQuery,
 	useGetRecommendedRoomsQuery,
+	useSearchGroupAvailableRoomsMutation,
 } = roomsApi;

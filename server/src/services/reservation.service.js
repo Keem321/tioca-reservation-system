@@ -56,6 +56,7 @@ class ReservationService {
 	async createReservation(reservationData) {
 		const {
 			roomId,
+			roomIds, // Support for group bookings with multiple rooms
 			userId,
 			guestName,
 			guestEmail,
@@ -69,8 +70,9 @@ class ReservationService {
 		} = reservationData;
 
 		// Validate required fields (userId is optional for guest bookings)
+		// Either roomId or roomIds must be provided
 		if (
-			!roomId ||
+			(!roomId && (!roomIds || roomIds.length === 0)) ||
 			!guestName ||
 			!guestEmail ||
 			!checkInDate ||
@@ -80,6 +82,10 @@ class ReservationService {
 		) {
 			throw new Error("Missing required fields");
 		}
+
+		// Determine if this is a group booking (multiple rooms) or single room
+		const isGroupBooking = roomIds && roomIds.length > 0;
+		const roomsToBook = isGroupBooking ? roomIds : [roomId];
 
 		// Validate dates (include time) and same-day buffer
 		const checkIn = new Date(checkInDate);
@@ -110,16 +116,29 @@ class ReservationService {
 		session.startTransaction();
 
 		try {
-			// Check if room exists and get details
-			const room = await RoomRepository.findById(roomId);
-			if (!room) {
-				throw new Error("Room not found");
+			// Check if all rooms exist and get details
+			const rooms = [];
+			let totalCapacity = 0;
+
+			for (const rid of roomsToBook) {
+				const room = await RoomRepository.findById(rid);
+				if (!room) {
+					throw new Error(`Room ${rid} not found`);
+				}
+				rooms.push(room);
+				// Calculate capacity: couples floor = 2, crystal on business floor = 2 (special suite), all others = 1
+				const roomCapacity =
+					room.floor === "couples" ||
+					(room.floor === "business" && room.quality === "crystal")
+						? 2
+						: 1;
+				totalCapacity += roomCapacity;
 			}
 
-			// Validate number of guests doesn't exceed room capacity
-			if (numberOfGuests > room.capacity) {
+			// Validate number of guests doesn't exceed total capacity
+			if (numberOfGuests > totalCapacity) {
 				throw new Error(
-					`Number of guests (${numberOfGuests}) exceeds room capacity (${room.capacity})`
+					`Number of guests (${numberOfGuests}) exceeds total room capacity (${totalCapacity})`
 				);
 			}
 
@@ -148,33 +167,33 @@ class ReservationService {
 					throw new Error("Hold has already been converted to a reservation");
 				}
 
-			// Verify hold dates match reservation dates (compare date parts only, not times)
-			// Extract date parts from the original strings to avoid timezone conversion issues
-			const getDatePart = (dateValue) => {
-				// If it's a Date object, convert to ISO string
-				if (dateValue instanceof Date) {
-					return dateValue.toISOString().split("T")[0];
-				}
-				// If it's a string, extract the date part (YYYY-MM-DD)
-				if (typeof dateValue === "string") {
-					return dateValue.split("T")[0];
-				}
-				return dateValue;
-			};
+				// Verify hold dates match reservation dates (compare date parts only, not times)
+				// Extract date parts from the original strings to avoid timezone conversion issues
+				const getDatePart = (dateValue) => {
+					// If it's a Date object, convert to ISO string
+					if (dateValue instanceof Date) {
+						return dateValue.toISOString().split("T")[0];
+					}
+					// If it's a string, extract the date part (YYYY-MM-DD)
+					if (typeof dateValue === "string") {
+						return dateValue.split("T")[0];
+					}
+					return dateValue;
+				};
 
-			const holdCheckInDate = getDatePart(hold.checkInDate);
-			const holdCheckOutDate = getDatePart(hold.checkOutDate);
-			const reservationCheckInDate = getDatePart(checkInDate); // Use original string
-			const reservationCheckOutDate = getDatePart(checkOutDate); // Use original string
+				const holdCheckInDate = getDatePart(hold.checkInDate);
+				const holdCheckOutDate = getDatePart(hold.checkOutDate);
+				const reservationCheckInDate = getDatePart(checkInDate); // Use original string
+				const reservationCheckOutDate = getDatePart(checkOutDate); // Use original string
 
-			if (
-				holdCheckInDate !== reservationCheckInDate ||
-				holdCheckOutDate !== reservationCheckOutDate
-			) {
-				throw new Error(
-					`Reservation dates do not match the hold. Hold: ${holdCheckInDate} to ${holdCheckOutDate}, Reservation: ${reservationCheckInDate} to ${reservationCheckOutDate}`
-				);
-			}
+				if (
+					holdCheckInDate !== reservationCheckInDate ||
+					holdCheckOutDate !== reservationCheckOutDate
+				) {
+					throw new Error(
+						`Reservation dates do not match the hold. Hold: ${holdCheckInDate} to ${holdCheckOutDate}, Reservation: ${reservationCheckInDate} to ${reservationCheckOutDate}`
+					);
+				}
 
 				// Verify hold room matches reservation room
 				const holdRoomId = hold.roomId._id
@@ -185,27 +204,33 @@ class ReservationService {
 				}
 			}
 
-			// Check for overlapping reservations (excluding current session's holds if holdId provided)
-			const overlapping = await ReservationRepository.findOverlapping(
-				roomId,
-				checkIn,
-				checkOut
-			);
+			// Check for overlapping reservations for all rooms
+			for (const rid of roomsToBook) {
+				const overlapping = await ReservationRepository.findOverlapping(
+					rid,
+					checkIn,
+					checkOut
+				);
 
-			if (overlapping.length > 0) {
-				throw new Error("Room is not available for the selected dates");
-			}
+				if (overlapping.length > 0) {
+					throw new Error(
+						`Room ${rid} is not available for the selected dates`
+					);
+				}
 
-			// Check for other active holds (excluding this session if holdId provided)
-			const overlappingHolds = await RoomHoldRepository.findActiveHolds(
-				roomId,
-				checkIn,
-				checkOut,
-				sessionId // Exclude holds from this session
-			);
+				// Check for other active holds (excluding this session if holdId provided)
+				const overlappingHolds = await RoomHoldRepository.findActiveHolds(
+					rid,
+					checkIn,
+					checkOut,
+					sessionId // Exclude holds from this session
+				);
 
-			if (overlappingHolds.length > 0) {
-				throw new Error("Room is currently being booked by another user");
+				if (overlappingHolds.length > 0) {
+					throw new Error(
+						`Room ${rid} is currently being booked by another user`
+					);
+				}
 			}
 
 			// Calculate number of nights
@@ -213,12 +238,42 @@ class ReservationService {
 				(checkOut - checkIn) / (1000 * 60 * 60 * 24)
 			);
 
-			// Calculate pricing using pricing service
-			const pricingData = await PricingService.calculateReservationPrice(
-				offeringId,
-				numberOfNights,
-				selectedAmenities
-			);
+			// For group bookings, calculate pricing for each room; for single, use the provided offeringId
+			let pricingData;
+			if (isGroupBooking) {
+				// Group booking: calculate price for each room and sum
+				let totalBasePrice = 0;
+				let totalAmenitiesPrice = 0;
+				const allPricingBreakdown = [];
+
+				for (const rid of roomsToBook) {
+					const room = rooms.find((r) => r._id.toString() === rid.toString());
+					const roomPricingData =
+						await PricingService.calculateReservationPrice(
+							room.offeringId,
+							numberOfNights,
+							selectedAmenities
+						);
+
+					totalBasePrice += roomPricingData.basePrice;
+					totalAmenitiesPrice += roomPricingData.amenitiesPrice;
+					allPricingBreakdown.push(roomPricingData);
+				}
+
+				pricingData = {
+					basePrice: totalBasePrice,
+					amenitiesPrice: totalAmenitiesPrice,
+					totalPrice: totalBasePrice + totalAmenitiesPrice,
+					breakdown: allPricingBreakdown,
+				};
+			} else {
+				// Single booking: calculate price for the single room
+				pricingData = await PricingService.calculateReservationPrice(
+					offeringId,
+					numberOfNights,
+					selectedAmenities
+				);
+			}
 
 			// Build amenities data for storage
 			const amenitiesData = [];
@@ -254,7 +309,6 @@ class ReservationService {
 
 			// Create reservation with new structure
 			const reservationPayload = {
-				roomId,
 				userId,
 				guestName,
 				guestEmail,
@@ -267,6 +321,14 @@ class ReservationService {
 				totalPrice: pricingData.totalPrice,
 			};
 
+			// Add room(s) to payload - use roomIds for group bookings, roomId for backward compatibility
+			if (isGroupBooking) {
+				reservationPayload.roomIds = roomsToBook;
+			} else {
+				reservationPayload.roomId = roomId;
+				reservationPayload.roomIds = [roomId]; // Also populate roomIds array for consistency
+			}
+
 			// Add confirmation code to payload
 			reservationPayload.confirmationCode = confirmationCode;
 
@@ -275,16 +337,22 @@ class ReservationService {
 				reservationPayload
 			);
 
-			// Populate room and offering details before returning
-			await reservation.populate("roomId", "podId quality floor");
+			// Populate room details before returning
+			if (isGroupBooking) {
+				await reservation.populate("roomIds", "podId quality floor");
+			} else {
+				await reservation.populate("roomId", "podId quality floor");
+			}
 
 			// If hold exists, mark it as converted
 			if (holdId) {
 				await RoomHoldRepository.markAsConverted(holdId, reservation._id);
 			}
 
-			// Update room status to reserved
-			await RoomRepository.updateStatus(roomId, "reserved");
+			// Update all room statuses to reserved
+			for (const rid of roomsToBook) {
+				await RoomRepository.updateStatus(rid, "reserved");
+			}
 
 			// Commit the transaction
 			await session.commitTransaction();

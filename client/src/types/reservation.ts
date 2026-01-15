@@ -10,17 +10,16 @@ export interface ReservationAmenity {
 
 /**
  * Reservation type definition for frontend usage.
+ * Supports both single room (roomId) and group bookings (roomIds)
  */
 export interface Reservation {
 	_id: string;
-	roomId:
+	roomId?:
 		| string
-		| {
-				_id: string;
-				podId: string;
-				quality: string;
-				floor: string;
-		  };
+		| { _id: string; podId: string; quality: string; floor: string }; // Single room (backward compat)
+	roomIds?: Array<
+		string | { _id: string; podId: string; quality: string; floor: string }
+	>; // Multiple rooms for group bookings
 	userId?: string | { _id: string; name: string; email: string };
 	guestName: string;
 	guestEmail: string;
@@ -44,9 +43,11 @@ export interface Reservation {
 
 /**
  * Reservation form data for creating/updating reservations
+ * Supports both individual (roomId) and group (roomIds) bookings
  */
 export interface ReservationFormData {
-	roomId: string;
+	roomId?: string; // Single room
+	roomIds?: string[]; // Multiple rooms for group bookings
 	userId?: string;
 	guestName: string;
 	guestEmail: string;

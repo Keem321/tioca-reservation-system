@@ -1,16 +1,16 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { Calendar, Users } from "lucide-react";
-import {
-	setCheckIn,
-	setCheckOut,
-	setGuests,
-} from "../../features/bookingSlice";
+import { useDispatch } from "react-redux";
+import { useAppSelector } from "../../hooks";
+import { Calendar, Building } from "lucide-react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { setCheckIn, setCheckOut, setZone } from "../../features/bookingSlice";
 import { useGetRoomsQuery } from "../../features/roomsApi";
 import { useGetReservationsQuery } from "../../features/reservationsApi";
-import type { RootState } from "../../store";
-import type { Room } from "../../types/room";
+// RootState type not needed due to typed selector hook
+import type { BookingState } from "../../features/bookingSlice";
+import type { Room, PodFloor } from "../../types/room";
 import type { Reservation } from "../../types/reservation";
 import "./BookingForm.css";
 
@@ -22,13 +22,11 @@ import "./BookingForm.css";
 const BookingForm: React.FC = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const { checkIn, checkOut, guests } = useSelector(
-		(state: RootState) => state.booking
+	const { checkIn, checkOut, zone } = useAppSelector(
+		(state) => state.booking as BookingState
 	);
 
-	const isValid = Boolean(
-		checkIn && checkOut && checkIn < checkOut && guests > 0
-	);
+	const isValid = Boolean(checkIn && checkOut && checkIn < checkOut && zone);
 	const [searched, setSearched] = React.useState(false);
 
 	// Fetch data when inputs are valid; results will populate after search
@@ -45,7 +43,7 @@ const BookingForm: React.FC = () => {
 	// Reset searched flag when input changes
 	React.useEffect(() => {
 		setSearched(false);
-	}, [checkIn, checkOut, guests]);
+	}, [checkIn, checkOut, zone]);
 
 	const overlaps = React.useCallback(
 		(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date) =>
@@ -70,14 +68,15 @@ const BookingForm: React.FC = () => {
 						windowEnd
 					)
 				)
-				.map((r) => (typeof r.roomId === "string" ? r.roomId : r.roomId._id))
+				.filter((r) => r.roomId)
+				.map((r) => (typeof r.roomId === "string" ? r.roomId : r.roomId!._id))
 		);
 
 		return rooms.filter((room) => {
 			if (room.status === "maintenance") return false;
 			if (bookedRoomIds.has(room._id)) return false;
-			const capacity = room.capacity ?? (room.floor === "couples" ? 2 : 1);
-			return capacity >= guests;
+			if (zone && room.floor !== zone) return false;
+			return true;
 		}).length;
 	}, [
 		isValid,
@@ -87,7 +86,7 @@ const BookingForm: React.FC = () => {
 		reservations,
 		rooms,
 		overlaps,
-		guests,
+		zone,
 	]);
 
 	const handlePrimary = () => {
@@ -106,12 +105,20 @@ const BookingForm: React.FC = () => {
 					<label className="booking-form__label">Check In</label>
 					<div className="booking-form__input-wrapper">
 						<Calendar size={18} className="booking-form__icon" />
-						<input
-							type="date"
-							value={checkIn}
-							onChange={(e) => dispatch(setCheckIn(e.target.value))}
+						<DatePicker
+							selected={checkIn ? new Date(checkIn) : null}
+							onChange={(date: Date | null) =>
+								dispatch(
+									setCheckIn(date ? date.toISOString().split("T")[0] : "")
+								)
+							}
+							minDate={new Date()}
+							maxDate={checkOut ? new Date(checkOut) : undefined}
+							dateFormat="MM/dd/yyyy"
+							placeholderText="mm/dd/yyyy"
 							className="booking-form__input"
-							min={new Date().toISOString().split("T")[0]}
+							wrapperClassName="booking-form__datepicker-wrapper"
+							calendarClassName="booking-form__calendar"
 						/>
 					</div>
 				</div>
@@ -120,27 +127,39 @@ const BookingForm: React.FC = () => {
 					<label className="booking-form__label">Check Out</label>
 					<div className="booking-form__input-wrapper">
 						<Calendar size={18} className="booking-form__icon" />
-						<input
-							type="date"
-							value={checkOut}
-							onChange={(e) => dispatch(setCheckOut(e.target.value))}
+						<DatePicker
+							selected={checkOut ? new Date(checkOut) : null}
+							onChange={(date: Date | null) =>
+								dispatch(
+									setCheckOut(date ? date.toISOString().split("T")[0] : "")
+								)
+							}
+							minDate={checkIn ? new Date(checkIn) : new Date()}
+							dateFormat="MM/dd/yyyy"
+							placeholderText="mm/dd/yyyy"
 							className="booking-form__input"
-							min={checkIn || new Date().toISOString().split("T")[0]}
+							wrapperClassName="booking-form__datepicker-wrapper"
+							calendarClassName="booking-form__calendar"
 						/>
 					</div>
 				</div>
 
 				<div className="booking-form__field">
-					<label className="booking-form__label">Guests (Max 2)</label>
+					<label className="booking-form__label">Floor</label>
 					<div className="booking-form__input-wrapper">
-						<Users size={18} className="booking-form__icon" />
+						<Building size={18} className="booking-form__icon" />
 						<select
-							value={guests}
-							onChange={(e) => dispatch(setGuests(parseInt(e.target.value)))}
+							value={zone}
+							onChange={(e) => dispatch(setZone(e.target.value as PodFloor))}
 							className="booking-form__input booking-form__select"
 						>
-							<option value={1}>1 Guest</option>
-							<option value={2}>2 Guests</option>
+							<option value="" disabled>
+								Select Floor
+							</option>
+							<option value="women-only">Women Only</option>
+							<option value="men-only">Men Only</option>
+							<option value="couples">Couples</option>
+							<option value="business">Business</option>
 						</select>
 					</div>
 				</div>

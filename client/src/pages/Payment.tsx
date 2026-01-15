@@ -9,13 +9,14 @@ import {
 	useStripe,
 	useElements,
 } from "@stripe/react-stripe-js";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { useAppSelector } from "../hooks";
 import {
 	useCreatePaymentIntentMutation,
 	useConfirmPaymentMutation,
 } from "../features/paymentsApi";
 import { resetBooking } from "../features/bookingSlice";
-import type { RootState } from "../store";
+import type { BookingState } from "../features/bookingSlice";
 import type { Reservation } from "../types/reservation";
 import Navbar from "../components/landing/Navbar";
 import "./Payment.css";
@@ -34,6 +35,8 @@ const stripePromise = STRIPE_PUBLISHABLE_KEY
  * Payment Form Component
  * Handles the actual payment form with Stripe Elements
  */
+import type { PaymentRequest as StripePaymentRequest } from "@stripe/stripe-js";
+
 const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 	reservation,
 }) => {
@@ -49,7 +52,8 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 		clientSecret: string;
 		paymentIntentId: string;
 	} | null>(null);
-	const [paymentRequest, setPaymentRequest] = useState<any>(null);
+	const [paymentRequest, setPaymentRequest] =
+		useState<StripePaymentRequest | null>(null);
 	const [createPaymentIntent, { isLoading: isCreatingIntent }] =
 		useCreatePaymentIntentMutation();
 	const [confirmPayment, { isLoading: isConfirming }] =
@@ -431,14 +435,13 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 const Payment: React.FC = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
-	// const dispatch = useDispatch();
-	const { pendingReservation, holdId } = useSelector(
-		(state: RootState) => state.booking
+	const { pendingReservation } = useAppSelector(
+		(state) => state.booking as BookingState
 	);
 
-	// Get reservation from location state or Redux store
+	// Get reservation from either location state or Redux
 	const reservation: Reservation | null =
-		location.state?.reservation || pendingReservation;
+		location.state?.reservation || pendingReservation || null;
 
 	// Note: We don't extend the hold here because:
 	// - The reservation was already created on the confirmation page
@@ -447,15 +450,7 @@ const Payment: React.FC = () => {
 	// - If payment succeeds → reservation becomes "confirmed"
 	// - If payment fails → reservation stays "pending" (can be cleaned up later)
 
-	// Log for debugging
-	useEffect(() => {
-		if (holdId) {
-			console.log(
-				"[Payment] Reservation created, hold already converted. Payment processing..."
-			);
-		}
-		// No cleanup needed - hold is already converted and linked to reservation
-	}, [holdId]);
+	// No hold extension needed; reservation already created on confirmation
 
 	// Redirect if no reservation
 	useEffect(() => {
@@ -491,17 +486,11 @@ const Payment: React.FC = () => {
 	// Note: stripePromise is a Promise, so we can't check it directly here
 	// The Elements component will handle loading errors
 
+	// Group bookings are now handled as single reservations with roomIds array
+
+	// Individual booking flow
 	if (!reservation) {
-		return (
-			<>
-				<Navbar />
-				<div className="payment-page">
-					<div className="payment-page__error">
-						No reservation found. Please start a new booking.
-					</div>
-				</div>
-			</>
-		);
+		return null;
 	}
 
 	// Calculate number of nights
@@ -561,9 +550,21 @@ const Payment: React.FC = () => {
 						<div className="payment-page__summary">
 							<h2>Reservation Summary</h2>
 							<div className="summary-item">
-								<span className="summary-label">Room:</span>
+								<span className="summary-label">
+									{reservation.roomIds && reservation.roomIds.length > 1
+										? "Rooms:"
+										: "Room:"}
+								</span>
 								<span className="summary-value">
-									{typeof reservation.roomId === "object" && reservation.roomId?.podId
+									{reservation.roomIds && reservation.roomIds.length > 0
+										? reservation.roomIds
+												.map((room) =>
+													typeof room === "object"
+														? `Pod ${room.podId} (${room.quality})`
+														: "Room"
+												)
+												.join(", ")
+										: typeof reservation.roomId === "object"
 										? `Pod ${reservation.roomId.podId} - ${reservation.roomId.quality}`
 										: "Room"}
 								</span>

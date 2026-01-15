@@ -9,6 +9,7 @@ import {
 	updateRoomStatus,
 	getAvailableRooms,
 	getRecommendedRooms,
+	searchGroupBooking,
 } from "../controllers/room.controller.js";
 import { requireRole, requireAuth } from "../middleware/roleAuth.js";
 
@@ -20,6 +21,9 @@ roomRouter.get("/available", getAvailableRooms);
 
 // Get recommended rooms (public)
 roomRouter.get("/recommended", getRecommendedRooms);
+
+// Search for group booking combinations (public)
+roomRouter.post("/group-search", searchGroupBooking);
 
 // Get a single room by ID (public)
 roomRouter.get("/:id", getRoomById);

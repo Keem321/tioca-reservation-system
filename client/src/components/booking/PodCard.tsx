@@ -20,7 +20,8 @@ import "./PodCard.css";
  */
 
 interface PodCardProps {
-	pod: Room;
+	pod: Room; // representative room for display
+	assignableRooms?: Room[]; // pool of rooms to auto-assign
 	nights: number;
 	checkIn: string;
 	checkOut: string;
@@ -28,6 +29,7 @@ interface PodCardProps {
 
 const PodCard: React.FC<PodCardProps> = ({
 	pod,
+	assignableRooms,
 	nights,
 	checkIn,
 	checkOut,
@@ -36,7 +38,9 @@ const PodCard: React.FC<PodCardProps> = ({
 	const dispatch = useDispatch();
 
 	// Get price from offering (in cents)
-	const pricePerNight = pod.offering?.basePrice || 0;
+	const assignablePool = assignableRooms?.length ? assignableRooms : [pod];
+	const chosenRoom = assignablePool[0];
+	const pricePerNight = chosenRoom.offering?.basePrice || 0;
 	const totalPrice = pricePerNight * nights;
 	const displayLabel = getRoomDisplayLabel(pod.quality, pod.floor);
 	const roomImage = getRoomImage(pod.quality, pod.floor);
@@ -44,12 +48,12 @@ const PodCard: React.FC<PodCardProps> = ({
 	const dimensions = getRoomDimensions(pod.quality, pod.floor);
 
 	const handleBookNow = () => {
-		// Store selected room in Redux for booking confirmation
-		dispatch(setSelectedRoom(pod));
-		// Navigate to booking confirmation page
+		// Auto-assign the first available room in the pool
+		const assigned = assignablePool[0];
+		dispatch(setSelectedRoom(assigned));
 		navigate("/booking/confirm", {
 			state: {
-				room: pod,
+				room: assigned,
 				checkIn,
 				checkOut,
 				nights,
@@ -77,7 +81,11 @@ const PodCard: React.FC<PodCardProps> = ({
 				</div>
 				<div className="pod-card__content">
 					<h3 className="pod-card__title">{displayLabel}</h3>
-					<p className="pod-card__room-number">Room {pod.podId}</p>
+					<p className="pod-card__room-number">
+						{assignablePool.length > 1
+							? `${assignablePool.length} rooms available`
+							: "Room assigned on booking"}
+					</p>
 					<p className="pod-card__description">
 						{description} • {dimensions}
 					</p>

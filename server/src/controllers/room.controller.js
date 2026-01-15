@@ -173,3 +173,42 @@ export async function getRecommendedRooms(req, res) {
 		res.status(400).json({ error: err.message });
 	}
 }
+
+/**
+ * Search for group booking combinations
+ * @route POST /api/rooms/group-search
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @returns {void}
+ */
+export async function searchGroupBooking(req, res) {
+	try {
+		const { checkIn, checkOut, members, proximityByFloor } = req.body;
+		// Note: Do NOT exclude sessionId for group searches
+		// Group bookings should check against ALL holds, not just non-current-session holds
+		// This ensures rooms with active holds from any session are properly filtered out
+
+		if (!checkIn || !checkOut || !members || !Array.isArray(members)) {
+			return res.status(400).json({
+				error: "Check-in, check-out dates, and members array are required",
+			});
+		}
+
+		if (members.length === 0) {
+			return res.status(400).json({
+				error: "Members array cannot be empty",
+			});
+		}
+
+		const result = await RoomService.searchGroupBooking(
+			checkIn,
+			checkOut,
+			members,
+			proximityByFloor || {},
+			null // Pass null to exclude NO holds - all holds should be checked
+		);
+		res.json(result);
+	} catch (err) {
+		res.status(400).json({ error: err.message });
+	}
+}

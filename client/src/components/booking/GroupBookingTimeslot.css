@@ -1,0 +1,440 @@
+.group-booking-timeslot {
+	background-color: var(--color-linen);
+	border: 2px solid var(--color-primary);
+	border-radius: 12px;
+	padding: 24px;
+	margin-bottom: 24px;
+	box-shadow: 0 4px 16px rgba(44, 22, 7, 0.08);
+}
+
+.group-booking-timeslot__header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.group-booking-timeslot__title {
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--color-deep-walnut);
+	margin: 0;
+}
+
+.group-booking-timeslot__remove-btn {
+	background: none;
+	border: none;
+	color: var(--color-primary);
+	cursor: pointer;
+	padding: 8px;
+	border-radius: 6px;
+	transition: all 0.2s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.group-booking-timeslot__remove-btn:hover {
+	background-color: rgba(188, 143, 103, 0.1);
+	color: var(--color-deep-walnut);
+}
+
+/* Step Container */
+.group-booking-timeslot__step {
+	animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.group-booking-timeslot__step-title {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--color-deep-walnut);
+	margin: 0 0 12px 0;
+}
+
+.group-booking-timeslot__step-subtitle {
+	font-size: 13px;
+	color: var(--color-text-secondary, rgba(44, 22, 7, 0.6));
+	margin: 0 0 16px 0;
+	line-height: 1.5;
+}
+
+/* STEP 1: Date Selection */
+.group-booking-timeslot__dates {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.group-booking-timeslot__date-group {
+	display: flex;
+	flex-direction: column;
+}
+
+.group-booking-timeslot__label {
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color-deep-walnut);
+	margin-bottom: 8px;
+}
+
+.group-booking-timeslot__input {
+	padding: 12px 14px;
+	border: 1px solid var(--color-border, rgba(44, 22, 7, 0.2));
+	border-radius: 8px;
+	background-color: var(--color-white, white);
+	font-size: 14px;
+	font-family: inherit;
+	transition: border-color 0.2s ease;
+}
+
+.group-booking-timeslot__input:focus {
+	outline: none;
+	border-color: var(--color-primary);
+	box-shadow: 0 0 0 3px rgba(188, 143, 103, 0.1);
+}
+
+.group-booking-timeslot__next-btn {
+	width: 100%;
+	padding: 1rem;
+	background-color: var(--color-primary);
+	border: none;
+	border-radius: 12px;
+	color: white;
+	font-size: 1rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	box-shadow: 0 4px 12px rgba(44, 22, 7, 0.08);
+}
+
+.group-booking-timeslot__next-btn:hover:not(.disabled) {
+	background-color: var(--color-secondary);
+	transform: translateY(-1px);
+	box-shadow: 0 6px 18px rgba(44, 22, 7, 0.12);
+}
+
+.group-booking-timeslot__next-btn.disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+/* STEP 2: Floor Selection & Guest Configuration */
+.group-booking-timeslot__floor-sections {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	margin-bottom: 20px;
+}
+
+.group-booking-timeslot__floor-section {
+	background-color: var(--color-white, white);
+	border: 2px solid var(--color-border, rgba(44, 22, 7, 0.1));
+	border-radius: 10px;
+	overflow: hidden;
+	transition: all 0.2s ease;
+}
+
+.group-booking-timeslot__floor-section.selected {
+	border-color: var(--color-primary);
+	box-shadow: 0 4px 12px rgba(188, 143, 103, 0.1);
+}
+
+.group-booking-timeslot__floor-header {
+	background-color: rgba(250, 248, 246, 0.5);
+}
+
+.group-booking-timeslot__floor-toggle {
+	width: 100%;
+	padding: 16px 20px;
+	background-color: transparent;
+	border: none;
+	color: var(--color-deep-walnut);
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	text-align: left;
+	text-transform: capitalize;
+}
+
+.group-booking-timeslot__floor-toggle:hover {
+	background-color: rgba(188, 143, 103, 0.05);
+}
+
+.group-booking-timeslot__floor-toggle.selected {
+	background-color: rgba(188, 143, 103, 0.1);
+	color: var(--color-primary);
+}
+
+.group-booking-timeslot__floor-name {
+	font-weight: 600;
+	font-size: 14px;
+}
+
+.group-booking-timeslot__floor-badge {
+	background-color: var(--color-primary, #bc8f67);
+	color: var(--color-white, white);
+	padding: 4px 12px;
+	border-radius: 12px;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.group-booking-timeslot__floor-content {
+	padding: 16px 20px 20px;
+	border-top: 1px solid rgba(44, 22, 7, 0.1);
+	background-color: rgba(250, 248, 246, 0.3);
+}
+
+.group-booking-timeslot__floor-members {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.group-booking-timeslot__add-floor-member-btn {
+	width: 100%;
+	padding: 0.75rem;
+	background: transparent;
+	border: 2px dashed var(--color-border);
+	border-radius: 12px;
+	color: var(--color-primary);
+	font-size: 0.9rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+}
+
+.group-booking-timeslot__add-floor-member-btn:hover {
+	background-color: rgba(188, 143, 103, 0.05);
+	border-color: var(--color-primary);
+	border-style: solid;
+}
+
+.group-booking-timeslot__proximity-checkbox {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 16px;
+	padding: 12px;
+	background-color: var(--color-white, white);
+	border-radius: 8px;
+	border: 1px solid var(--color-border, rgba(44, 22, 7, 0.1));
+	font-size: 13px;
+	color: var(--color-text-secondary, rgba(44, 22, 7, 0.8));
+	cursor: pointer;
+	user-select: none;
+	transition: all 0.2s ease;
+}
+
+.group-booking-timeslot__proximity-checkbox:hover {
+	background-color: rgba(188, 143, 103, 0.05);
+	border-color: var(--color-primary);
+}
+
+.group-booking-timeslot__proximity-checkbox input[type="checkbox"] {
+	cursor: pointer;
+	accent-color: var(--color-primary);
+	width: 18px;
+	height: 18px;
+}
+
+/* STEP 3: Quality Selection */
+.group-booking-timeslot__members {
+	display: flex;
+}
+
+.group-booking-timeslot__member-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid rgba(44, 22, 7, 0.1);
+}
+
+.group-booking-timeslot__member-number {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--color-primary);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.group-booking-timeslot__member-floor {
+	font-size: 12px;
+	color: rgba(44, 22, 7, 0.6);
+	font-weight: 500;
+}
+
+.group-booking-timeslot__field {
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 8px;
+}
+
+.group-booking-timeslot__field-label {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--color-deep-walnut);
+	margin-bottom: 4px;
+}
+
+.group-booking-timeslot__field-select {
+	padding: 0.75rem 1rem;
+	border: 1px solid rgba(44, 22, 7, 0.15);
+	border-radius: 12px;
+	background-color: rgba(250, 248, 246, 0.6);
+	font-size: 0.95rem;
+	font-family: inherit;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	color: var(--color-text-primary);
+	appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235a3a24' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 1rem center;
+	padding-right: 2.5rem;
+}
+
+.group-booking-timeslot__field-select:focus {
+	outline: none;
+	border-color: var(--color-primary);
+	box-shadow: 0 0 0 3px rgba(188, 143, 103, 0.1);
+}
+
+.group-booking-timeslot__remove-member-btn {
+	width: 100%;
+	padding: 8px;
+	background-color: rgba(188, 143, 103, 0.05);
+	border: 1px solid rgba(188, 143, 103, 0.2);
+	border-radius: 6px;
+	color: var(--color-primary);
+	font-size: 12px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	margin-top: 4px;
+}
+
+.group-booking-timeslot__remove-member-btn:hover {
+	background-color: rgba(188, 143, 103, 0.15);
+	border-color: var(--color-primary);
+}
+
+.group-booking-timeslot__add-member-btn {
+	width: 100%;
+	padding: 12px;
+	background-color: white;
+	border: 2px dashed var(--color-primary);
+	border-radius: 8px;
+	color: var(--color-primary);
+	font-size: 13px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.group-booking-timeslot__add-member-btn:hover {
+	background-color: rgba(188, 143, 103, 0.05);
+	border-color: var(--color-deep-walnut);
+	color: var(--color-deep-walnut);
+}
+
+/* Step Actions (Navigation) */
+.group-booking-timeslot__step-actions {
+	display: flex;
+	gap: 12px;
+	justify-content: space-between;
+	margin-top: 24px;
+}
+
+.group-booking-timeslot__back-btn {
+	flex: 0 0 auto;
+	padding: 0.75rem 1.25rem;
+	background: transparent;
+	border: 1px solid var(--color-border);
+	border-radius: 12px;
+	color: var(--color-text-primary);
+	font-size: 1rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.group-booking-timeslot__back-btn:hover {
+	background-color: var(--color-background);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.group-booking-timeslot__search-btn {
+	flex: 1;
+	padding: 1rem;
+	background-color: var(--color-secondary);
+	border: none;
+	border-radius: 12px;
+	color: white;
+	font-size: 1rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	box-shadow: 0 4px 12px rgba(168, 100, 52, 0.2);
+}
+
+.group-booking-timeslot__search-btn:hover:not(.disabled) {
+	filter: brightness(1.1);
+	transform: translateY(-1px);
+	box-shadow: 0 6px 18px rgba(168, 100, 52, 0.3);
+}
+
+.group-booking-timeslot__search-btn.disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	.group-booking-timeslot {
+		padding: 16px;
+	}
+
+	.group-booking-timeslot__dates {
+		grid-template-columns: 1fr;
+	}
+
+	.group-booking-timeslot__member-fields {
+		grid-template-columns: 1fr;
+	}
+}
