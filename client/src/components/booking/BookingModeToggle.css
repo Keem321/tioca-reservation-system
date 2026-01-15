@@ -1,0 +1,40 @@
+.booking-mode-toggle {
+	display: flex;
+	gap: 1rem;
+	margin-bottom: 2rem;
+	background-color: rgba(188, 143, 103, 0.1);
+	padding: 0.5rem;
+	border-radius: 12px;
+	width: fit-content;
+}
+
+.booking-mode-toggle__btn {
+	padding: 0.75rem 1.5rem;
+	border: none;
+	border-radius: 10px;
+	background-color: transparent;
+	color: var(--color-text-secondary);
+	cursor: pointer;
+	font-size: 0.95rem;
+	font-weight: 600;
+	transition: all 0.3s ease;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	white-space: nowrap;
+}
+
+.booking-mode-toggle__btn:hover {
+	background-color: rgba(188, 143, 103, 0.15);
+	color: var(--color-text-primary);
+}
+
+.booking-mode-toggle__btn--active {
+	background-color: white;
+	color: var(--color-primary);
+	box-shadow: 0 2px 8px rgba(44, 22, 7, 0.1);
+}
+
+.booking-mode-toggle__btn--active:hover {
+	background-color: white;
+	color: var(--color-secondary);
+}

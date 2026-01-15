@@ -2,7 +2,15 @@ import { Schema, model } from "mongoose";
 
 const reservationSchema = new Schema(
 	{
-		roomId: { type: Schema.Types.ObjectId, ref: "Room", required: true },
+		roomIds: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: "Room",
+				required: true,
+			},
+		],
+		// Backward compatibility: single roomId reference (deprecated, use roomIds)
+		roomId: { type: Schema.Types.ObjectId, ref: "Room", required: false },
 		userId: { type: Schema.Types.ObjectId, ref: "User", required: false },
 		guestName: { type: String, required: true },
 		guestEmail: { type: String, required: true },
@@ -56,7 +64,8 @@ const reservationSchema = new Schema(
 );
 
 // Indexes for efficient querying
-reservationSchema.index({ roomId: 1, checkInDate: 1, checkOutDate: 1 });
+reservationSchema.index({ roomIds: 1, checkInDate: 1, checkOutDate: 1 });
+reservationSchema.index({ roomId: 1, checkInDate: 1, checkOutDate: 1 }); // Backward compatibility
 reservationSchema.index({ userId: 1 });
 
 export default model("Reservation", reservationSchema);

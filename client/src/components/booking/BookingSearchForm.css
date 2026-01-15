@@ -52,10 +52,10 @@
 
 .booking-search-form__input {
 	width: 100%;
-	padding: 0.875rem 1rem 0.875rem 3rem;
+	padding: 0.875rem 1rem;
 	border: 1px solid rgba(44, 22, 7, 0.15);
 	border-radius: 12px;
-	background-color: #fff6eb;
+	background-color: rgba(250, 248, 246, 0.6);
 	font-size: 0.95rem;
 	color: #2c1607;
 	outline: none;
@@ -64,14 +64,90 @@
 }
 
 .booking-search-form__input:focus {
-	border-color: #a86434;
-	box-shadow: 0 0 0 3px rgba(168, 100, 52, 0.1);
+	border-color: var(--color-primary);
+	box-shadow: 0 0 0 3px rgba(188, 143, 103, 0.1);
 }
 
 .booking-search-form__input:disabled {
 	background-color: #e8ddcf;
 	cursor: not-allowed;
 	opacity: 0.6;
+}
+
+/* DatePicker Styling */
+.booking-search-form__datepicker {
+	padding: 0.875rem 1rem !important;
+}
+
+.react-datepicker-wrapper {
+	width: 100%;
+}
+
+.react-datepicker__input-container {
+	width: 100%;
+}
+
+.react-datepicker__header {
+	background-color: var(--color-deep-walnut);
+	border-bottom: none;
+	padding-top: 1rem;
+}
+
+.react-datepicker__current-month {
+	color: white;
+	font-weight: 600;
+	font-size: 1rem;
+}
+
+.react-datepicker__day-name {
+	color: var(--color-linen);
+	width: 2.5rem;
+	line-height: 2.5rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+}
+
+.react-datepicker__day {
+	width: 2.5rem;
+	line-height: 2.5rem;
+	border-radius: 6px;
+	margin: 0.25rem;
+}
+
+.react-datepicker__day--selected {
+	background-color: var(--color-primary);
+	color: white;
+}
+
+.react-datepicker__day--keyboard-selected {
+	background-color: rgba(188, 143, 103, 0.3);
+	color: var(--color-deep-walnut);
+}
+
+.react-datepicker__day--in-range {
+	background-color: rgba(188, 143, 103, 0.15);
+	color: var(--color-deep-walnut);
+}
+
+.react-datepicker__day--today {
+	font-weight: 600;
+	color: var(--color-primary);
+}
+
+.react-datepicker__day:hover {
+	background-color: rgba(188, 143, 103, 0.2);
+	border-radius: 6px;
+}
+
+.react-datepicker {
+	border: 2px solid var(--color-primary);
+	border-radius: 12px;
+	box-shadow: 0 12px 40px rgba(44, 22, 7, 0.25),
+		0 4px 16px rgba(44, 22, 7, 0.15);
+}
+
+.react-datepicker__month {
+	padding: 0.5rem;
 }
 
 .booking-search-form__select {
@@ -81,6 +157,7 @@
 	background-repeat: no-repeat;
 	background-position: right 1rem center;
 	padding-right: 2.5rem;
+	padding-left: 3rem;
 }
 
 .booking-search-form__select:disabled {

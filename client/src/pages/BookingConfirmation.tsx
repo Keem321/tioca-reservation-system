@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -14,8 +14,10 @@ import {
 	resetBooking,
 	setHoldId,
 } from "../features/bookingSlice";
+import { resetGroupBooking } from "../features/groupBookingSlice";
 import type { RootState } from "../store";
 import type { ReservationFormData } from "../types/reservation";
+import type { Room } from "../types/room";
 import Navbar from "../components/landing/Navbar";
 import {
 	getRoomImage,
@@ -23,6 +25,50 @@ import {
 	getRoomQualityDescription,
 } from "../utils/roomImages";
 import "./BookingConfirmation.css";
+
+// Type for group booking results passed from search
+interface GroupSearchResults {
+	primary: Array<{
+		memberId: string;
+		roomId: string;
+		room: Room;
+		floor: string;
+		quality: string;
+		isProximate: boolean;
+	}>;
+	recommendations: Array<{
+		memberId: string;
+		quality: string;
+		preferredFloor?: string;
+		status: string;
+	}>;
+}
+
+// Type for timeslot in group booking
+interface GroupBookingTimeslot {
+	id: string;
+	checkIn: string;
+	checkOut: string;
+	members: Array<{
+		id: string;
+		numberOfGuests?: number;
+		quality?: string;
+		floor?: string;
+	}>;
+}
+
+// Type for timeslot in group booking
+interface GroupBookingTimeslot {
+	id: string;
+	checkIn: string;
+	checkOut: string;
+	members: Array<{
+		id: string;
+		numberOfGuests?: number;
+		quality?: string;
+		floor?: string;
+	}>;
+}
 
 /**
  * BookingConfirmation Component
@@ -40,21 +86,58 @@ const BookingConfirmation: React.FC = () => {
 	);
 	const { user } = useSelector((state: RootState) => state.auth);
 
-	// Guest information form state
+	// Check if this is a group booking from location state
+	const isGroupBooking = location.state?.isGroupBooking || false;
+	const groupResults: GroupSearchResults | undefined =
+		location.state?.groupResults;
+	const timeslots = useMemo(
+		() =>
+			(location.state?.timeslots || []) as Array<{
+				id: string;
+				checkIn: string;
+				checkOut: string;
+				members: Array<{
+					id: string;
+					numberOfGuests?: number;
+					quality?: string;
+					floor?: string;
+				}>;
+			}>,
+		[location.state?.timeslots]
+	);
+
+	// Guest information form state - primary guest
 	const [guestName, setGuestName] = useState(user?.name || "");
 	const [guestEmail, setGuestEmail] = useState(user?.email || "");
 	const [guestPhone, setGuestPhone] = useState("");
 
-	// Time selection state
+	// Group guest names (optional for non-primary guests)
+	const [groupGuestNames, setGroupGuestNames] = useState<
+		Record<string, string>
+	>({});
+
+	// Time selection state for individual booking
 	const [checkInTime, setCheckInTime] = useState("");
 	const [checkOutTime, setCheckOutTime] = useState("");
+
+	// Time selection state for group booking (per timeslot)
+	const [timeslotTimes, setTimeslotTimes] = useState<
+		Record<
+			string,
+			{
+				checkInTime: string;
+				checkOutTime: string;
+			}
+		>
+	>({});
+
 	const [timeError, setTimeError] = useState("");
 
 	// Hold state
 	const [holdError, setHoldError] = useState("");
 	const [isCreatingHold, setIsCreatingHold] = useState(false);
 
-	// Get room from location state or Redux
+	// Get room from location state or Redux (individual booking only)
 	const room = location.state?.room || selectedRoom;
 
 	// Hold mutations
@@ -92,8 +175,77 @@ const BookingConfirmation: React.FC = () => {
 		return `${String(hourNum).padStart(2, "0")}:${minute}`;
 	};
 
+	// Helper to generate arrival time slots
+	// If date is today, only show times at least 2 hours in the future
+	// Otherwise show all hour blocks from start to end of day
+	const generateArrivalSlots = (dateStr: string): string[] => {
+		const today = new Date();
+		const checkDate = toLocalDate(dateStr);
+		const isToday = today.toDateString() === checkDate.toDateString();
+
+		const slots: string[] = [];
+
+		if (isToday) {
+			// Current time + 2 hours minimum
+			const now = new Date();
+			const startHour = now.getHours() + 2;
+			const endHour = 23; // 11 PM is last option
+
+			// If start hour goes past 11 PM, no slots available
+			if (startHour > endHour) {
+				return [];
+			}
+
+			for (let hour = startHour; hour <= endHour; hour++) {
+				const ampm = hour < 12 ? "AM" : "PM";
+				const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+				slots.push(`${displayHour}:00 ${ampm}`);
+			}
+		} else {
+			// Show all hours from start to end of day
+			// Standard hours: 12 AM to 11 PM (midnight to 11 PM)
+			for (let hour = 0; hour <= 23; hour++) {
+				const ampm = hour < 12 ? "AM" : "PM";
+				const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+				slots.push(`${displayHour}:00 ${ampm}`);
+			}
+		}
+
+		return slots;
+	};
+
+	// Helper to generate departure time slots
+	// Always show all hour blocks from 9 AM to 2 PM (standard checkout times)
+	const generateDepartureSlots = (): string[] => {
+		const slots: string[] = [];
+		// Standard departure hours: 9 AM to 2 PM
+		for (let hour = 9; hour <= 14; hour++) {
+			const ampm = hour < 12 ? "AM" : "PM";
+			const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+			slots.push(`${displayHour}:00 ${ampm}`);
+		}
+		return slots;
+	};
+
+	// Parse dates as local to avoid timezone shifts from Date parsing of YYYY-MM-DD
+	const toLocalDate = (value: string) => new Date(`${value}T00:00:00`);
+
+	// Check if individual booking check-in is today
+	const isCheckInToday = (() => {
+		if (!isGroupBooking && checkIn) {
+			const today = new Date();
+			const checkInDateLocal = toLocalDate(checkIn);
+			return today.toDateString() === checkInDateLocal.toDateString();
+		}
+		return false;
+	})();
+
 	// Derive slots from query data and convert to AM/PM
-	const checkInSlots = (checkInSlotsData?.slots || []).map(formatTimeAmPm);
+	// For individual booking, we now use the helper functions for more control
+	const checkInSlots = isCheckInToday
+		? generateArrivalSlots(checkIn)
+		: (checkInSlotsData?.slots || []).map(formatTimeAmPm);
+
 	const rawCheckOutSlots = (checkOutSlotsData?.slots || []).map(formatTimeAmPm);
 	const checkoutSlots =
 		checkIn === checkOut && checkInTime
@@ -166,10 +318,26 @@ const BookingConfirmation: React.FC = () => {
 
 	// Redirect if no room selected or missing booking data
 	useEffect(() => {
-		if (!room || !checkIn || !checkOut) {
-			navigate("/booking");
+		if (isGroupBooking) {
+			// For group booking, validate group data
+			if (!groupResults || !timeslots || timeslots.length === 0) {
+				navigate("/booking");
+			}
+		} else {
+			// For individual booking, validate individual data
+			if (!room || !checkIn || !checkOut) {
+				navigate("/booking");
+			}
 		}
-	}, [room, checkIn, checkOut, navigate]);
+	}, [
+		isGroupBooking,
+		groupResults,
+		timeslots,
+		room,
+		checkIn,
+		checkOut,
+		navigate,
+	]);
 
 	const handleProceedToPayment = async () => {
 		if (
@@ -239,27 +407,414 @@ const BookingConfirmation: React.FC = () => {
 	};
 
 	const handleCancel = () => {
-		dispatch(resetBooking());
+		if (isGroupBooking) {
+			dispatch(resetGroupBooking());
+		} else {
+			dispatch(resetBooking());
+		}
 		navigate("/booking");
 	};
 
-	if (!room || !checkIn || !checkOut) {
+	const handleSetGroupGuestName = (memberId: string, name: string) => {
+		setGroupGuestNames((prev) => ({
+			...prev,
+			[memberId]: name,
+		}));
+	};
+
+	const handleSetTimeslotTime = (
+		timeslotId: string,
+		type: "checkIn" | "checkOut",
+		time: string
+	) => {
+		setTimeslotTimes((prev) => ({
+			...prev,
+			[timeslotId]: {
+				...(prev[timeslotId] || { checkInTime: "", checkOutTime: "" }),
+				[type === "checkIn" ? "checkInTime" : "checkOutTime"]: time,
+			},
+		}));
+	};
+
+	if (isGroupBooking && (!groupResults || !timeslots)) {
 		return null;
 	}
 
-	// Parse dates as local to avoid timezone shifts from Date parsing of YYYY-MM-DD
-	const toLocalDate = (value: string) => new Date(`${value}T00:00:00`);
+	if (!isGroupBooking && (!room || !checkIn || !checkOut)) {
+		return null;
+	}
+
 	const combineDateTime = (date: string, time: string) => {
 		const time24 = convertAmPmTo24(time);
 		return `${date}T${time24}:00`;
 	};
 
-	const isCheckInToday = (() => {
-		const today = new Date();
-		const checkInDateLocal = toLocalDate(checkIn);
-		return today.toDateString() === checkInDateLocal.toDateString();
-	})();
+	// Group Booking Render
+	if (isGroupBooking && groupResults && timeslots.length > 0) {
+		console.log("Group booking data:", { groupResults, timeslots });
+		const firstTimeslot = timeslots[0];
+		const totalRooms = groupResults.primary.length;
+		const totalGuests = groupResults.primary.reduce((sum, assignment) => {
+			const member = firstTimeslot.members.find(
+				(m: { id: string }) => m.id === assignment.memberId
+			);
+			return sum + (member?.numberOfGuests || 1);
+		}, 0);
 
+		return (
+			<>
+				<Navbar />
+				<div className="booking-confirmation">
+					<div className="booking-confirmation__container">
+						<div className="booking-confirmation__header">
+							<h1>Confirm Group Booking</h1>
+							<p className="booking-confirmation__subtitle">
+								{totalRooms} room{totalRooms > 1 ? "s" : ""} for {totalGuests}{" "}
+								guest{totalGuests > 1 ? "s" : ""}
+							</p>
+						</div>
+
+						{/* Primary Guest Information */}
+						<div className="booking-confirmation__section">
+							<h2>Primary Guest Information</h2>
+							<p
+								style={{
+									fontSize: "0.9rem",
+									color: "var(--color-text-secondary)",
+									marginBottom: "1rem",
+								}}
+							>
+								Primary contact for the reservation
+							</p>
+							<div className="guest-form">
+								<div className="form-group">
+									<label htmlFor="guestName">Full Name *</label>
+									<input
+										id="guestName"
+										type="text"
+										value={guestName}
+										onChange={(e) => setGuestName(e.target.value)}
+										required
+									/>
+								</div>
+								<div className="form-group">
+									<label htmlFor="guestEmail">Email Address *</label>
+									<input
+										id="guestEmail"
+										type="email"
+										value={guestEmail}
+										onChange={(e) => setGuestEmail(e.target.value)}
+										required
+									/>
+								</div>
+								<div className="form-group">
+									<label htmlFor="guestPhone">Phone Number</label>
+									<input
+										id="guestPhone"
+										type="tel"
+										value={guestPhone}
+										onChange={(e) => setGuestPhone(e.target.value)}
+									/>
+								</div>
+							</div>
+						</div>
+
+						{/* Additional Guest Names (Optional) */}
+						{totalGuests > 1 &&
+							(() => {
+								// Create array of all guests beyond the primary (first) guest
+								const additionalGuests: Array<{
+									guestNumber: number;
+									roomId: string;
+									memberId: string;
+									guestIndexInRoom: number;
+								}> = [];
+								let guestCounter = 1; // Primary guest is 1
+
+								groupResults.primary.forEach((assignment) => {
+									const member = firstTimeslot.members.find(
+										(m: { id: string }) => m.id === assignment.memberId
+									);
+									const numGuests = member?.numberOfGuests || 1;
+
+									for (let i = 0; i < numGuests; i++) {
+										if (guestCounter > 1) {
+											// Skip primary guest
+											additionalGuests.push({
+												guestNumber: guestCounter,
+												roomId: assignment.room.podId,
+												memberId: `${assignment.memberId}-guest-${i}`,
+												guestIndexInRoom: i,
+											});
+										}
+										guestCounter++;
+									}
+								});
+
+								return (
+									<div className="booking-confirmation__section">
+										<h2>Additional Guests (Optional)</h2>
+										<p
+											style={{
+												fontSize: "0.9rem",
+												color: "var(--color-text-secondary)",
+												marginBottom: "1rem",
+											}}
+										>
+											Provide names for other guests in your group
+										</p>
+										<div className="guest-form">
+											{additionalGuests.map((guest) => (
+												<div className="form-group" key={guest.memberId}>
+													<label htmlFor={`guest-${guest.memberId}`}>
+														Guest {guest.guestNumber} - Room {guest.roomId}
+													</label>
+													<input
+														id={`guest-${guest.memberId}`}
+														type="text"
+														placeholder="Guest name (optional)"
+														value={groupGuestNames[guest.memberId] || ""}
+														onChange={(e) =>
+															handleSetGroupGuestName(
+																guest.memberId,
+																e.target.value
+															)
+														}
+													/>
+												</div>
+											))}
+										</div>
+									</div>
+								);
+							})()}
+						{/* Timeslot Details with Arrival/Departure */}
+						{timeslots.map((timeslot: GroupBookingTimeslot) => {
+							const timeslotAssignments = groupResults.primary.filter(
+								(assignment) =>
+									timeslot.members.some(
+										(m: { id: string }) => m.id === assignment.memberId
+									)
+							);
+
+							if (timeslotAssignments.length === 0) return null;
+
+							// Ensure dates are in YYYY-MM-DD format before parsing
+							const checkInStr =
+								timeslot.checkIn?.split("T")[0] || timeslot.checkIn;
+							const checkOutStr =
+								timeslot.checkOut?.split("T")[0] || timeslot.checkOut;
+
+							if (!checkInStr || !checkOutStr) {
+								console.error("Missing dates for timeslot:", timeslot);
+								return null;
+							}
+
+							const checkInDate = toLocalDate(checkInStr);
+							const checkOutDate = toLocalDate(checkOutStr);
+
+							return (
+								<div
+									key={timeslot.id}
+									className="booking-confirmation__section"
+									style={{
+										background: "var(--color-white, white)",
+										padding: "1.5rem",
+										borderRadius: "12px",
+										border: "2px solid rgba(188,143,103,0.2)",
+									}}
+								>
+									<h3
+										style={{
+											marginTop: 0,
+											marginBottom: "1rem",
+											color: "var(--color-deep-walnut)",
+										}}
+									>
+										{checkInDate.toLocaleDateString("en-US", {
+											month: "short",
+											day: "numeric",
+										})}{" "}
+										-{" "}
+										{checkOutDate.toLocaleDateString("en-US", {
+											month: "short",
+											day: "numeric",
+										})}
+									</h3>
+
+									{/* Arrival & Departure Times */}
+									<div className="guest-form">
+										<div className="form-group">
+											<label>Arrival Time *</label>
+											<select
+												value={timeslotTimes[timeslot.id]?.checkInTime || ""}
+												onChange={(e) =>
+													handleSetTimeslotTime(
+														timeslot.id,
+														"checkIn",
+														e.target.value
+													)
+												}
+												required
+											>
+												<option value="">Select arrival time</option>
+												{generateArrivalSlots(checkInStr).map((slot) => (
+													<option key={slot} value={slot}>
+														{slot}
+													</option>
+												))}
+											</select>
+										</div>
+										<div className="form-group">
+											<label>Departure Time *</label>
+											<select
+												value={timeslotTimes[timeslot.id]?.checkOutTime || ""}
+												onChange={(e) =>
+													handleSetTimeslotTime(
+														timeslot.id,
+														"checkOut",
+														e.target.value
+													)
+												}
+												required
+											>
+												<option value="">Select departure time</option>
+												{generateDepartureSlots().map((slot) => (
+													<option key={slot} value={slot}>
+														{slot}
+													</option>
+												))}
+											</select>
+										</div>
+									</div>
+
+									{/* Rooms in this timeslot */}
+									<div style={{ marginTop: "1rem" }}>
+										<h4
+											style={{
+												fontSize: "1rem",
+												marginBottom: "0.75rem",
+												color: "var(--color-text-primary)",
+											}}
+										>
+											Rooms ({timeslotAssignments.length})
+										</h4>
+										<div style={{ display: "grid", gap: "0.75rem" }}>
+											{timeslotAssignments.map((assignment) => (
+												<div
+													key={assignment.memberId}
+													style={{
+														background: "var(--color-linen)",
+														padding: "1rem",
+														borderRadius: "8px",
+														display: "flex",
+														justifyContent: "space-between",
+														alignItems: "center",
+													}}
+												>
+													<div>
+														<div
+															style={{
+																fontWeight: 600,
+																color: "var(--color-deep-walnut)",
+															}}
+														>
+															{assignment.room.podId}
+														</div>
+														<div
+															style={{
+																fontSize: "0.9rem",
+																color: "var(--color-text-secondary)",
+																textTransform: "capitalize",
+															}}
+														>
+															{assignment.quality} • {assignment.floor}
+														</div>
+													</div>
+													{assignment.isProximate && (
+														<div
+															style={{
+																fontSize: "0.85rem",
+																color: "var(--color-secondary)",
+																fontWeight: 500,
+															}}
+														>
+															🔗 Adjacent
+														</div>
+													)}
+												</div>
+											))}
+										</div>
+									</div>
+								</div>
+							);
+						})}
+
+						{timeError && (
+							<div className="booking-confirmation__error">{timeError}</div>
+						)}
+
+						{/* Actions */}
+						<div className="booking-confirmation__actions">
+							<button
+								onClick={handleCancel}
+								className="booking-confirmation__button booking-confirmation__button--cancel"
+							>
+								Cancel
+							</button>
+							<button
+								onClick={() => {
+									// Validation for group booking
+									if (!guestName || !guestEmail) {
+										setTimeError(
+											"Please provide primary guest name and email."
+										);
+										return;
+									}
+
+									// Check all timeslots have times selected
+									const missingTimes = timeslots.some(
+										(ts: GroupBookingTimeslot) =>
+											!timeslotTimes[ts.id]?.checkInTime ||
+											!timeslotTimes[ts.id]?.checkOutTime
+									);
+									if (missingTimes) {
+										setTimeError(
+											"Please select arrival and departure times for all periods."
+										);
+										return;
+									}
+
+									setTimeError("");
+									// TODO: Create group reservation and proceed to payment
+									alert(
+										"Group booking reservation creation coming soon!\n\n" +
+											`Primary Guest: ${guestName}\n` +
+											`Email: ${guestEmail}\n` +
+											`Total Rooms: ${totalRooms}\n` +
+											`Total Guests: ${totalGuests}`
+									);
+								}}
+								className="booking-confirmation__button booking-confirmation__button--primary"
+								disabled={
+									!guestName ||
+									!guestEmail ||
+									timeslots.some(
+										(ts: GroupBookingTimeslot) =>
+											!timeslotTimes[ts.id]?.checkInTime ||
+											!timeslotTimes[ts.id]?.checkOutTime
+									)
+								}
+							>
+								Proceed to Payment
+							</button>
+						</div>
+					</div>
+				</div>
+			</>
+		);
+	}
+
+	// Individual Booking Render (existing code continues below)
 	// Calculate booking details
 	const checkInDate = toLocalDate(checkIn);
 	const checkOutDate = toLocalDate(checkOut);

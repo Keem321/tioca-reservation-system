@@ -135,7 +135,7 @@
 .react-datepicker__day--keyboard-selected {
 	background-color: var(--color-primary) !important;
 	color: white !important;
-	font-weight: 700 !var(--color-linen) tant;
+	font-weight: 700 !important;
 	border-radius: 8px !important;
 }
 

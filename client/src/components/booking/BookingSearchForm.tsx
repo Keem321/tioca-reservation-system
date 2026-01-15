@@ -1,6 +1,8 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Calendar, Building } from "lucide-react";
+import { Building } from "lucide-react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { setCheckIn, setCheckOut, setZone } from "../../features/bookingSlice";
 import type { RootState } from "../../store";
 import type { PodFloor } from "../../types/room";
@@ -35,19 +37,25 @@ const BookingSearchForm: React.FC<BookingSearchFormProps> = ({
 	const { checkIn, checkOut, zone } = useSelector(
 		(state: RootState) => state.booking
 	);
-	const today = React.useMemo(() => new Date().toISOString().split("T")[0], []);
+
+	// Convert ISO strings to Date objects for DatePicker
+	const checkInDate = checkIn ? new Date(checkIn) : null;
+	const checkOutDate = checkOut ? new Date(checkOut) : null;
 
 	const isValid = checkIn && checkOut && checkIn < checkOut && zone;
 
-	const handleCheckInChange = (value: string) => {
-		const sanitized = value && value < today ? today : value;
-		dispatch(setCheckIn(sanitized));
-		onValuesChange?.();
+	const handleCheckInChange = (date: Date | null) => {
+		if (date) {
+			dispatch(setCheckIn(date.toISOString().split("T")[0]));
+			onValuesChange?.();
+		}
 	};
 
-	const handleCheckOutChange = (value: string) => {
-		dispatch(setCheckOut(value));
-		onValuesChange?.();
+	const handleCheckOutChange = (date: Date | null) => {
+		if (date) {
+			dispatch(setCheckOut(date.toISOString().split("T")[0]));
+			onValuesChange?.();
+		}
 	};
 
 	const handleZoneChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -64,16 +72,13 @@ const BookingSearchForm: React.FC<BookingSearchFormProps> = ({
 					<label className="booking-search-form__label">
 						Check In <span className="booking-search-form__required">*</span>
 					</label>
-					<div className="booking-search-form__input-wrapper">
-						<Calendar size={18} className="booking-search-form__icon" />
-						<input
-							type="date"
-							value={checkIn}
-							onChange={(e) => handleCheckInChange(e.target.value)}
-							min={today}
-							className="booking-search-form__input"
-						/>
-					</div>
+					<DatePicker
+						selected={checkInDate}
+						onChange={handleCheckInChange}
+						minDate={new Date()}
+						placeholderText="Select check-in"
+						className="booking-search-form__input booking-search-form__datepicker"
+					/>
 				</div>
 
 				{/* Check Out */}
@@ -81,16 +86,13 @@ const BookingSearchForm: React.FC<BookingSearchFormProps> = ({
 					<label className="booking-search-form__label">
 						Check Out <span className="booking-search-form__required">*</span>
 					</label>
-					<div className="booking-search-form__input-wrapper">
-						<Calendar size={18} className="booking-search-form__icon" />
-						<input
-							type="date"
-							value={checkOut}
-							onChange={(e) => handleCheckOutChange(e.target.value)}
-							min={checkIn || today}
-							className="booking-search-form__input"
-						/>
-					</div>
+					<DatePicker
+						selected={checkOutDate}
+						onChange={handleCheckOutChange}
+						minDate={checkInDate || new Date()}
+						placeholderText="Select check-out"
+						className="booking-search-form__input booking-search-form__datepicker"
+					/>
 				</div>
 
 				{/* Zone Selection */}

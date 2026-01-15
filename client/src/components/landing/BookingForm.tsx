@@ -8,7 +8,7 @@ import { setCheckIn, setCheckOut, setZone } from "../../features/bookingSlice";
 import { useGetRoomsQuery } from "../../features/roomsApi";
 import { useGetReservationsQuery } from "../../features/reservationsApi";
 import type { RootState } from "../../store";
-import type { Room } from "../../types/room";
+import type { Room, PodFloor } from "../../types/room";
 import type { Reservation } from "../../types/reservation";
 import "./BookingForm.css";
 
@@ -66,7 +66,8 @@ const BookingForm: React.FC = () => {
 						windowEnd
 					)
 				)
-				.map((r) => (typeof r.roomId === "string" ? r.roomId : r.roomId._id))
+				.filter((r) => r.roomId)
+				.map((r) => (typeof r.roomId === "string" ? r.roomId : r.roomId!._id))
 		);
 
 		return rooms.filter((room) => {
@@ -104,7 +105,7 @@ const BookingForm: React.FC = () => {
 						<Calendar size={18} className="booking-form__icon" />
 						<DatePicker
 							selected={checkIn ? new Date(checkIn) : null}
-							onChange={(date) =>
+							onChange={(date: Date | null) =>
 								dispatch(
 									setCheckIn(date ? date.toISOString().split("T")[0] : "")
 								)
@@ -126,7 +127,7 @@ const BookingForm: React.FC = () => {
 						<Calendar size={18} className="booking-form__icon" />
 						<DatePicker
 							selected={checkOut ? new Date(checkOut) : null}
-							onChange={(date) =>
+							onChange={(date: Date | null) =>
 								dispatch(
 									setCheckOut(date ? date.toISOString().split("T")[0] : "")
 								)
@@ -147,7 +148,7 @@ const BookingForm: React.FC = () => {
 						<Building size={18} className="booking-form__icon" />
 						<select
 							value={zone}
-							onChange={(e) => dispatch(setZone(e.target.value as any))}
+							onChange={(e) => dispatch(setZone(e.target.value as PodFloor))}
 							className="booking-form__input booking-form__select"
 						>
 							<option value="" disabled>

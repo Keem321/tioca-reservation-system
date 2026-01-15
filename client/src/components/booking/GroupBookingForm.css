@@ -1,0 +1,235 @@
+.group-booking-form {
+	background-color: var(--color-linen);
+	border: 2px solid rgba(188, 143, 103, 0.3);
+	border-radius: 16px;
+	padding: 2rem;
+	margin-top: 2rem;
+}
+
+.group-booking-form__header {
+	margin-bottom: 1.5rem;
+}
+
+.group-booking-form__title {
+	font-family: "Playfair Display", serif;
+	font-size: 1.5rem;
+	color: var(--color-text-primary);
+	margin-bottom: 0.5rem;
+	font-weight: 600;
+}
+
+.group-booking-form__subtitle {
+	color: var(--color-text-secondary);
+	font-size: 0.95rem;
+	opacity: 0.8;
+}
+
+/* Proximity Section */
+.group-booking-form__proximity {
+	display: flex;
+	gap: 1rem;
+	align-items: flex-start;
+	padding: 1rem;
+	background-color: rgba(188, 143, 103, 0.05);
+	border-radius: 12px;
+	margin-bottom: 2rem;
+}
+
+.group-booking-form__checkbox {
+	background: none;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: opacity 0.2s;
+}
+
+.group-booking-form__checkbox:hover {
+	opacity: 0.8;
+}
+
+.group-booking-form__checkbox:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.group-booking-form__icon-checked {
+	color: var(--color-primary);
+}
+
+.group-booking-form__icon-unchecked {
+	color: var(--color-text-secondary);
+	opacity: 0.6;
+}
+
+.group-booking-form__proximity-text {
+	flex: 1;
+}
+
+.group-booking-form__proximity-label {
+	display: block;
+	font-weight: 600;
+	color: var(--color-text-primary);
+	margin-bottom: 0.3rem;
+	cursor: pointer;
+}
+
+.group-booking-form__proximity-help {
+	font-size: 0.85rem;
+	color: var(--color-text-secondary);
+	opacity: 0.75;
+	margin: 0;
+}
+
+/* Members List */
+.group-booking-form__members {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+	margin-bottom: 1.5rem;
+}
+
+.group-booking-form__member {
+	background-color: white;
+	border: 2px solid rgba(44, 22, 7, 0.08);
+	border-radius: 12px;
+	padding: 1.5rem;
+	transition: all 0.2s ease;
+}
+
+.group-booking-form__member:hover {
+	border-color: rgba(188, 143, 103, 0.3);
+	box-shadow: 0 4px 12px rgba(44, 22, 7, 0.08);
+}
+
+.group-booking-form__member-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1rem;
+}
+
+.group-booking-form__member-number {
+	font-weight: 600;
+	color: var(--color-text-primary);
+	font-size: 0.95rem;
+}
+
+.group-booking-form__remove-btn {
+	background: none;
+	border: none;
+	padding: 0.5rem;
+	cursor: pointer;
+	color: var(--color-text-secondary);
+	transition: all 0.2s ease;
+	border-radius: 6px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.group-booking-form__remove-btn:hover:not(:disabled) {
+	background-color: rgba(188, 143, 103, 0.1);
+	color: var(--color-primary);
+}
+
+.group-booking-form__remove-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.group-booking-form__member-fields {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 1rem;
+}
+
+.group-booking-form__field {
+	display: flex;
+	flex-direction: column;
+}
+
+.group-booking-form__label {
+	font-size: 0.875rem;
+	color: var(--color-deep-walnut);
+	margin-bottom: 0.5rem;
+	font-weight: 500;
+}
+
+.group-booking-form__select {
+	padding: 0.75rem;
+	border: 2px solid rgba(44, 22, 7, 0.15);
+	border-radius: 8px;
+	background-color: rgba(250, 248, 246, 0.6);
+	font-size: 0.95rem;
+	color: var(--color-text-primary);
+	outline: none;
+	transition: all 0.3s ease;
+	font-family: "Inter", sans-serif;
+	font-weight: 500;
+}
+
+.group-booking-form__select:hover {
+	border-color: rgba(188, 143, 103, 0.4);
+	background-color: rgba(250, 248, 246, 0.9);
+}
+
+.group-booking-form__select:focus {
+	border-color: var(--color-primary);
+	background-color: rgba(250, 248, 246, 1);
+	box-shadow: 0 0 0 3px rgba(188, 143, 103, 0.1);
+}
+
+.group-booking-form__select option {
+	background-color: var(--color-linen);
+	color: var(--color-text-primary);
+	padding: 0.5rem;
+	font-weight: 500;
+}
+
+/* Add Member Button */
+.group-booking-form__add-member-btn {
+	width: 100%;
+	padding: 1rem;
+	border: 2px solid var(--color-primary);
+	border-radius: 12px;
+	background: transparent;
+	color: var(--color-primary);
+	cursor: pointer;
+	font-size: 0.95rem;
+	font-weight: 600;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	transition: all 0.3s ease;
+	margin-bottom: 1.5rem;
+}
+
+.group-booking-form__add-member-btn:hover {
+	background-color: var(--color-primary);
+	color: white;
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(44, 22, 7, 0.15);
+}
+
+.group-booking-form__add-member-btn:active {
+	transform: translateY(0);
+}
+
+/* Info Text */
+.group-booking-form__info {
+	padding: 1rem;
+	background-color: rgba(111, 138, 69, 0.08);
+	border-left: 3px solid var(--color-success);
+	border-radius: 8px;
+}
+
+.group-booking-form__info p {
+	margin: 0;
+	font-size: 0.9rem;
+	color: var(--color-text-secondary);
+}

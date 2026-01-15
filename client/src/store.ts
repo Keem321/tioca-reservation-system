@@ -6,6 +6,7 @@ import { paymentsApi } from "./features/paymentsApi";
 import { holdsApi } from "./features/holdsApi";
 import { offeringsApi } from "./features/offeringsApi";
 import bookingReducer from "./features/bookingSlice";
+import groupBookingReducer from "./features/groupBookingSlice";
 import authReducer from "./features/authSlice";
 import { setupListeners } from "@reduxjs/toolkit/query";
 
@@ -25,6 +26,7 @@ export const store = configureStore({
 	reducer: {
 		auth: authReducer,
 		booking: bookingReducer,
+		groupBooking: groupBookingReducer,
 		[roomsApi.reducerPath]: roomsApi.reducer,
 		[reservationsApi.reducerPath]: reservationsApi.reducer,
 		[userApi.reducerPath]: userApi.reducer,
