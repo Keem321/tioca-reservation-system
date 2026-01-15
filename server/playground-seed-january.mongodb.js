@@ -228,11 +228,30 @@ const AMENITY_OFFERINGS = [
 	},
 ];
 
-const offeringsResult = db.offerings.insertMany([
-	...ROOM_OFFERINGS,
-	...AMENITY_OFFERINGS,
-]);
-const offeringIds = offeringsResult.insertedIds;
+let offeringsResult;
+let offeringIds;
+
+try {
+	offeringsResult = db.offerings.insertMany([
+		...ROOM_OFFERINGS,
+		...AMENITY_OFFERINGS,
+	]);
+	offeringIds = offeringsResult.insertedIds;
+	print(`✓ Inserted ${Object.keys(offeringIds).length} offerings\n`);
+} catch (e) {
+	print(`Error inserting offerings: ${e.message}`);
+	print("Attempting to retrieve existing offerings...");
+	const existingOfferings = db.offerings.find({}).toArray();
+	if (existingOfferings.length > 0) {
+		existingOfferings.forEach((o, idx) => {
+			offeringIds = offeringIds || {};
+			offeringIds[idx] = o._id;
+		});
+		print(`✓ Using ${existingOfferings.length} existing offerings\n`);
+	} else {
+		throw new Error("Could not create or find offerings");
+	}
+}
 
 // Map offerings by quality for room creation
 const offeringMap = {};
@@ -338,7 +357,15 @@ const allRooms = [
 	...couplesRooms,
 	...businessRooms,
 ];
-const roomsResult = db.rooms.insertMany(allRooms);
+
+let roomsResult;
+try {
+	roomsResult = db.rooms.insertMany(allRooms);
+	print(`✓ Inserted ${Object.keys(roomsResult.insertedIds).length} rooms\n`);
+} catch (e) {
+	print(`Error inserting rooms: ${e.message}\n`);
+	throw e;
+}
 
 // Create room lookup for reservations
 const roomsByFloorQuality = {};
@@ -354,8 +381,6 @@ allRooms.forEach((room, idx) => {
 		quality: room.quality,
 	});
 });
-
-print(`✓ Inserted ${Object.keys(roomsResult.insertedIds).length} rooms\n`);
 
 // ============================================
 // STEP 4: SEED USERS
@@ -450,7 +475,16 @@ const users = [
 ];
 
 const usersResult = db.users.insertMany(users);
-const userIds = usersResult.insertedIds;
+let userIds = usersResult.insertedIds;
+
+if (!userIds || Object.keys(userIds).length === 0) {
+	print("⚠️  Warning: Users insertion returned no IDs");
+	const existingUsers = db.users.find({}).toArray();
+	userIds = {};
+	existingUsers.forEach((u, idx) => {
+		userIds[idx] = u._id;
+	});
+}
 
 print(`✓ Inserted ${Object.keys(userIds).length} users\n`);
 
@@ -1251,78 +1285,102 @@ users.slice(2).forEach((user) => {
 });
 
 print("\n--- RESERVATION STATUS BREAKDOWN ---");
-const statusCounts = db.reservations
-	.aggregate([
-		{ $group: { _id: "$status", count: { $sum: 1 } } },
-		{ $sort: { count: -1 } },
-	])
-	.toArray();
-statusCounts.forEach((stat) => {
-	print(`  ${stat._id}: ${stat.count}`);
-});
-
-print("\n--- PAYMENT STATUS BREAKDOWN ---");
-const paymentStatusCounts = db.payments
-	.aggregate([
-		{ $group: { _id: "$status", count: { $sum: 1 } } },
-		{ $sort: { count: -1 } },
-	])
-	.toArray();
-paymentStatusCounts.forEach((stat) => {
-	print(`  ${stat._id}: ${stat.count}`);
-});
-
-print("\n--- REVENUE SUMMARY ---");
-const totalRevenue = db.payments
-	.aggregate([
-		{ $match: { status: "succeeded" } },
-		{ $group: { _id: null, total: { $sum: "$amount" } } },
-	])
-	.toArray();
-if (totalRevenue.length > 0) {
-	print(
-		`Total revenue (succeeded): $${(totalRevenue[0].total / 100).toFixed(2)}`
-	);
+try {
+	const statusCounts = db.reservations
+		.aggregate([
+			{ $group: { _id: "$status", count: { $sum: 1 } } },
+			{ $sort: { count: -1 } },
+		])
+		.toArray();
+	statusCounts.forEach((stat) => {
+		print(`  ${stat._id}: ${stat.count}`);
+	});
+} catch (e) {
+	print(`  (No reservations to count)`);
 }
 
-const refundedAmount = db.payments
-	.aggregate([
-		{ $match: { refundAmount: { $gt: 0 } } },
-		{ $group: { _id: null, total: { $sum: "$refundAmount" } } },
-	])
-	.toArray();
-if (refundedAmount.length > 0) {
-	print(`Total refunded: $${(refundedAmount[0].total / 100).toFixed(2)}`);
+print("\n--- PAYMENT STATUS BREAKDOWN ---");
+try {
+	const paymentStatusCounts = db.payments
+		.aggregate([
+			{ $group: { _id: "$status", count: { $sum: 1 } } },
+			{ $sort: { count: -1 } },
+		])
+		.toArray();
+	paymentStatusCounts.forEach((stat) => {
+		print(`  ${stat._id}: ${stat.count}`);
+	});
+} catch (e) {
+	print(`  (No payments to count)`);
+}
+
+print("\n--- REVENUE SUMMARY ---");
+try {
+	const totalRevenue = db.payments
+		.aggregate([
+			{ $match: { status: "succeeded" } },
+			{ $group: { _id: null, total: { $sum: "$amount" } } },
+		])
+		.toArray();
+	if (totalRevenue.length > 0) {
+		print(
+			`Total revenue (succeeded): $${(totalRevenue[0].total / 100).toFixed(2)}`
+		);
+	}
+} catch (e) {
+	print("  (No revenue data)");
+}
+
+try {
+	const refundedAmount = db.payments
+		.aggregate([
+			{ $match: { refundAmount: { $gt: 0 } } },
+			{ $group: { _id: null, total: { $sum: "$refundAmount" } } },
+		])
+		.toArray();
+	if (refundedAmount.length > 0) {
+		print(`Total refunded: $${(refundedAmount[0].total / 100).toFixed(2)}`);
+	}
+} catch (e) {
+	print("  (No refund data)");
 }
 
 print("\n--- ROOM OCCUPANCY ---");
-const occupancyByFloor = db.reservations
-	.aggregate([
-		{
-			$lookup: {
-				from: "rooms",
-				localField: "roomId",
-				foreignField: "_id",
-				as: "room",
+try {
+	const occupancyByFloor = db.reservations
+		.aggregate([
+			{
+				$lookup: {
+					from: "rooms",
+					localField: "roomId",
+					foreignField: "_id",
+					as: "room",
+				},
 			},
-		},
-		{ $unwind: "$room" },
-		{ $group: { _id: "$room.floor", count: { $sum: 1 } } },
-		{ $sort: { _id: 1 } },
-	])
-	.toArray();
-occupancyByFloor.forEach((floor) => {
-	print(`  ${floor._id}: ${floor.count} bookings`);
-});
+			{ $unwind: "$room" },
+			{ $group: { _id: "$room.floor", count: { $sum: 1 } } },
+			{ $sort: { _id: 1 } },
+		])
+		.toArray();
+	occupancyByFloor.forEach((floor) => {
+		print(`  ${floor._id}: ${floor.count} bookings`);
+	});
+} catch (e) {
+	print("  (No occupancy data)");
+}
 
 print("\n--- SAMPLE AVAILABLE PODS (for testing) ---");
-const sampleAvailablePods = db.rooms
-	.find({ status: "available" })
-	.limit(5)
-	.toArray();
-sampleAvailablePods.forEach((room) => {
-	print(`  Pod ${room.podId} (${room.floor}, ${room.quality})`);
-});
+try {
+	const sampleAvailablePods = db.rooms
+		.find({ status: "available" })
+		.limit(5)
+		.toArray();
+	sampleAvailablePods.forEach((room) => {
+		print(`  Pod ${room.podId} (${room.floor}, ${room.quality})`);
+	});
+} catch (e) {
+	print("  (Could not retrieve sample pods)");
+}
 
 print("\n========================================");
 print("✓ Dataset ready for testing!");
