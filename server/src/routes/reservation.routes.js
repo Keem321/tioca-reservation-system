@@ -14,6 +14,7 @@ import {
 	getCurrentCheckOuts,
 	updateReservationStatus,
 	getAvailableSlots,
+	getAvailabilityCount,
 } from "../controllers/reservation.controller.js";
 import {
 	requestReservationAccess,
@@ -31,7 +32,10 @@ import { requireRole, requireAuth } from "../middleware/roleAuth.js";
 reservationRouter.post("/request-access", requestReservationAccess);
 
 // Request access by email only (no confirmation code needed)
-reservationRouter.post("/request-access-by-email", requestReservationAccessByEmail);
+reservationRouter.post(
+	"/request-access-by-email",
+	requestReservationAccessByEmail
+);
 
 // Verify token from email link
 reservationRouter.get("/verify/:token", verifyToken);
@@ -47,6 +51,9 @@ reservationRouter.post("/lookup", lookupReservation);
 
 // Cancel guest reservation (public - no auth required)
 reservationRouter.post("/guest/:id/cancel", cancelGuestReservation);
+
+// Check availability for a date range and floor (public - no auth required)
+reservationRouter.get("/availability/count", getAvailabilityCount);
 
 // Get all reservations (manager only)
 reservationRouter.get(

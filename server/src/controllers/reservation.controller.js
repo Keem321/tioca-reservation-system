@@ -96,7 +96,10 @@ export async function getReservationById(req, res) {
  */
 export async function createReservation(req, res) {
 	try {
-		console.log("[Reservation] Request cookies:", req.headers.cookie || "NO COOKIES");
+		console.log(
+			"[Reservation] Request cookies:",
+			req.headers.cookie || "NO COOKIES"
+		);
 		console.log("[Reservation] Session ID:", req.sessionID);
 
 		// Include session ID from the request
@@ -370,5 +373,64 @@ export async function getAvailableSlots(req, res) {
 		res.json({ slots });
 	} catch (err) {
 		res.status(400).json({ error: err.message });
+	}
+}
+
+/**
+ * Get available room count for a date range and floor (PUBLIC - no auth required)
+ * Used for availability checking on the booking form
+ * @route GET /api/reservations/availability/count?checkIn=YYYY-MM-DD&checkOut=YYYY-MM-DD&floor=floor-name
+ * @returns {Object} { availableCount: number, totalRooms: number, floor: string }
+ */
+export async function getAvailabilityCount(req, res) {
+	try {
+		const { checkIn, checkOut, floor } = req.query;
+
+		// Validate inputs
+		if (!checkIn || !checkOut || !floor) {
+			return res.status(400).json({
+				error: "Missing required parameters: checkIn, checkOut, floor",
+			});
+		}
+
+		// Parse dates with explicit UTC to avoid timezone issues
+		const checkInDate = new Date(`${checkIn}T00:00:00Z`);
+		const checkOutDate = new Date(`${checkOut}T23:59:59Z`);
+
+		// Validate date range
+		if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
+			return res
+				.status(400)
+				.json({ error: "Invalid date format. Use YYYY-MM-DD" });
+		}
+
+		if (checkInDate >= checkOutDate) {
+			return res.status(400).json({
+				error: "Check-in date must be before check-out date",
+			});
+		}
+
+		console.log(
+			`[Availability API] Request: Floor=${floor}, CheckIn=${checkIn}, CheckOut=${checkOut}`
+		);
+
+		const count = await ReservationService.getAvailabilityCount(
+			checkInDate,
+			checkOutDate,
+			floor
+		);
+
+		console.log(
+			`[Availability API] Response: ${count.available}/${count.total} available rooms on ${floor}`
+		);
+
+		res.json({
+			availableCount: count.available,
+			totalRooms: count.total,
+			floor,
+		});
+	} catch (err) {
+		console.error("Error getting availability count:", err);
+		res.status(500).json({ error: err.message });
 	}
 }

@@ -7,17 +7,16 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { setCheckIn, setCheckOut, setZone } from "../../features/bookingSlice";
 import { useGetRoomsQuery } from "../../features/roomsApi";
-import { useGetReservationsQuery } from "../../features/reservationsApi";
 // RootState type not needed due to typed selector hook
 import type { BookingState } from "../../features/bookingSlice";
-import type { Room, PodFloor } from "../../types/room";
-import type { Reservation } from "../../types/reservation";
+import type { PodFloor } from "../../types/room";
 import "./BookingForm.css";
 
 /**
  * BookingForm Component
  *
  * Minimal booking form on the hero that navigates to the Booking page.
+ * Uses public availability endpoint to check room availability for guests.
  */
 const BookingForm: React.FC = () => {
 	const dispatch = useDispatch();
@@ -28,66 +27,53 @@ const BookingForm: React.FC = () => {
 
 	const isValid = Boolean(checkIn && checkOut && checkIn < checkOut && zone);
 	const [searched, setSearched] = React.useState(false);
-
-	// Fetch data when inputs are valid; results will populate after search
-	const { data: roomsData } = useGetRoomsQuery(undefined, { skip: !isValid });
-	const { data: reservationsData } = useGetReservationsQuery(undefined, {
-		skip: !isValid,
-	});
-	const rooms = React.useMemo<Room[]>(() => roomsData ?? [], [roomsData]);
-	const reservations = React.useMemo<Reservation[]>(
-		() => reservationsData ?? [],
-		[reservationsData]
+	const [availableCount, setAvailableCount] = React.useState<number | null>(
+		null
 	);
+	const [loading, setLoading] = React.useState(false);
+
+	// Fetch rooms (for the floor selector, not used for availability)
+	const { data: roomsData } = useGetRoomsQuery(undefined, { skip: !isValid });
+
+	// Fetch availability from public endpoint when search is clicked
+	React.useEffect(() => {
+		if (!searched || !isValid) {
+			return;
+		}
+
+		const fetchAvailability = async () => {
+			setLoading(true);
+			try {
+				const apiUrl = import.meta.env.VITE_API_URL || "";
+				const response = await fetch(
+					`${apiUrl}/api/reservations/availability/count?checkIn=${checkIn}&checkOut=${checkOut}&floor=${zone}`,
+					{
+						credentials: "include",
+					}
+				);
+
+				if (!response.ok) {
+					throw new Error("Failed to check availability");
+				}
+
+				const data = await response.json();
+				setAvailableCount(data.availableCount);
+			} catch (error) {
+				console.error("[BookingForm] Error checking availability:", error);
+				setAvailableCount(0);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		fetchAvailability();
+	}, [searched, isValid, checkIn, checkOut, zone]);
 
 	// Reset searched flag when input changes
 	React.useEffect(() => {
 		setSearched(false);
+		setAvailableCount(null);
 	}, [checkIn, checkOut, zone]);
-
-	const overlaps = React.useCallback(
-		(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date) =>
-			aStart < bEnd && aEnd > bStart,
-		[]
-	);
-
-	const availableCount = React.useMemo(() => {
-		if (!isValid || !searched) return 0;
-		const windowStart = new Date(checkIn as string);
-		const windowEnd = new Date(checkOut as string);
-		const activeStatuses = new Set(["pending", "confirmed", "checked-in"]);
-
-		const bookedRoomIds = new Set(
-			reservations
-				.filter((r) => activeStatuses.has(r.status))
-				.filter((r) =>
-					overlaps(
-						new Date(r.checkInDate),
-						new Date(r.checkOutDate),
-						windowStart,
-						windowEnd
-					)
-				)
-				.filter((r) => r.roomId)
-				.map((r) => (typeof r.roomId === "string" ? r.roomId : r.roomId!._id))
-		);
-
-		return rooms.filter((room) => {
-			if (room.status === "maintenance") return false;
-			if (bookedRoomIds.has(room._id)) return false;
-			if (zone && room.floor !== zone) return false;
-			return true;
-		}).length;
-	}, [
-		isValid,
-		searched,
-		checkIn,
-		checkOut,
-		reservations,
-		rooms,
-		overlaps,
-		zone,
-	]);
 
 	const handlePrimary = () => {
 		if (!isValid) return;
@@ -167,14 +153,20 @@ const BookingForm: React.FC = () => {
 
 			<button
 				onClick={handlePrimary}
-				disabled={!isValid}
+				disabled={!isValid || (searched && loading)}
 				className="booking-form__button"
 			>
-				{searched ? "Book Now" : "Search Availability"}
+				{loading
+					? "Checking Availability..."
+					: searched
+					? "Book Now"
+					: "Search Availability"}
 			</button>
 			{searched && isValid && (
 				<div className="booking-form__success">
-					{availableCount} room(s) available for your dates
+					{availableCount !== null
+						? `${availableCount} room(s) available for your dates`
+						: "Loading availability..."}
 				</div>
 			)}
 		</div>

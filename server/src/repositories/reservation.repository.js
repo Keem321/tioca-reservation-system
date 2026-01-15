@@ -23,7 +23,7 @@ class ReservationRepository {
 		const { podIdFilter, ...dbFilter } = filter;
 
 		let query = Reservation.find(dbFilter)
-			.populate("roomId", "podId quality floor")
+			.populate("roomId", "_id podId quality floor")
 			.populate("userId", "name email")
 			.sort({ createdAt: -1 });
 

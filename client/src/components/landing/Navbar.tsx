@@ -28,9 +28,21 @@ const Navbar: React.FC = () => {
 	const isManagerOrAdmin = isManagerOrAbove(user?.role as UserRole);
 
 	const handleSignOut = async () => {
-		await dispatch(logout());
+		console.log("[Navbar] Signing out user...");
+		// Dispatch logout and wait for completion
+		try {
+			await dispatch(logout()).unwrap();
+			console.log("[Navbar] Logout successful");
+		} catch (error) {
+			console.error("[Navbar] Logout error (continuing anyway):", error);
+		}
+		// Close menu
 		setAccountMenuOpen(false);
-		navigate("/");
+		// Small delay to ensure logout is processed before redirect
+		// Use replace to prevent back button issues
+		setTimeout(() => {
+			navigate("/", { replace: true });
+		}, 100);
 	};
 
 	return (
@@ -171,21 +183,21 @@ const Navbar: React.FC = () => {
 									}}
 									className="navbar__dropdown-item"
 								>
-							Sign In
-						</button>
-					)}
-				{!isLoggedIn && (
-					<button
-						onClick={() => {
-							navigate("/reservations/lookup");
-							setAccountMenuOpen(false);
-						}}
-						className="navbar__dropdown-item"
-					>
-						Check Reservation
-					</button>
-				)}
-				</div>
+									Sign In
+								</button>
+							)}
+							{!isLoggedIn && (
+								<button
+									onClick={() => {
+										navigate("/reservations/lookup");
+										setAccountMenuOpen(false);
+									}}
+									className="navbar__dropdown-item"
+								>
+									Check Reservation
+								</button>
+							)}
+						</div>
 					)}
 				</div>
 

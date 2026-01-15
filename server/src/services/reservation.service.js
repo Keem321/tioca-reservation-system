@@ -646,6 +646,103 @@ class ReservationService {
 		}
 		return reservation;
 	}
+
+	/**
+	 * Get available room count for a date range and floor
+	 * Counts rooms that are NOT booked during the requested dates
+	 * A room is unavailable if ANY reservation overlaps the date range
+	 * @param {Date} checkInDate - Check-in date
+	 * @param {Date} checkOutDate - Check-out date
+	 * @param {string} floor - Floor name (women-only, men-only, couples, business)
+	 * @returns {Promise<Object>} { available: number, total: number }
+	 */
+	async getAvailabilityCount(checkInDate, checkOutDate, floor) {
+		// Get all rooms on this floor
+		const allRooms = await RoomRepository.findAll({ floor });
+		const totalRooms = allRooms.length;
+
+		if (totalRooms === 0) {
+			return { available: 0, total: 0 };
+		}
+
+		// Get all room IDs on this floor
+		const floorRoomIds = allRooms.map((room) => room._id.toString());
+
+		// Get ALL active reservations that overlap with the requested date range
+		// Overlap logic: A reservation overlaps if: reservationStart < checkOutDate AND reservationEnd > checkInDate
+		const overlappingReservations = await ReservationRepository.findAll({
+			checkInDate: { $lt: checkOutDate },
+			checkOutDate: { $gt: checkInDate },
+			status: { $in: ["pending", "confirmed", "checked-in"] }, // Active statuses
+		});
+
+		// Log for debugging
+		if (process.env.NODE_ENV !== "production") {
+			console.log(
+				`[Availability] Floor: ${floor}, Check-In: ${checkInDate.toISOString()}, Check-Out: ${checkOutDate.toISOString()}`
+			);
+			console.log(`[Availability] Total rooms on floor: ${totalRooms}`);
+			console.log(
+				`[Availability] Found ${overlappingReservations.length} overlapping reservations database-wide`
+			);
+		}
+
+		// Filter to only rooms on this floor that are booked
+		const bookedRoomIds = new Set(
+			overlappingReservations
+				.filter((r) => {
+					// Handle both ObjectId references and populated room objects
+					let roomIdStr = null;
+					if (typeof r.roomId === "object" && r.roomId !== null) {
+						// Populated room object - extract the _id
+						roomIdStr = r.roomId._id ? r.roomId._id.toString() : null;
+					} else if (r.roomId) {
+						// ObjectId reference - convert directly
+						roomIdStr = r.roomId.toString();
+					}
+
+					const isOnFloor = roomIdStr && floorRoomIds.includes(roomIdStr);
+
+					if (process.env.NODE_ENV !== "production") {
+						console.log(
+							`[Availability] Checking reservation ${
+								r._id
+							}: roomIdStr=${roomIdStr}, isOnFloor=${isOnFloor}, floor=${
+								typeof r.roomId === "object" && r.roomId !== null
+									? r.roomId.floor
+									: "unknown"
+							}`
+						);
+					}
+
+					return isOnFloor;
+				})
+				.map((r) => {
+					// Extract the actual room ID for the set
+					if (typeof r.roomId === "object" && r.roomId !== null) {
+						return r.roomId._id.toString();
+					}
+					return r.roomId.toString();
+				})
+		);
+
+		if (process.env.NODE_ENV !== "production") {
+			console.log(
+				`[Availability] Rooms booked on this floor: ${bookedRoomIds.size}`
+			);
+		}
+
+		// Count available rooms (not in booked set and not in maintenance)
+		const availableRooms = allRooms.filter(
+			(room) =>
+				!bookedRoomIds.has(room._id.toString()) && room.status !== "maintenance"
+		);
+
+		return {
+			available: availableRooms.length,
+			total: totalRooms,
+		};
+	}
 }
 
 export default new ReservationService();
