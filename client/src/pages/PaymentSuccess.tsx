@@ -49,28 +49,23 @@ const PaymentSuccess: React.FC = () => {
 		// Mark that we've done the initial check
 		isInitialMount.current = false;
 
-		// If user is not logged in on initial load, any reservation data is stale
-		// We should redirect to landing page
-		if (!user) {
-			console.log(
-				"[PaymentSuccess] User is logged out on page load - redirecting to landing page"
-			);
-			navigate("/", { replace: true });
-			return;
-		}
-
-		// If user IS logged in, check if we have valid reservation data
-		const hasReservation = !!(
-			location.state?.reservation || pendingReservation
-		);
-
+		// Check if we have valid reservation data (works for both logged in and guest users)
+		const hasReservation = !!(location.state?.reservation || pendingReservation);
+		
 		if (!hasReservation) {
-			console.log(
-				"[PaymentSuccess] No reservation data found on page load - redirecting to booking"
-			);
-			navigate("/booking", { replace: true });
+			// No reservation data - redirect based on auth status
+			if (!user) {
+				// Guest user with no reservation data - redirect to landing
+				console.log("[PaymentSuccess] No reservation data and not logged in - redirecting to landing page");
+				navigate("/", { replace: true });
+			} else {
+				// Logged in user with no reservation data - redirect to booking
+				console.log("[PaymentSuccess] No reservation data but logged in - redirecting to booking");
+				navigate("/booking", { replace: true });
+			}
 		} else {
-			console.log("[PaymentSuccess] Reservation data found, staying on page");
+			// Has reservation data - allow viewing (for both logged in and guest users)
+			console.log("[PaymentSuccess] Reservation data found, staying on page (user:", user ? "logged in" : "guest", ")");
 		}
 	}, [
 		location.state?.reservation,

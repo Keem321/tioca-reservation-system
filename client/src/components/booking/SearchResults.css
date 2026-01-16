@@ -13,11 +13,23 @@
 .search-results__grid {
 	display: grid;
 	gap: 1.25rem;
-	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+	.search-results__grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
 }
 
 .search-results__grid--recommendations {
-	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+	.search-results__grid--recommendations {
+		grid-template-columns: repeat(2, 1fr);
+	}
 }
 
 .search-results--empty {

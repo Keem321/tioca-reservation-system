@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../hooks";
@@ -24,6 +24,7 @@ import type { ReservationFormData } from "../types/reservation";
 import type { Room } from "../types/room";
 import type { AmenityOffering } from "../types/offering";
 import Navbar from "../components/landing/Navbar";
+import BookingBreadcrumb from "../components/booking/BookingBreadcrumb";
 import {
 	getRoomImage,
 	getRoomDisplayLabel,
@@ -79,6 +80,14 @@ const BookingConfirmation: React.FC = () => {
 	);
 	const { user } = useAppSelector((state) => state.auth);
 
+	// Handle breadcrumb navigation
+	const handleBreadcrumbClick = (step: number) => {
+		if (step === 1) {
+			// Navigate back to booking/search page
+			navigate("/booking");
+		}
+	};
+
 	// Check if this is a group booking from location state
 	const isGroupBooking = location.state?.isGroupBooking || false;
 	const groupResults: GroupSearchResults | undefined =
@@ -133,6 +142,10 @@ const BookingConfirmation: React.FC = () => {
 	const [holdError, setHoldError] = useState("");
 	const [isCreatingHold, setIsCreatingHold] = useState(false);
 	const [groupHoldIds, setGroupHoldIds] = useState<string[]>([]);
+
+	// Refs to prevent duplicate hold creation in React Strict Mode
+	const holdCreationAttempted = useRef(false);
+	const groupHoldCreationAttempted = useRef(false);
 
 	// Get room from location state or Redux (individual booking only)
 	const room = location.state?.room || selectedRoom;
@@ -268,10 +281,19 @@ const BookingConfirmation: React.FC = () => {
 		let createdHoldId: string | null = null;
 
 		const createRoomHold = async () => {
-			// Don't create if we already have a hold or component unmounted
-			if (!room || !checkIn || !checkOut || holdId || !mounted) {
+			// Don't create if we already have a hold or already attempted
+			if (
+				!room ||
+				!checkIn ||
+				!checkOut ||
+				holdId ||
+				holdCreationAttempted.current
+			) {
 				return;
 			}
+
+			// Mark as attempted to prevent duplicate creation (React Strict Mode)
+			holdCreationAttempted.current = true;
 
 			setIsCreatingHold(true);
 			setHoldError("");
@@ -284,24 +306,30 @@ const BookingConfirmation: React.FC = () => {
 					stage: "confirmation",
 				}).unwrap();
 
+				// Always update Redux state (persists across remounts)
+				dispatch(setHoldId(hold._id));
+				createdHoldId = hold._id;
+
+				// Only show toast if still mounted
 				if (mounted) {
-					dispatch(setHoldId(hold._id));
-					createdHoldId = hold._id;
 					toast.success(`${room.podId} is now reserved for you`);
 				}
 			} catch (err) {
+				// Reset flag on error so user can retry if needed
+				holdCreationAttempted.current = false;
+
+				const error = err as { data?: { error?: string } };
+				const errorMessage =
+					error?.data?.error ||
+					"Failed to reserve this room. It may no longer be available.";
+				setHoldError(errorMessage);
+
 				if (mounted) {
-					const error = err as { data?: { error?: string } };
-					const errorMessage =
-						error?.data?.error ||
-						"Failed to reserve this room. It may no longer be available.";
-					setHoldError(errorMessage);
 					toast.error(errorMessage);
 				}
 			} finally {
-				if (mounted) {
-					setIsCreatingHold(false);
-				}
+				// Always reset loading state
+				setIsCreatingHold(false);
 			}
 		};
 
@@ -327,15 +355,18 @@ const BookingConfirmation: React.FC = () => {
 		const createdHoldIds: string[] = [];
 
 		const createGroupRoomHolds = async () => {
-			// Don't create if we don't have group data, already have holds, or component unmounted
+			// Don't create if we don't have group data, already have holds, or already attempted
 			if (
 				!isGroupBooking ||
 				!groupResults ||
 				groupHoldIds.length > 0 ||
-				!mounted
+				groupHoldCreationAttempted.current
 			) {
 				return;
 			}
+
+			// Mark as attempted to prevent duplicate creation (React Strict Mode)
+			groupHoldCreationAttempted.current = true;
 
 			// Extract all unique room IDs from group results
 			const roomIds = groupResults.primary.map(
@@ -393,9 +424,12 @@ const BookingConfirmation: React.FC = () => {
 					holdIds.push(hold._id);
 				}
 
+				// Always update state (persists across remounts)
+				setGroupHoldIds(holdIds);
+				createdHoldIds.push(...holdIds);
+
+				// Only show toast if still mounted
 				if (mounted) {
-					setGroupHoldIds(holdIds);
-					createdHoldIds.push(...holdIds);
 					toast.success(
 						`Reserved ${roomIds.length} room${
 							roomIds.length > 1 ? "s" : ""
@@ -403,18 +437,21 @@ const BookingConfirmation: React.FC = () => {
 					);
 				}
 			} catch (err) {
+				// Reset flag on error so user can retry if needed
+				groupHoldCreationAttempted.current = false;
+
+				const error = err as { data?: { error?: string } };
+				const errorMessage =
+					error?.data?.error ||
+					"Failed to reserve rooms. It may no longer be available.";
+				setHoldError(errorMessage);
+
 				if (mounted) {
-					const error = err as { data?: { error?: string } };
-					const errorMessage =
-						error?.data?.error ||
-						"Failed to reserve rooms. It may no longer be available.";
-					setHoldError(errorMessage);
 					toast.error(errorMessage);
 				}
 			} finally {
-				if (mounted) {
-					setIsCreatingHold(false);
-				}
+				// Always reset loading state
+				setIsCreatingHold(false);
 			}
 		};
 
@@ -765,11 +802,12 @@ const BookingConfirmation: React.FC = () => {
 		return (
 			<>
 				<Navbar />
+				<BookingBreadcrumb currentStep={2} onStepClick={handleBreadcrumbClick} />
 				<div className="booking-confirmation">
-					<div className="booking-confirmation__container">
-						<div className="booking-confirmation__header">
-							<h1>Confirm Group Booking</h1>
-							<p className="booking-confirmation__subtitle">
+				<div className="booking-confirmation__container">
+					<div className="booking-confirmation__header">
+						<h1>Confirm Group Booking</h1>
+						<p className="booking-confirmation__subtitle">
 								{totalRooms} room{totalRooms > 1 ? "s" : ""} for {totalGuests}{" "}
 								guest{totalGuests > 1 ? "s" : ""}
 							</p>
@@ -1096,10 +1134,11 @@ const BookingConfirmation: React.FC = () => {
 	const roomLabel = getRoomDisplayLabel(room.quality, room.floor);
 	const roomDescription = getRoomQualityDescription(room.quality);
 
-	return (
-		<>
-			<Navbar />
-			<div className="booking-confirmation">
+		return (
+			<>
+				<Navbar />
+				<BookingBreadcrumb currentStep={2} onStepClick={handleBreadcrumbClick} />
+				<div className="booking-confirmation">
 				<div className="booking-confirmation__container">
 					<div className="booking-confirmation__header">
 						<h1>Confirm Your Booking</h1>

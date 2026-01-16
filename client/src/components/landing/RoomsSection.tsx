@@ -221,12 +221,12 @@ const RoomsSection: React.FC = () => {
 										</div>
 									))}
 								</div>
-								<button
-									className="rooms-section__card-button rooms-section__card-button--twin"
-									onClick={handleBookNow}
-								>
-									Book Now
-								</button>
+							<button
+								className="rooms-section__card-button"
+								onClick={handleBookNow}
+							>
+								Book Now
+							</button>
 							</div>
 						</div>
 					)}
