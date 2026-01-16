@@ -45,6 +45,8 @@
 	color: var(--color-text-secondary);
 	margin-bottom: 0;
 	line-height: 1.6;
+	word-break: break-word;
+	overflow-wrap: break-word;
 }
 
 .payment-success__content {
@@ -100,6 +102,26 @@
 	color: var(--color-text-primary);
 	font-weight: 600;
 	text-align: right;
+	word-break: break-word;
+	overflow-wrap: break-word;
+}
+
+.detail-value--email {
+	cursor: help;
+	transition: color 0.2s ease;
+	white-space: nowrap !important;
+	overflow: hidden !important;
+	text-overflow: ellipsis !important;
+	max-width: 200px;
+	display: block;
+	word-break: normal !important;
+	overflow-wrap: normal !important;
+	flex-shrink: 1;
+	min-width: 0;
+}
+
+.detail-value--email:hover {
+	color: var(--color-primary);
 }
 
 .detail-value--status {

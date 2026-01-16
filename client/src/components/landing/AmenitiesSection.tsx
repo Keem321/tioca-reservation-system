@@ -1,4 +1,14 @@
 import React from "react";
+import { 
+	Wifi, 
+	Wind, 
+	Lock, 
+	Lightbulb, 
+	BatteryCharging, 
+	Coffee, 
+	Droplets, 
+	BellOff 
+} from "lucide-react";
 import "./AmenitiesSection.css";
 
 /**
@@ -8,14 +18,14 @@ import "./AmenitiesSection.css";
  */
 const AmenitiesSection: React.FC = () => {
 	const amenities = [
-		"High-speed WiFi",
-		"Climate control",
-		"Personal storage",
-		"Reading lights",
-		"USB charging ports",
-		"Shared lounges",
-		"Premium showers",
-		"Quiet hours enforced",
+		{ text: "High-speed WiFi", icon: Wifi },
+		{ text: "Climate control", icon: Wind },
+		{ text: "Personal storage", icon: Lock },
+		{ text: "Reading lights", icon: Lightbulb },
+		{ text: "USB charging ports", icon: BatteryCharging },
+		{ text: "Shared lounges", icon: Coffee },
+		{ text: "Premium showers", icon: Droplets },
+		{ text: "Quiet hours enforced", icon: BellOff },
 	];
 
 	return (
@@ -27,11 +37,17 @@ const AmenitiesSection: React.FC = () => {
 				</p>
 
 				<div className="amenities-section__grid">
-					{amenities.map((amenity, idx) => (
-						<div key={idx} className="amenities-section__item">
-							<span className="amenities-section__text">{amenity}</span>
-						</div>
-					))}
+					{amenities.map((amenity, idx) => {
+						const Icon = amenity.icon;
+						return (
+							<div key={idx} className="amenities-section__item">
+								<div className="amenities-section__icon">
+									<Icon size={24} />
+								</div>
+								<span className="amenities-section__text">{amenity.text}</span>
+							</div>
+						);
+					})}
 				</div>
 			</div>
 		</section>

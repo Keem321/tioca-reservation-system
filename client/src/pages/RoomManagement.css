@@ -399,3 +399,87 @@
 	font-size: 0.875rem;
 	font-weight: 500;
 }
+
+/* Mobile Responsive Design */
+@media (max-width: 768px) {
+	.room-management {
+		padding: var(--spacing-md) var(--spacing-sm);
+	}
+
+	.room-management h1 {
+		font-size: 1.75rem;
+	}
+
+	.rm-tabs {
+		flex-wrap: wrap;
+		gap: var(--spacing-xs);
+	}
+
+	.rm-tabs button {
+		padding: var(--spacing-xs) var(--spacing-sm);
+		font-size: 0.875rem;
+	}
+
+	.filters {
+		flex-direction: column;
+		align-items: stretch;
+		gap: var(--spacing-sm);
+	}
+
+	.filters label {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.filters select,
+	.filters input[type="text"],
+	.filters input[type="date"] {
+		width: 100%;
+		min-width: auto;
+	}
+
+	.filters .date-range {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.filters button {
+		margin-left: 0;
+		width: 100%;
+	}
+
+	.room-form {
+		padding: var(--spacing-md);
+	}
+
+	.form-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.room-list {
+		padding: var(--spacing-md);
+		overflow-x: auto;
+	}
+
+	.room-list table {
+		min-width: 600px;
+	}
+
+	.room-list th,
+	.room-list td {
+		padding: var(--spacing-sm);
+		font-size: 0.875rem;
+	}
+
+	.actions {
+		flex-direction: column;
+	}
+
+	.actions button {
+		width: 100%;
+	}
+
+	.floor-grid {
+		grid-template-columns: 1fr;
+	}
+}
