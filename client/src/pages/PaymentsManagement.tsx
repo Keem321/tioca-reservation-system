@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import type { AppDispatch } from "../store";
 import type { PaymentRoomInfo, PaymentAmenityInfo } from "../types/payment";
 import {
@@ -206,18 +208,29 @@ export default function PaymentsManagement() {
 						<div className="reports-filters">
 							<div className="filter-group">
 								<label>From Date:</label>
-								<input
-									type="date"
-									value={dateFrom}
-									onChange={(e) => setDateFrom(e.target.value)}
+								<DatePicker
+									selected={dateFrom ? new Date(dateFrom) : null}
+									onChange={(date) =>
+										setDateFrom(date ? date.toISOString().split("T")[0] : "")
+									}
+									dateFormat="MMM d, yyyy"
+									className="payments-management__datepicker"
+									placeholderText="Select start date"
+									isClearable
 								/>
 							</div>
 							<div className="filter-group">
 								<label>To Date:</label>
-								<input
-									type="date"
-									value={dateTo}
-									onChange={(e) => setDateTo(e.target.value)}
+								<DatePicker
+									selected={dateTo ? new Date(dateTo) : null}
+									onChange={(date) =>
+										setDateTo(date ? date.toISOString().split("T")[0] : "")
+									}
+									minDate={dateFrom ? new Date(dateFrom) : undefined}
+									dateFormat="MMM d, yyyy"
+									className="payments-management__datepicker"
+									placeholderText="Select end date"
+									isClearable
 								/>
 							</div>
 							<div className="filter-group">

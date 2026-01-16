@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import Navbar from "../components/landing/Navbar";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import {
 	useGetRoomsQuery,
 	useCreateRoomMutation,
@@ -586,19 +588,28 @@ export default function RoomManagement() {
 					{(tab === "booked" || tab === "floor") && (
 						<div className="date-range">
 							<label>
-								Start
-								<input
-									type="date"
-									value={startDate}
-									onChange={(e) => setStartDate(e.target.value)}
+								Start Date
+								<DatePicker
+									selected={startDate ? new Date(startDate) : null}
+									onChange={(date) =>
+										setStartDate(date ? date.toISOString().split("T")[0] : "")
+									}
+									dateFormat="MMM d, yyyy"
+									className="room-management__datepicker"
+									placeholderText="Select start date"
 								/>
 							</label>
 							<label>
-								End
-								<input
-									type="date"
-									value={endDate}
-									onChange={(e) => setEndDate(e.target.value)}
+								End Date
+								<DatePicker
+									selected={endDate ? new Date(endDate) : null}
+									onChange={(date) =>
+										setEndDate(date ? date.toISOString().split("T")[0] : "")
+									}
+									minDate={startDate ? new Date(startDate) : undefined}
+									dateFormat="MMM d, yyyy"
+									className="room-management__datepicker"
+									placeholderText="Select end date"
 								/>
 							</label>
 						</div>

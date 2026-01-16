@@ -699,3 +699,101 @@
 		flex-wrap: wrap;
 	}
 }
+
+/* React DatePicker Styling */
+.payments-management__datepicker {
+	width: 100%;
+	padding: var(--spacing-sm) var(--spacing-md);
+	border: 1px solid var(--color-border);
+	border-radius: var(--border-radius-md);
+	background-color: var(--color-linen);
+	font-size: 0.875rem;
+	color: #2c1607;
+	outline: none;
+	font-family: inherit;
+	transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.payments-management__datepicker:focus {
+	border-color: var(--color-primary);
+	box-shadow: 0 0 0 3px rgba(188, 143, 103, 0.1);
+}
+
+.react-datepicker-wrapper {
+	width: 100%;
+}
+
+.react-datepicker__input-container {
+	width: 100%;
+}
+
+.react-datepicker__header {
+	background-color: var(--color-deep-walnut);
+	border-bottom: none;
+	padding-top: 1rem;
+}
+
+.react-datepicker__current-month {
+	color: white;
+	font-weight: 600;
+	font-size: 1rem;
+}
+
+.react-datepicker__day-name {
+	color: var(--color-linen);
+	width: 2.5rem;
+	line-height: 2.5rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+}
+
+.react-datepicker__day {
+	width: 2.5rem;
+	line-height: 2.5rem;
+	border-radius: 6px;
+	margin: 0.25rem;
+}
+
+.react-datepicker__day--selected {
+	background-color: var(--color-primary);
+	color: white;
+}
+
+.react-datepicker__day--keyboard-selected {
+	background-color: rgba(188, 143, 103, 0.3);
+	color: var(--color-deep-walnut);
+}
+
+.react-datepicker__day--in-range {
+	background-color: rgba(188, 143, 103, 0.15);
+	color: var(--color-deep-walnut);
+}
+
+.react-datepicker__day--today {
+	font-weight: 600;
+	color: var(--color-primary);
+}
+
+.react-datepicker__day:hover {
+	background-color: rgba(188, 143, 103, 0.2);
+	border-radius: 6px;
+}
+
+.react-datepicker {
+	border: 2px solid var(--color-primary);
+	border-radius: 12px;
+	box-shadow: 0 12px 40px rgba(44, 22, 7, 0.25),
+		0 4px 16px rgba(44, 22, 7, 0.15);
+}
+
+.react-datepicker-popper {
+	z-index: 9999 !important;
+}
+
+.react-datepicker-popper[data-placement^="bottom"] {
+	padding-top: 8px;
+}
+
+.react-datepicker__month {
+	padding: 0.5rem;
+}

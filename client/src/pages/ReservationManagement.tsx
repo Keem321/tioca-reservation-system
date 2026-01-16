@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react";
 import Navbar from "../components/landing/Navbar";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { Calendar, Mail, Search, SlidersHorizontal } from "lucide-react";
 import {
 	useGetReservationsQuery,
 	useCreateReservationMutation,
@@ -29,6 +32,15 @@ export default function ReservationManagement() {
 	const [dateToFilter, setDateToFilter] = useState<string>("");
 	const [guestEmailFilter, setGuestEmailFilter] = useState<string>("");
 	const [podIdFilter, setPodIdFilter] = useState<string>("");
+
+	// Calculate active filter count
+	const activeFilterCount = [
+		statusFilter,
+		dateFromFilter,
+		dateToFilter,
+		guestEmailFilter,
+		podIdFilter,
+	].filter(Boolean).length;
 
 	// UI state
 	const [showForm, setShowForm] = useState(false);
@@ -384,9 +396,16 @@ export default function ReservationManagement() {
 				<h1>Reservation Management</h1>
 
 				{/* Advanced Filters */}
-				<div className="filters">
+				<div className={`filters ${activeFilterCount > 0 ? "filters--active" : ""}`}>
 					<div className="filters__header">
-						<h3>Search & Filter</h3>
+						<div className="filters__header-content">
+							<Search size={32} className="filters__icon filters__icon--main" />
+							{activeFilterCount > 0 && (
+								<span className="filters__badge">
+									{activeFilterCount} {activeFilterCount === 1 ? "filter" : "filters"} active
+								</span>
+							)}
+						</div>
 						<button
 							className="filters__clear"
 							onClick={() => {
@@ -396,85 +415,131 @@ export default function ReservationManagement() {
 								setGuestEmailFilter("");
 								setPodIdFilter("");
 							}}
+							disabled={activeFilterCount === 0}
 						>
 							Clear All Filters
 						</button>
 					</div>
-					<div className="filters__grid">
-						<label>
-							Status:
-							<select
-								value={statusFilter}
-								onChange={(e) => setStatusFilter(e.target.value)}
-							>
-								<option value="">All Statuses</option>
-								<option value="pending">Pending</option>
-								<option value="confirmed">Confirmed</option>
-								<option value="checked-in">Checked In</option>
-								<option value="checked-out">Checked Out</option>
-								<option value="cancelled">Cancelled</option>
-							</select>
-						</label>
-						<label>
-							Check-in From:
-							<input
-								type="date"
-								value={dateFromFilter}
-								onChange={(e) => setDateFromFilter(e.target.value)}
-							/>
-						</label>
-						<label>
-							Check-in To:
-							<input
-								type="date"
-								value={dateToFilter}
-								onChange={(e) => setDateToFilter(e.target.value)}
-							/>
-						</label>
-						<label>
-							Guest Email:
-							<input
-								type="email"
-								value={guestEmailFilter}
-								onChange={(e) => setGuestEmailFilter(e.target.value)}
-								placeholder="Search email..."
-							/>
-						</label>
-						<label>
-							Pod ID:
-							<input
-								type="text"
-								value={podIdFilter}
-								onChange={(e) => setPodIdFilter(e.target.value)}
-								placeholder="e.g., A101"
-							/>
-						</label>
-						<label>
-							Sort By:
-							<div style={{ display: "flex", gap: "0.5rem" }}>
+
+					<div className="filters__content">
+						<div className="filter-group">
+							<label className="filter-label">
+								<span className="filter-label-text">Status</span>
 								<select
-									value={sortBy}
-									onChange={(e) =>
-										setSortBy(e.target.value as "date" | "status" | "guest")
-									}
+									value={statusFilter}
+									onChange={(e) => setStatusFilter(e.target.value)}
+									className={`filter-input ${statusFilter ? "filter-input--active" : ""}`}
 								>
-									<option value="date">Check-in Date</option>
-									<option value="status">Status</option>
-									<option value="guest">Guest Name</option>
+									<option value="">All Statuses</option>
+									<option value="pending">Pending</option>
+									<option value="confirmed">Confirmed</option>
+									<option value="checked-in">Checked In</option>
+									<option value="checked-out">Checked Out</option>
+									<option value="cancelled">Cancelled</option>
 								</select>
-								<button
-									onClick={() =>
-										setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+							</label>
+						</div>
+
+						<div className="filter-group">
+							<label className="filter-label">
+								<span className="filter-label-text">
+									<Mail size={14} /> Guest Email
+								</span>
+								<input
+									type="email"
+									value={guestEmailFilter}
+									onChange={(e) => setGuestEmailFilter(e.target.value)}
+									placeholder="Search by email..."
+									className={`filter-input ${guestEmailFilter ? "filter-input--active" : ""}`}
+								/>
+							</label>
+						</div>
+
+						<div className="filter-group">
+							<label className="filter-label">
+								<span className="filter-label-text">
+									<Search size={14} /> Pod ID
+								</span>
+								<input
+									type="text"
+									value={podIdFilter}
+									onChange={(e) => setPodIdFilter(e.target.value)}
+									placeholder="e.g., A101"
+									className={`filter-input ${podIdFilter ? "filter-input--active" : ""}`}
+								/>
+							</label>
+						</div>
+
+						<div className="filter-group">
+							<label className="filter-label">
+								<span className="filter-label-text">
+									<Calendar size={14} /> Check-in From
+								</span>
+								<DatePicker
+									selected={dateFromFilter ? new Date(dateFromFilter) : null}
+									onChange={(date) =>
+										setDateFromFilter(
+											date ? date.toISOString().split("T")[0] : ""
+										)
 									}
-									title={`Sort ${
-										sortOrder === "asc" ? "descending" : "ascending"
-									}`}
-									style={{ padding: "0.5rem 1rem" }}
-								>
-									{sortOrder === "asc" ? "↑" : "↓"}
-								</button>
-							</div>
-						</label>
+									dateFormat="MMM d, yyyy"
+									className={`filter-input ${dateFromFilter ? "filter-input--active" : ""}`}
+									placeholderText="From date"
+									isClearable
+								/>
+							</label>
+						</div>
+
+						<div className="filter-group">
+							<label className="filter-label">
+								<span className="filter-label-text">
+									<Calendar size={14} /> Check-in To
+								</span>
+								<DatePicker
+									selected={dateToFilter ? new Date(dateToFilter) : null}
+									onChange={(date) =>
+										setDateToFilter(date ? date.toISOString().split("T")[0] : "")
+									}
+									minDate={
+										dateFromFilter ? new Date(dateFromFilter) : undefined
+									}
+									dateFormat="MMM d, yyyy"
+									className={`filter-input ${dateToFilter ? "filter-input--active" : ""}`}
+									placeholderText="To date"
+									isClearable
+								/>
+							</label>
+						</div>
+
+						<div className="filter-group filter-group--sort">
+							<label className="filter-label">
+								<span className="filter-label-text">Sort By</span>
+								<div className="sort-controls">
+									<select
+										value={sortBy}
+										onChange={(e) =>
+											setSortBy(e.target.value as "date" | "status" | "guest")
+										}
+										className="filter-input"
+									>
+										<option value="date">Check-in Date</option>
+										<option value="status">Status</option>
+										<option value="guest">Guest Name</option>
+									</select>
+									<button
+										className="sort-toggle"
+										onClick={() =>
+											setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+										}
+										title={`Sort ${
+											sortOrder === "asc" ? "descending" : "ascending"
+										}`}
+									>
+										{sortOrder === "asc" ? "↑" : "↓"}
+									</button>
+								</div>
+							</label>
+						</div>
 					</div>
 				</div>
 
