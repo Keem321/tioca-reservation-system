@@ -10,11 +10,12 @@
  *
  * Timeline:
  * - Frontend warns at 30s inactivity, then 10s warning = 40s total
- * - Backend timeout must be LONGER than frontend total (45s)
+ * - Backend timeout must be LONGER than frontend total with generous buffer (60s)
+ * - This 20s buffer accounts for network latency and processing time
  * - Each API request updates the lastActivity timestamp
  */
 
-const INACTIVITY_TIMEOUT = 45 * 1000; // 45 seconds for testing (15 minutes for production: 15 * 60 * 1000)
+const INACTIVITY_TIMEOUT = 60 * 1000; // 60 seconds for testing (18 minutes for production: 18 * 60 * 1000)
 
 /**
  * Middleware to track and enforce session activity timeout
