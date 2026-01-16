@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
+import React from "react";
 import Navbar from "../components/landing/Navbar";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { Calendar, Mail, Search, SlidersHorizontal } from "lucide-react";
+import { Calendar, Mail, Search, SlidersHorizontal, Plus, X } from "lucide-react";
+import Pagination from "../components/Pagination";
 import {
 	useGetReservationsQuery,
 	useCreateReservationMutation,
@@ -52,6 +54,10 @@ export default function ReservationManagement() {
 	const [selectedReservations, setSelectedReservations] = useState<Set<string>>(
 		new Set()
 	);
+
+	// Pagination state
+	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage, setItemsPerPage] = useState(10);
 
 	const [formData, setFormData] = useState<ReservationFormData>({
 		roomId: "",
@@ -147,22 +153,56 @@ export default function ReservationManagement() {
 	]);
 
 	// Sorting
-	const reservations = [...(allReservations as Reservation[])].sort((a, b) => {
-		let compareValue = 0;
-		switch (sortBy) {
-			case "date":
-				compareValue =
-					new Date(a.checkInDate).getTime() - new Date(b.checkInDate).getTime();
-				break;
-			case "status":
-				compareValue = a.status.localeCompare(b.status);
-				break;
-			case "guest":
-				compareValue = a.guestName.localeCompare(b.guestName);
-				break;
+	const sortedReservations = [...(allReservations as Reservation[])].sort(
+		(a, b) => {
+			let compareValue = 0;
+			switch (sortBy) {
+				case "date":
+					compareValue =
+						new Date(a.checkInDate).getTime() -
+						new Date(b.checkInDate).getTime();
+					break;
+				case "status":
+					compareValue = a.status.localeCompare(b.status);
+					break;
+				case "guest":
+					compareValue = a.guestName.localeCompare(b.guestName);
+					break;
+			}
+			return sortOrder === "asc" ? compareValue : -compareValue;
 		}
-		return sortOrder === "asc" ? compareValue : -compareValue;
-	});
+	);
+
+	// Pagination
+	const totalPages = Math.ceil(sortedReservations.length / itemsPerPage);
+	const startIndex = (currentPage - 1) * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
+	const reservations = sortedReservations.slice(startIndex, endIndex);
+
+	// Reset to page 1 when filters change
+	React.useEffect(() => {
+		setCurrentPage(1);
+	}, [statusFilter, dateFromFilter, dateToFilter, guestEmailFilter, podIdFilter]);
+
+	// Handle ESC key to close modal
+	React.useEffect(() => {
+		const handleEscape = (e: KeyboardEvent) => {
+			if (e.key === "Escape" && showForm) {
+				setShowForm(false);
+			}
+		};
+
+		if (showForm) {
+			document.addEventListener("keydown", handleEscape);
+			// Prevent body scroll when modal is open
+			document.body.style.overflow = "hidden";
+		}
+
+		return () => {
+			document.removeEventListener("keydown", handleEscape);
+			document.body.style.overflow = "unset";
+		};
+	}, [showForm]);
 
 	const handleInputChange = (
 		e: React.ChangeEvent<
@@ -543,26 +583,27 @@ export default function ReservationManagement() {
 					</div>
 				</div>
 
-				{/* Results Count */}
-				<div className="results-info">
-					<p>Showing {reservations.length} reservation(s)</p>
-					<button
-						onClick={() => setShowForm(!showForm)}
-						className="btn-primary"
-					>
-						{showForm ? "Cancel" : "Add New Reservation"}
-					</button>
-				</div>
-
-				{/* Form */}
+				{/* Form Modal */}
 				{showForm && (
-					<div className="reservation-form">
-						<h2>
-							{editingReservation
-								? "Edit Reservation"
-								: "Create New Reservation"}
-						</h2>
-						<form onSubmit={handleSubmit}>
+					<>
+						<div className="modal-overlay" onClick={() => setShowForm(false)}></div>
+						<div className="modal" onClick={(e) => e.stopPropagation()}>
+							<div className="modal__header">
+								<h2>
+									{editingReservation
+										? "Edit Reservation"
+										: "Create New Reservation"}
+								</h2>
+								<button
+									type="button"
+									className="modal__close"
+									onClick={() => setShowForm(false)}
+									aria-label="Close modal"
+								>
+									<X size={24} />
+								</button>
+							</div>
+							<form onSubmit={handleSubmit}>
 							<div className="form-grid">
 								<label>
 									Room:
@@ -768,43 +809,61 @@ export default function ReservationManagement() {
 							</div>
 						</form>
 					</div>
+					</>
 				)}
-
-				{/* Bulk actions */}
-				<div className="bulk-actions">
-					<div className="bulk-actions__left">
-						<label>
-							<input
-								type="checkbox"
-								onChange={(e) => toggleSelectAll(e.target.checked)}
-								checked={
-									selectedReservations.size > 0 &&
-									selectedReservations.size === reservations.length
-								}
-							/>
-							Select All
-						</label>
-						<span>{selectedReservations.size} selected</span>
-					</div>
-					<div className="bulk-actions__right">
-						<button
-							onClick={bulkCheckIn}
-							disabled={selectedReservations.size === 0}
-						>
-							Bulk Check-in
-						</button>
-						<button
-							onClick={bulkCheckOut}
-							disabled={selectedReservations.size === 0}
-						>
-							Bulk Check-out
-						</button>
-					</div>
-				</div>
 
 				{/* Reservations List */}
 				<div className="reservation-list">
-					<h2>Reservations</h2>
+					<div className="reservation-list__header">
+						<div className="reservation-list__header-left">
+							<h2>Reservations</h2>
+							<button
+								onClick={() => setShowForm(!showForm)}
+								className="btn-add-reservation"
+								title={showForm ? "Cancel" : "Add New Reservation"}
+							>
+								<Plus size={28} />
+							</button>
+							{reservations.length > 0 && (
+								<>
+									<label className="select-all-label">
+										<input
+											type="checkbox"
+											onChange={(e) => toggleSelectAll(e.target.checked)}
+											checked={
+												selectedReservations.size > 0 &&
+												selectedReservations.size === reservations.length
+											}
+										/>
+										Select All
+										{selectedReservations.size > 0 && (
+											<span className="selected-count">
+												({selectedReservations.size} selected)
+											</span>
+										)}
+									</label>
+									{selectedReservations.size > 0 && (
+										<div className="bulk-actions-inline">
+											<button
+												onClick={bulkCheckIn}
+												disabled={selectedReservations.size === 0}
+												className="bulk-action-btn"
+											>
+												Bulk Check-in
+											</button>
+											<button
+												onClick={bulkCheckOut}
+												disabled={selectedReservations.size === 0}
+												className="bulk-action-btn"
+											>
+												Bulk Check-out
+											</button>
+										</div>
+									)}
+								</>
+							)}
+						</div>
+					</div>
 					{isLoading && <p>Loading reservations...</p>}
 					{error && <p className="error">Failed to load reservations.</p>}
 
@@ -925,6 +984,18 @@ export default function ReservationManagement() {
 								</tbody>
 							</table>
 						</div>
+					)}
+
+					{/* Pagination */}
+					{!isLoading && sortedReservations.length > 0 && (
+						<Pagination
+							currentPage={currentPage}
+							totalPages={totalPages}
+							onPageChange={setCurrentPage}
+							totalItems={sortedReservations.length}
+							itemsPerPage={itemsPerPage}
+							onItemsPerPageChange={setItemsPerPage}
+						/>
 					)}
 				</div>
 			</div>

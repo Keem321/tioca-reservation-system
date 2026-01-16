@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -15,6 +15,7 @@ import {
 import { paymentsApi } from "../features/paymentsApi";
 import Navbar from "../components/landing/Navbar";
 import RoleGuard from "../components/RoleGuard";
+import Pagination from "../components/Pagination";
 import "./PaymentsManagement.css";
 import { useToast } from "../components/useToast";
 
@@ -35,6 +36,14 @@ export default function PaymentsManagement() {
 		description: "",
 		reason: "",
 	});
+
+	// Pagination state for management tab
+	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage, setItemsPerPage] = useState(10);
+
+	// Pagination state for transaction history (reports tab)
+	const [transactionPage, setTransactionPage] = useState(1);
+	const [transactionItemsPerPage, setTransactionItemsPerPage] = useState(10);
 
 	const { data: payments = [], isLoading: paymentsLoading } =
 		useGetPaymentsQuery({
@@ -57,6 +66,24 @@ export default function PaymentsManagement() {
 		useGetPaymentHistoryQuery(selectedPaymentId || "", {
 			skip: !selectedPaymentId,
 		});
+
+	// Pagination calculations for management tab
+	const totalPages = Math.ceil(payments.length / itemsPerPage);
+	const startIndex = (currentPage - 1) * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
+	const paginatedPayments = payments.slice(startIndex, endIndex);
+
+	// Pagination calculations for transaction history (reports tab)
+	const transactionTotalPages = Math.ceil(payments.length / transactionItemsPerPage);
+	const transactionStartIndex = (transactionPage - 1) * transactionItemsPerPage;
+	const transactionEndIndex = transactionStartIndex + transactionItemsPerPage;
+	const paginatedTransactions = payments.slice(transactionStartIndex, transactionEndIndex);
+
+	// Reset to page 1 when filters change
+	useEffect(() => {
+		setCurrentPage(1);
+		setTransactionPage(1);
+	}, [dateFrom, dateTo, statusFilter]);
 
 	const handleRefund = async (reservationId: string) => {
 		if (!window.confirm("Are you sure you want to refund this payment?")) {
@@ -351,21 +378,22 @@ export default function PaymentsManagement() {
 							) : payments.length === 0 ? (
 								<p>No payments found</p>
 							) : (
-								<div className="table-wrapper">
-									<table className="payments-table">
-										<thead>
-											<tr>
-												<th>Date</th>
-												<th>Guest</th>
-												<th>Email</th>
-												<th>Amount</th>
-												<th>Status</th>
-												<th>Receipt</th>
-												<th>Action</th>
-											</tr>
-										</thead>
-										<tbody>
-											{payments.map((payment) => (
+								<>
+									<div className="table-wrapper">
+										<table className="payments-table">
+											<thead>
+												<tr>
+													<th>Date</th>
+													<th>Guest</th>
+													<th>Email</th>
+													<th>Amount</th>
+													<th>Status</th>
+													<th>Receipt</th>
+													<th>Action</th>
+												</tr>
+											</thead>
+											<tbody>
+												{paginatedTransactions.map((payment) => (
 												<tr key={payment._id}>
 													<td>{formatDate(payment.createdAt)}</td>
 													<td>{payment.reservationId?.guestName || "-"}</td>
@@ -412,10 +440,19 @@ export default function PaymentsManagement() {
 														)}
 													</td>
 												</tr>
-											))}
-										</tbody>
-									</table>
-								</div>
+												))}
+											</tbody>
+										</table>
+									</div>
+									<Pagination
+										currentPage={transactionPage}
+										totalPages={transactionTotalPages}
+										onPageChange={setTransactionPage}
+										totalItems={payments.length}
+										itemsPerPage={transactionItemsPerPage}
+										onItemsPerPageChange={setTransactionItemsPerPage}
+									/>
+								</>
 							)}
 						</div>
 					</div>
@@ -433,39 +470,49 @@ export default function PaymentsManagement() {
 								) : payments.length === 0 ? (
 									<p>No payments found</p>
 								) : (
-									<div className="list-items">
-										{payments.map((payment) => (
-											<div
-												key={payment._id}
-												className={`list-item ${
-													selectedPaymentId === payment._id
-														? "list-item--selected"
-														: ""
-												}`}
-												onClick={() => setSelectedPaymentId(payment._id)}
-											>
-												<div className="list-item__header">
-													<strong>
-														{payment.reservationId?.guestName || "Unknown"}
-													</strong>
-													<span
-														className="status-badge"
-														style={{
-															backgroundColor: getStatusColor(payment.status),
-														}}
-													>
-														{payment.status}
-													</span>
-												</div>
-												<div className="list-item__details">
-													<div>{formatCurrency(payment.amount)}</div>
-													<div className="text-muted">
-														{formatDate(payment.createdAt)}
+									<>
+										<div className="list-items">
+											{paginatedPayments.map((payment) => (
+												<div
+													key={payment._id}
+													className={`list-item ${
+														selectedPaymentId === payment._id
+															? "list-item--selected"
+															: ""
+													}`}
+													onClick={() => setSelectedPaymentId(payment._id)}
+												>
+													<div className="list-item__header">
+														<strong>
+															{payment.reservationId?.guestName || "Unknown"}
+														</strong>
+														<span
+															className="status-badge"
+															style={{
+																backgroundColor: getStatusColor(payment.status),
+															}}
+														>
+															{payment.status}
+														</span>
+													</div>
+													<div className="list-item__details">
+														<div>{formatCurrency(payment.amount)}</div>
+														<div className="text-muted">
+															{formatDate(payment.createdAt)}
+														</div>
 													</div>
 												</div>
-											</div>
-										))}
-									</div>
+											))}
+										</div>
+										<Pagination
+											currentPage={currentPage}
+											totalPages={totalPages}
+											onPageChange={setCurrentPage}
+											totalItems={payments.length}
+											itemsPerPage={itemsPerPage}
+											onItemsPerPageChange={setItemsPerPage}
+										/>
+									</>
 								)}
 							</div>
 

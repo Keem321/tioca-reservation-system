@@ -1,7 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Navbar from "../components/landing/Navbar";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { Search, Calendar } from "lucide-react";
+import Pagination from "../components/Pagination";
 import {
 	useGetRoomsQuery,
 	useCreateRoomMutation,
@@ -93,6 +95,10 @@ export default function RoomManagement() {
 	const [filterFloor, setFilterFloor] = useState<"" | PodFloor>("");
 	const [filterStatus, setFilterStatus] = useState<"" | Room["status"]>("");
 
+	// Pagination state
+	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage, setItemsPerPage] = useState(10);
+
 	// Two-week window default for "Booked" tab
 	const [startDate, setStartDate] = useState<string>(() =>
 		new Date().toISOString().slice(0, 10)
@@ -103,14 +109,22 @@ export default function RoomManagement() {
 		return d.toISOString().slice(0, 10);
 	});
 
+	// Calculate active filter count (after all state declarations)
+	const activeFilterCount = [
+		search,
+		filterFloor,
+		filterStatus,
+		...(tab === "booked" || tab === "floor" ? [startDate, endDate] : []),
+	].filter(Boolean).length;
+
 	// Reservations overlapping helper
 	const overlaps = (aStart: Date, aEnd: Date, bStart: Date, bEnd: Date) => {
 		return aStart < bEnd && aEnd > bStart;
 	};
 
 	// Compute booked roomIds for the selected window
-	const windowStart = useMemo(() => new Date(startDate), [startDate]);
-	const windowEnd = useMemo(() => new Date(endDate), [endDate]);
+	const windowStart = useMemo(() => startDate ? new Date(startDate) : null, [startDate]);
+	const windowEnd = useMemo(() => endDate ? new Date(endDate) : null, [endDate]);
 	const activeStatuses = useMemo(
 		() => new Set(["pending", "confirmed", "checked-in"]),
 		[]
@@ -119,14 +133,20 @@ export default function RoomManagement() {
 		return new Set(
 			reservations
 				.filter(
-					(r) =>
-						activeStatuses.has(r.status) &&
-						overlaps(
-							new Date(r.checkInDate),
-							new Date(r.checkOutDate),
-							windowStart,
-							windowEnd
-						)
+					(r) => {
+						// Only filter by active status if dates are not set
+						if (!windowStart || !windowEnd) {
+							return activeStatuses.has(r.status);
+						}
+						// Filter by date range if dates are set
+						return activeStatuses.has(r.status) &&
+							overlaps(
+								new Date(r.checkInDate),
+								new Date(r.checkOutDate),
+								windowStart,
+								windowEnd
+							);
+					}
 				)
 				.map((r) => (typeof r.roomId === "string" ? r.roomId : r.roomId?._id))
 				.filter((id): id is string => id !== null && id !== undefined)
@@ -144,9 +164,29 @@ export default function RoomManagement() {
 		});
 	}, [rooms, search, filterFloor, filterStatus]);
 
-	const bookedRooms = useMemo(() => {
+	const allBookedRooms = useMemo(() => {
 		return filteredRooms.filter((r) => bookedRoomIds.has(r._id));
 	}, [filteredRooms, bookedRoomIds]);
+
+	// Pagination for booked rooms
+	const bookedTotalPages = Math.ceil(allBookedRooms.length / itemsPerPage);
+	const bookedStartIndex = (currentPage - 1) * itemsPerPage;
+	const bookedEndIndex = bookedStartIndex + itemsPerPage;
+	const bookedRooms = allBookedRooms.slice(bookedStartIndex, bookedEndIndex);
+
+	// Pagination for all rooms
+	const allRoomsTotalPages = Math.ceil(filteredRooms.length / itemsPerPage);
+	const allRoomsStartIndex = (currentPage - 1) * itemsPerPage;
+	const allRoomsEndIndex = allRoomsStartIndex + itemsPerPage;
+	const paginatedAllRooms = filteredRooms.slice(
+		allRoomsStartIndex,
+		allRoomsEndIndex
+	);
+
+	// Reset to page 1 when filters or tab changes
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [search, filterFloor, filterStatus, tab, startDate, endDate]);
 
 	// Per-floor summary for the overview grid
 	const floorKeys = useMemo<PodFloor[]>(
@@ -547,79 +587,144 @@ export default function RoomManagement() {
 				</RoleGuard>
 
 				{/* Filters shared (search, floor, status) */}
-				<div className="filters">
-					<label>
-						Search PodId
-						<input
-							type="text"
-							placeholder="e.g. 201"
-							value={search}
-							onChange={(e) => setSearch(e.target.value)}
-						/>
-					</label>
-					<label>
-						Floor
-						<select
-							value={filterFloor}
-							onChange={(e) => setFilterFloor(e.target.value as "" | PodFloor)}
+				<div
+					className={`filters ${activeFilterCount > 0 ? "filters--active" : ""}`}
+				>
+					<div className="filters__header">
+						<div className="filters__header-content">
+							<Search size={32} className="filters__icon filters__icon--main" />
+							{activeFilterCount > 0 && (
+								<span className="filters__badge">
+									{activeFilterCount}{" "}
+									{activeFilterCount === 1 ? "filter" : "filters"} active
+								</span>
+							)}
+						</div>
+						<button
+							className="filters__clear"
+							onClick={() => {
+								setSearch("");
+								setFilterFloor("");
+								setFilterStatus("");
+								setStartDate("");
+								setEndDate("");
+								setCurrentPage(1);
+							}}
+							disabled={activeFilterCount === 0}
 						>
-							<option value="">All</option>
-							<option value="women-only">Women-Only</option>
-							<option value="men-only">Men-Only</option>
-							<option value="couples">Couples</option>
-							<option value="business">Business</option>
-						</select>
-					</label>
-					<label>
-						Status
-						<select
-							value={filterStatus}
-							onChange={(e) =>
-								setFilterStatus(e.target.value as "" | Room["status"])
-							}
-						>
-							<option value="">All</option>
-							<option value="available">Available</option>
-							<option value="reserved">Reserved</option>
-							<option value="occupied">Occupied</option>
-							<option value="maintenance">Maintenance</option>
-						</select>
-					</label>
-					{(tab === "booked" || tab === "floor") && (
-						<div className="date-range">
-							<label>
-								Start Date
-								<DatePicker
-									selected={startDate ? new Date(startDate) : null}
-									onChange={(date) =>
-										setStartDate(date ? date.toISOString().split("T")[0] : "")
-									}
-									dateFormat="MMM d, yyyy"
-									className="room-management__datepicker"
-									placeholderText="Select start date"
-								/>
-							</label>
-							<label>
-								End Date
-								<DatePicker
-									selected={endDate ? new Date(endDate) : null}
-									onChange={(date) =>
-										setEndDate(date ? date.toISOString().split("T")[0] : "")
-									}
-									minDate={startDate ? new Date(startDate) : undefined}
-									dateFormat="MMM d, yyyy"
-									className="room-management__datepicker"
-									placeholderText="Select end date"
+							Clear All Filters
+						</button>
+					</div>
+
+					<div className="filters__content">
+						<div className="filter-group">
+							<label className="filter-label">
+								<span className="filter-label-text">
+									<Search size={14} /> Pod ID
+								</span>
+								<input
+									type="text"
+									placeholder="Search by Pod ID (e.g., 201)"
+									value={search}
+									onChange={(e) => setSearch(e.target.value)}
+									className={`filter-input ${search ? "filter-input--active" : ""}`}
 								/>
 							</label>
 						</div>
-					)}
-					<div className="spacer" />
-					<RoleGuard requiredRoles="admin">
-						<button onClick={() => setShowForm(!showForm)}>
-							{showForm ? "Cancel" : "Add New Room"}
-						</button>
-					</RoleGuard>
+
+						<div className="filter-group">
+							<label className="filter-label">
+								<span className="filter-label-text">Floor</span>
+								<select
+									value={filterFloor}
+									onChange={(e) =>
+										setFilterFloor(e.target.value as "" | PodFloor)
+									}
+									className={`filter-input ${filterFloor ? "filter-input--active" : ""}`}
+								>
+									<option value="">All Floors</option>
+									<option value="women-only">Women-Only</option>
+									<option value="men-only">Men-Only</option>
+									<option value="couples">Couples</option>
+									<option value="business">Business</option>
+								</select>
+							</label>
+						</div>
+
+						<div className="filter-group">
+							<label className="filter-label">
+								<span className="filter-label-text">Status</span>
+								<select
+									value={filterStatus}
+									onChange={(e) =>
+										setFilterStatus(e.target.value as "" | Room["status"])
+									}
+									className={`filter-input ${filterStatus ? "filter-input--active" : ""}`}
+								>
+									<option value="">All Statuses</option>
+									<option value="available">Available</option>
+									<option value="reserved">Reserved</option>
+									<option value="occupied">Occupied</option>
+									<option value="maintenance">Maintenance</option>
+								</select>
+							</label>
+						</div>
+
+						{(tab === "booked" || tab === "floor") && (
+							<>
+								<div className="filter-group">
+									<label className="filter-label">
+										<span className="filter-label-text">
+											<Calendar size={14} /> Start Date
+										</span>
+										<DatePicker
+											selected={startDate ? new Date(startDate) : null}
+											onChange={(date) =>
+												setStartDate(
+													date ? date.toISOString().split("T")[0] : ""
+												)
+											}
+											dateFormat="MMM d, yyyy"
+											className={`filter-input ${startDate ? "filter-input--active" : ""}`}
+											placeholderText="Select start date"
+										/>
+									</label>
+								</div>
+
+								<div className="filter-group">
+									<label className="filter-label">
+										<span className="filter-label-text">
+											<Calendar size={14} /> End Date
+										</span>
+										<DatePicker
+											selected={endDate ? new Date(endDate) : null}
+											onChange={(date) =>
+												setEndDate(date ? date.toISOString().split("T")[0] : "")
+											}
+											minDate={startDate ? new Date(startDate) : undefined}
+											dateFormat="MMM d, yyyy"
+											className={`filter-input ${endDate ? "filter-input--active" : ""}`}
+											placeholderText="Select end date"
+										/>
+									</label>
+								</div>
+							</>
+						)}
+
+						<RoleGuard requiredRoles="admin">
+							<div className="filter-group filter-group--action">
+								<label className="filter-label">
+									<span className="filter-label-text">Actions</span>
+									<button
+										onClick={() => setShowForm(!showForm)}
+										className="filter-input filter-input--button"
+									>
+										{showForm ? "Cancel" : "+ Add New Room"}
+									</button>
+								</label>
+							</div>
+						</RoleGuard>
+					</div>
 				</div>
 
 				{/* Tab: Booked (Next Two Weeks) */}
@@ -693,6 +798,18 @@ export default function RoomManagement() {
 								</tbody>
 							</table>
 						)}
+
+						{/* Pagination for Booked Rooms */}
+						{allBookedRooms.length > 0 && (
+							<Pagination
+								currentPage={currentPage}
+								totalPages={bookedTotalPages}
+								onPageChange={setCurrentPage}
+								totalItems={allBookedRooms.length}
+								itemsPerPage={itemsPerPage}
+								onItemsPerPageChange={setItemsPerPage}
+							/>
+						)}
 					</div>
 				)}
 
@@ -717,7 +834,7 @@ export default function RoomManagement() {
 									</tr>
 								</thead>
 								<tbody>
-									{filteredRooms.map((room: Room) => (
+									{paginatedAllRooms.map((room: Room) => (
 										<tr key={room._id}>
 											<td>{room.podId}</td>
 											<td>
@@ -773,6 +890,18 @@ export default function RoomManagement() {
 									))}
 								</tbody>
 							</table>
+						)}
+
+						{/* Pagination for All Rooms */}
+						{filteredRooms.length > 0 && (
+							<Pagination
+								currentPage={currentPage}
+								totalPages={allRoomsTotalPages}
+								onPageChange={setCurrentPage}
+								totalItems={filteredRooms.length}
+								itemsPerPage={itemsPerPage}
+								onItemsPerPageChange={setItemsPerPage}
+							/>
 						)}
 					</div>
 				)}
