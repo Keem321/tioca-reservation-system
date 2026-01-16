@@ -32,7 +32,7 @@ const ReservationLookup: React.FC = () => {
 
 		try {
 			const response = await fetch(
-				`${import.meta.env.VITE_API_URL || ""}/api/reservations/request-access-by-email`,
+				`${import.meta.env.VITE_API_URL || ""}/reservations/request-access-by-email`,
 				{
 					method: "POST",
 					headers: {
@@ -73,7 +73,7 @@ const ReservationLookup: React.FC = () => {
 
 		try {
 			const response = await fetch(
-				`${import.meta.env.VITE_API_URL || ""}/api/reservations/lookup-by-code`,
+				`${import.meta.env.VITE_API_URL || ""}/reservations/lookup-by-code`,
 				{
 					method: "POST",
 					headers: {
@@ -114,7 +114,7 @@ const ReservationLookup: React.FC = () => {
 
 		try {
 			const response = await fetch(
-				`${import.meta.env.VITE_API_URL || ""}/api/reservations/verify-code`,
+				`${import.meta.env.VITE_API_URL || ""}/reservations/verify-code`,
 				{
 					method: "POST",
 					headers: {

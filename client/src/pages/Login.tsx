@@ -22,7 +22,7 @@ const Login: React.FC = () => {
 	const handleGoogleLogin = () => {
 		const apiUrl = import.meta.env.VITE_API_URL || "";
 		// Google OAuth will redirect to home, then we check role on landing
-		window.location.href = `${apiUrl}/api/auth/google?redirect=/`;
+		window.location.href = `${apiUrl}/auth/google?redirect=/`;
 	};
 
 	const handleLocalLogin = async (e: React.FormEvent) => {
@@ -32,7 +32,7 @@ const Login: React.FC = () => {
 		setIsSubmitting(true);
 		try {
 			const apiUrl = import.meta.env.VITE_API_URL || "";
-			const res = await fetch(`${apiUrl}/api/auth/login`, {
+		const res = await fetch(`${apiUrl}/auth/login`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",

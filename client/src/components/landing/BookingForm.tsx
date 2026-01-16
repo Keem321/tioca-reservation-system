@@ -42,7 +42,7 @@ const BookingForm: React.FC = () => {
 			try {
 				const apiUrl = import.meta.env.VITE_API_URL || "";
 				const response = await fetch(
-					`${apiUrl}/api/reservations/availability/count?checkIn=${checkIn}&checkOut=${checkOut}&floor=${zone}`,
+					`${apiUrl}/reservations/availability/count?checkIn=${checkIn}&checkOut=${checkOut}&floor=${zone}`,
 					{
 						credentials: "include",
 					}

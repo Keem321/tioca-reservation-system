@@ -28,8 +28,7 @@ const ReservationVerify: React.FC = () => {
 		const verifyToken = async () => {
 			try {
 				const response = await fetch(
-					`${import.meta.env.VITE_API_URL || ""}/api/reservations/verify/${token}`
-				);
+				`${import.meta.env.VITE_API_URL || ""}/reservations/verify/${token}`
 
 				const data = await response.json();
 

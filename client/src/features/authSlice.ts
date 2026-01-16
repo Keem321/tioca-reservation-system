@@ -33,7 +33,7 @@ const initialState: AuthState = {
  */
 export const checkAuth = createAsyncThunk("auth/checkAuth", async () => {
 	const apiUrl = import.meta.env.VITE_API_URL || "";
-	const res = await fetch(`${apiUrl}/api/auth/loggedin`, {
+	const res = await fetch(`${apiUrl}/auth/loggedin`, {
 		credentials: "include",
 	});
 	if (!res.ok) throw new Error("Not authenticated");
@@ -48,7 +48,7 @@ export const checkAuth = createAsyncThunk("auth/checkAuth", async () => {
 export const logout = createAsyncThunk("auth/logout", async () => {
 	const apiUrl = import.meta.env.VITE_API_URL || "";
 	try {
-		const response = await fetch(`${apiUrl}/api/auth/logout`, {
+		const response = await fetch(`${apiUrl}/auth/logout`, {
 			method: "POST",
 			credentials: "include",
 		});
@@ -70,7 +70,7 @@ export const logout = createAsyncThunk("auth/logout", async () => {
  */
 export const keepAlive = createAsyncThunk("auth/keepAlive", async () => {
 	const apiUrl = import.meta.env.VITE_API_URL || "";
-	const res = await fetch(`${apiUrl}/api/auth/keepalive`, {
+	const res = await fetch(`${apiUrl}/auth/keepalive`, {
 		method: "POST",
 		credentials: "include",
 	});

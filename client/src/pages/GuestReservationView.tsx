@@ -61,7 +61,7 @@ const GuestReservationView: React.FC = () => {
 
 		try {
 			const response = await fetch(
-				`${import.meta.env.VITE_API_URL || ""}/api/reservations/guest/${
+				`${import.meta.env.VITE_API_URL || ""}/reservations/guest/${
 					reservation._id
 				}/cancel`,
 				{
