@@ -153,6 +153,29 @@ const GuestReservationView: React.FC = () => {
 
 	const roomInfo = getRoomInfo();
 
+	// Format quality with proper casing
+	const formatQuality = (quality: string) => {
+		const qualityMap: Record<string, string> = {
+			classic: "Classic Pearl",
+			milk: "Milk Pearl",
+			golden: "Golden Pearl",
+			crystal: "Crystal Boba Suite",
+			matcha: "Matcha Pearl",
+		};
+		return qualityMap[quality.toLowerCase()] || quality;
+	};
+
+	// Format floor with proper readable formatting
+	const formatFloor = (floor: string) => {
+		const floorMap: Record<string, string> = {
+			"women-only": "Women-Only Floor",
+			"men-only": "Men-Only Floor",
+			couples: "Couples Floor",
+			business: "Business/Quiet Floor",
+		};
+		return floorMap[floor.toLowerCase()] || floor;
+	};
+
 	// Status badge styling
 	const getStatusBadge = (status: string) => {
 		const statusMap: Record<string, { label: string; className: string }> = {
@@ -230,12 +253,12 @@ const GuestReservationView: React.FC = () => {
 									<div className="detail-item">
 										<span className="detail-label">Quality:</span>
 										<span className="detail-value">
-											{roomInfo.quality} Pearl
+											{formatQuality(roomInfo.quality)}
 										</span>
 									</div>
 									<div className="detail-item">
 										<span className="detail-label">Floor:</span>
-										<span className="detail-value">{roomInfo.floor}</span>
+										<span className="detail-value">{formatFloor(roomInfo.floor)}</span>
 									</div>
 								</div>
 							</div>
@@ -277,7 +300,7 @@ const GuestReservationView: React.FC = () => {
 								{/* Base Room Cost */}
 								<div className="payment-row">
 									<span>
-										{roomInfo?.quality || "Pod"} × {nights} night
+										{roomInfo ? formatQuality(roomInfo.quality) : "Pod"} × {nights} night
 										{nights > 1 ? "s" : ""}
 									</span>
 									<span>{formatMoney(reservation.baseRoomPrice * nights)}</span>

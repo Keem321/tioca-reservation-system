@@ -78,6 +78,7 @@ const BookingSearchForm: React.FC<BookingSearchFormProps> = ({
 						minDate={new Date()}
 						placeholderText="Select check-in"
 						className="booking-search-form__input booking-search-form__datepicker"
+						popperPlacement="bottom-start"
 					/>
 				</div>
 
@@ -92,6 +93,7 @@ const BookingSearchForm: React.FC<BookingSearchFormProps> = ({
 						minDate={checkInDate || new Date()}
 						placeholderText="Select check-out"
 						className="booking-search-form__input booking-search-form__datepicker"
+						popperPlacement="bottom-start"
 					/>
 				</div>
 

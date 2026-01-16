@@ -301,7 +301,7 @@
 }
 
 .btn-modify {
-	background-color: #17a2b8;
+	background-color: #6f8a45;
 	color: white;
 	display: flex;
 	align-items: center;
@@ -309,19 +309,25 @@
 }
 
 .btn-modify:hover:not(:disabled) {
-	background-color: #138496;
+	background-color: #5a7036;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(111, 138, 69, 0.3);
 }
 
 .btn-cancel {
-	background-color: #dc3545;
+	background-color: #8b6f47;
 	color: white;
 	display: flex;
 	align-items: center;
 	gap: 8px;
+	border: 2px solid #8b6f47;
 }
 
 .btn-cancel:hover:not(:disabled) {
-	background-color: #c82333;
+	background-color: #6d5738;
+	border-color: #6d5738;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(139, 111, 71, 0.3);
 }
 
 .management-note {
