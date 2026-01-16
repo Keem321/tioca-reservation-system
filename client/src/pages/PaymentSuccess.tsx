@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { CheckCircle, Calendar, Users, CreditCard, MapPin } from "lucide-react";
@@ -19,24 +19,52 @@ const PaymentSuccess: React.FC = () => {
 	const { pendingReservation } = useSelector(
 		(state: RootState) => state.booking
 	);
+	const user = useSelector((state: RootState) => state.auth.user);
+	const hasChecked = useSelector((state: RootState) => state.auth.hasChecked);
+	
+	// Track if this is the initial mount (to detect page refresh)
+	const isInitialMount = useRef(true);
 
 	// Get reservation from location state (preferred) or Redux store (fallback)
 	const reservation = (location.state?.reservation || pendingReservation) as
 		| Reservation
 		| undefined;
 
-	// Only redirect if we truly don't have a reservation (after checking both sources)
+	// Redirect ONLY on initial page load (refresh), not when session expires while viewing
 	useEffect(() => {
-		if (!reservation) {
-			// Small delay to ensure location.state is available if navigation just happened
-			const timer = setTimeout(() => {
-				if (!location.state?.reservation && !pendingReservation) {
-					navigate("/booking", { replace: true });
-				}
-			}, 100);
-			return () => clearTimeout(timer);
+		// Wait for auth check to complete before deciding where to redirect
+		if (!hasChecked) {
+			console.log("[PaymentSuccess] Waiting for auth check to complete...");
+			return;
 		}
-	}, [reservation, location.state, pendingReservation, navigate]);
+
+		// Only check redirect logic on initial mount (page refresh/load)
+		if (!isInitialMount.current) {
+			console.log("[PaymentSuccess] Not initial mount - skipping redirect check");
+			return;
+		}
+
+		// Mark that we've done the initial check
+		isInitialMount.current = false;
+
+		// If user is not logged in on initial load, any reservation data is stale
+		// We should redirect to landing page
+		if (!user) {
+			console.log("[PaymentSuccess] User is logged out on page load - redirecting to landing page");
+			navigate("/", { replace: true });
+			return;
+		}
+
+		// If user IS logged in, check if we have valid reservation data
+		const hasReservation = !!(location.state?.reservation || pendingReservation);
+		
+		if (!hasReservation) {
+			console.log("[PaymentSuccess] No reservation data found on page load - redirecting to booking");
+			navigate("/booking", { replace: true });
+		} else {
+			console.log("[PaymentSuccess] Reservation data found, staying on page");
+		}
+	}, [location.state?.reservation, pendingReservation, navigate, user, hasChecked]);
 
 	// Calculate number of nights
 	const nights = reservation

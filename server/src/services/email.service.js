@@ -30,6 +30,7 @@ import nodemailer from "nodemailer";
 import fsPromises from "fs/promises";
 import crypto from "crypto";
 import EmailVerificationTokenRepository from "../repositories/emailVerificationToken.repository.js";
+import { formatMoney } from "../utils/money.js";
 
 /**
  * Email Service
@@ -182,13 +183,37 @@ class EmailService {
 
 			// Get room info
 			const room = reservation.roomId;
+			
+			// Format quality with proper casing
+			const formatQuality = (quality) => {
+				const qualityMap = {
+					classic: "Classic Pearl",
+					milk: "Milk Pearl",
+					golden: "Golden Pearl",
+					crystal: "Crystal Boba Suite",
+					matcha: "Matcha Pearl",
+				};
+				return qualityMap[quality?.toLowerCase()] || quality || "Pod";
+			};
+
+			// Format floor with proper readable formatting
+			const formatFloor = (floor) => {
+				const floorMap = {
+					"women-only": "Women-Only Floor",
+					"men-only": "Men-Only Floor",
+					couples: "Couples Floor",
+					business: "Business/Quiet Floor",
+				};
+				return floorMap[floor?.toLowerCase()] || floor || "Standard Floor";
+			};
+
 			const podType =
 				typeof room === "object" && room.quality
-					? `${room.quality} Pod`
+					? formatQuality(room.quality)
 					: "Pod";
 			const floor =
 				typeof room === "object" && room.floor
-					? `${room.floor} Floor`
+					? formatFloor(room.floor)
 					: "Standard Floor";
 
 			// Format dates
@@ -218,8 +243,8 @@ class EmailService {
 				numberOfGuests: reservation.numberOfGuests,
 				nights,
 				multiplNights: nights > 1,
-				subtotal: reservation.totalPrice.toLocaleString("en-US"),
-				totalPrice: reservation.totalPrice.toLocaleString("en-US"),
+				subtotal: formatMoney(reservation.totalPrice, "USD"),
+				totalPrice: formatMoney(reservation.totalPrice, "USD"),
 				receiptUrl: payment?.receiptUrl || "",
 				hasAccount: !!reservation.userId,
 				manageReservationUrl: `${frontendUrl}/reservations/lookup`,

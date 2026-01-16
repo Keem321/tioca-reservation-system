@@ -20,6 +20,8 @@ import ReservationLookup from "./pages/ReservationLookup";
 import GuestReservationView from "./pages/GuestReservationView";
 import ReservationVerify from "./pages/ReservationVerify";
 import SessionTimeoutTest from "./pages/SessionTimeoutTest";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SessionTimeoutWarning from "./components/SessionTimeoutWarning";
 import { useSessionTimeout } from "./utils/useSessionTimeout";
@@ -93,6 +95,8 @@ function App() {
 					<Route path="/booking/confirm" element={<BookingConfirmation />} />
 					<Route path="/payment" element={<Payment />} />
 					<Route path="/payment/success" element={<PaymentSuccess />} />
+					<Route path="/privacy" element={<Privacy />} />
+					<Route path="/terms" element={<Terms />} />
 					<Route
 						path="/session-timeout-test"
 						element={<SessionTimeoutTest />}
