@@ -122,7 +122,9 @@ const SessionTimeoutWarning: React.FC<SessionTimeoutWarningProps> = ({
 
 						<div
 							className={`session-timeout-countdown ${
-								remainingSeconds <= 30 ? "session-timeout-countdown--urgent" : ""
+								remainingSeconds <= 30
+									? "session-timeout-countdown--urgent"
+									: ""
 							}`}
 							aria-live="polite"
 							aria-atomic="true"

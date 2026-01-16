@@ -5,7 +5,7 @@ import "./ReservationLookup.css";
 
 /**
  * ReservationLookup Component
- * 
+ *
  * Allows guests without accounts to look up their reservations
  * using their email and confirmation code.
  */
@@ -15,7 +15,7 @@ const ReservationLookup: React.FC = () => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [emailOnlyMode, setEmailOnlyMode] = useState(false);
-	
+
 	// Email-only mode states
 	const [email, setEmail] = useState("");
 	const [verificationSent, setVerificationSent] = useState(false);
@@ -32,7 +32,9 @@ const ReservationLookup: React.FC = () => {
 
 		try {
 			const response = await fetch(
-				`${import.meta.env.VITE_API_URL || ""}/reservations/request-access-by-email`,
+				`${
+					import.meta.env.VITE_API_URL || ""
+				}/reservations/request-access-by-email`,
 				{
 					method: "POST",
 					headers: {
@@ -54,9 +56,7 @@ const ReservationLookup: React.FC = () => {
 			setShowCodeInput(true);
 		} catch (err) {
 			setError(
-				err instanceof Error
-					? err.message
-					: "Failed to send verification email"
+				err instanceof Error ? err.message : "Failed to send verification email"
 			);
 		} finally {
 			setLoading(false);
@@ -173,8 +173,8 @@ const ReservationLookup: React.FC = () => {
 							<div>
 								<strong>Verification email sent!</strong>
 								<p>
-									Please check your email for a verification link or enter
-									the code below.
+									Please check your email for a verification link or enter the
+									code below.
 								</p>
 							</div>
 						</div>

@@ -375,213 +375,216 @@ export default function OfferingManagement() {
 				<RoleGuard requiredRoles="admin">
 					{showForm && (
 						<div className="modal-overlay" onClick={handleCloseForm}>
-						<div className="modal-content" onClick={(e) => e.stopPropagation()}>
-							<div className="modal-header">
-								<h2>
-									{editingOffering ? "Edit" : "Create"}{" "}
-									{formData.type === "room" ? "Room" : "Amenity"} Offering
-								</h2>
-								<button onClick={handleCloseForm} className="modal-close">
-									&times;
-								</button>
-							</div>
+							<div
+								className="modal-content"
+								onClick={(e) => e.stopPropagation()}
+							>
+								<div className="modal-header">
+									<h2>
+										{editingOffering ? "Edit" : "Create"}{" "}
+										{formData.type === "room" ? "Room" : "Amenity"} Offering
+									</h2>
+									<button onClick={handleCloseForm} className="modal-close">
+										&times;
+									</button>
+								</div>
 
-							<form onSubmit={handleSubmit} className="modal-form">
-								<div className="modal-body">
-									<label>
-										Name:
-										<input
-											type="text"
-											name="name"
-											value={formData.name}
-											onChange={handleInputChange}
-											required
-											placeholder="e.g., Classic Pearl"
-										/>
-									</label>
-
-									<label>
-										Type:
-										<select
-											name="type"
-											value={formData.type}
-											onChange={handleInputChange}
-											required
-											disabled={!!editingOffering}
-										>
-											<option value="room">Room</option>
-											<option value="amenity">Amenity</option>
-										</select>
-									</label>
-
-									{formData.type === "room" && (
+								<form onSubmit={handleSubmit} className="modal-form">
+									<div className="modal-body">
 										<label>
-											Quality Level:
+											Name:
+											<input
+												type="text"
+												name="name"
+												value={formData.name}
+												onChange={handleInputChange}
+												required
+												placeholder="e.g., Classic Pearl"
+											/>
+										</label>
+
+										<label>
+											Type:
 											<select
-												name="quality"
-												value={formData.quality}
+												name="type"
+												value={formData.type}
+												onChange={handleInputChange}
+												required
+												disabled={!!editingOffering}
+											>
+												<option value="room">Room</option>
+												<option value="amenity">Amenity</option>
+											</select>
+										</label>
+
+										{formData.type === "room" && (
+											<label>
+												Quality Level:
+												<select
+													name="quality"
+													value={formData.quality}
+													onChange={handleInputChange}
+													required
+												>
+													<option value="classic">Classic</option>
+													<option value="milk">Milk</option>
+													<option value="golden">Golden</option>
+													<option value="crystal">Crystal</option>
+													<option value="matcha">Matcha</option>
+												</select>
+											</label>
+										)}
+
+										<label>
+											Base Price ($):
+											<input
+												type="number"
+												name="basePrice"
+												value={(formData.basePrice / 100).toFixed(2)}
+												onChange={handleInputChange}
+												min="0"
+												step="0.01"
+												required
+												placeholder="e.g., 65.00"
+											/>
+										</label>
+
+										<label>
+											Price Type:
+											<select
+												name="priceType"
+												value={formData.priceType}
 												onChange={handleInputChange}
 												required
 											>
-												<option value="classic">Classic</option>
-												<option value="milk">Milk</option>
-												<option value="golden">Golden</option>
-												<option value="crystal">Crystal</option>
-												<option value="matcha">Matcha</option>
+												<option value="per-night">Per Night</option>
+												<option value="flat">Flat Fee</option>
 											</select>
 										</label>
-									)}
 
-									<label>
-										Base Price ($):
-										<input
-											type="number"
-											name="basePrice"
-											value={(formData.basePrice / 100).toFixed(2)}
-											onChange={handleInputChange}
-											min="0"
-											step="0.01"
-											required
-											placeholder="e.g., 65.00"
-										/>
-									</label>
-
-									<label>
-										Price Type:
-										<select
-											name="priceType"
-											value={formData.priceType}
-											onChange={handleInputChange}
-											required
-										>
-											<option value="per-night">Per Night</option>
-											<option value="flat">Flat Fee</option>
-										</select>
-									</label>
-
-									<label>
-										Description:
-										<textarea
-											name="description"
-											value={formData.description}
-											onChange={handleInputChange}
-											rows={3}
-											placeholder="Brief description of this offering..."
-										/>
-									</label>
-
-									{formData.type === "room" && (
-										<>
-											<label>
-												Image URL:
-												<input
-													type="text"
-													name="imageUrl"
-													value={formData.imageUrl}
-													onChange={handleInputChange}
-													placeholder="/images/capsules/classic-pearl.jpg"
-												/>
-											</label>
-
-											<label>
-												Capacity:
-												<input
-													type="text"
-													name="capacity"
-													value={formData.capacity}
-													onChange={handleInputChange}
-													placeholder="e.g., 1 guest or 1-2 guests"
-												/>
-											</label>
-
-											<label>
-												Tag (optional):
-												<input
-													type="text"
-													name="tag"
-													value={formData.tag}
-													onChange={handleInputChange}
-													placeholder="e.g., Women Only, First Class"
-												/>
-											</label>
-										</>
-									)}
-
-									<div className="features-section">
-										<label>Features:</label>
-										<div className="feature-input-group">
-											<input
-												type="text"
-												value={featureInput}
-												onChange={(e) => setFeatureInput(e.target.value)}
-												placeholder="Add a feature..."
-												onKeyPress={(e) => {
-													if (e.key === "Enter") {
-														e.preventDefault();
-														handleAddFeature();
-													}
-												}}
+										<label>
+											Description:
+											<textarea
+												name="description"
+												value={formData.description}
+												onChange={handleInputChange}
+												rows={3}
+												placeholder="Brief description of this offering..."
 											/>
-											<button
-												type="button"
-												onClick={handleAddFeature}
-												className="btn-add-feature"
-											>
-												Add
-											</button>
-										</div>
-										{formData.features && formData.features.length > 0 && (
-											<ul className="feature-list-edit">
-												{formData.features.map((feature, idx) => (
-													<li key={idx}>
-														{feature}
-														<button
-															type="button"
-															onClick={() => handleRemoveFeature(idx)}
-															className="btn-remove-feature"
-														>
-															×
-														</button>
-													</li>
-												))}
-											</ul>
+										</label>
+
+										{formData.type === "room" && (
+											<>
+												<label>
+													Image URL:
+													<input
+														type="text"
+														name="imageUrl"
+														value={formData.imageUrl}
+														onChange={handleInputChange}
+														placeholder="/images/capsules/classic-pearl.jpg"
+													/>
+												</label>
+
+												<label>
+													Capacity:
+													<input
+														type="text"
+														name="capacity"
+														value={formData.capacity}
+														onChange={handleInputChange}
+														placeholder="e.g., 1 guest or 1-2 guests"
+													/>
+												</label>
+
+												<label>
+													Tag (optional):
+													<input
+														type="text"
+														name="tag"
+														value={formData.tag}
+														onChange={handleInputChange}
+														placeholder="e.g., Women Only, First Class"
+													/>
+												</label>
+											</>
 										)}
+
+										<div className="features-section">
+											<label>Features:</label>
+											<div className="feature-input-group">
+												<input
+													type="text"
+													value={featureInput}
+													onChange={(e) => setFeatureInput(e.target.value)}
+													placeholder="Add a feature..."
+													onKeyPress={(e) => {
+														if (e.key === "Enter") {
+															e.preventDefault();
+															handleAddFeature();
+														}
+													}}
+												/>
+												<button
+													type="button"
+													onClick={handleAddFeature}
+													className="btn-add-feature"
+												>
+													Add
+												</button>
+											</div>
+											{formData.features && formData.features.length > 0 && (
+												<ul className="feature-list-edit">
+													{formData.features.map((feature, idx) => (
+														<li key={idx}>
+															{feature}
+															<button
+																type="button"
+																onClick={() => handleRemoveFeature(idx)}
+																className="btn-remove-feature"
+															>
+																×
+															</button>
+														</li>
+													))}
+												</ul>
+											)}
+										</div>
+
+										<label className="checkbox-label">
+											<input
+												type="checkbox"
+												name="isActive"
+												checked={formData.isActive}
+												onChange={handleInputChange}
+											/>
+											<span>Active (visible to customers)</span>
+										</label>
 									</div>
 
-									<label className="checkbox-label">
-										<input
-											type="checkbox"
-											name="isActive"
-											checked={formData.isActive}
-											onChange={handleInputChange}
-										/>
-										<span>Active (visible to customers)</span>
-									</label>
-								</div>
-
-								<div className="modal-footer">
-									<button
-										type="submit"
-										disabled={isCreating || isUpdating}
-										className="btn-save btn-primary"
-									>
-										{isCreating || isUpdating
-											? "Saving..."
-											: editingOffering
-											? "Update Offering"
-											: "Create Offering"}
-									</button>
-									<button
-										type="button"
-										onClick={handleCloseForm}
-										className="btn-cancel btn-ghost"
-									>
-										Cancel
-									</button>
-								</div>
-						</form>
-					</div>
-				</div>
+									<div className="modal-footer">
+										<button
+											type="submit"
+											disabled={isCreating || isUpdating}
+											className="btn-save btn-primary"
+										>
+											{isCreating || isUpdating
+												? "Saving..."
+												: editingOffering
+												? "Update Offering"
+												: "Create Offering"}
+										</button>
+										<button
+											type="button"
+											onClick={handleCloseForm}
+											className="btn-cancel btn-ghost"
+										>
+											Cancel
+										</button>
+									</div>
+								</form>
+							</div>
+						</div>
 					)}
 				</RoleGuard>
 			</div>

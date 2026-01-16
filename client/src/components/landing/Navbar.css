@@ -124,7 +124,7 @@
 	padding: 0.5rem;
 	min-width: 200px;
 	box-shadow: 0 6px 18px rgba(44, 22, 7, 0.08);
-	
+
 	/* Slide-down and fade-in animation */
 	animation: dropdown-slide-in 0.2s ease-out;
 	transform-origin: top;
@@ -143,7 +143,7 @@
 
 /* Add invisible bridge between button and dropdown to prevent gap issues */
 .navbar__dropdown::before {
-	content: '';
+	content: "";
 	position: absolute;
 	top: -0.5rem;
 	left: 0;
@@ -194,7 +194,7 @@
 
 .navbar__book-button:hover {
 	background: var(--color-cinnamon-wood);
-	color: #CCE0A8;
+	color: #cce0a8;
 }
 
 /* Mobile Responsive Design */

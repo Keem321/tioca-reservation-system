@@ -95,7 +95,11 @@ const Navbar: React.FC = () => {
 				{mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
 			</button>
 
-			<div className={`navbar__links ${mobileMenuOpen ? "navbar__links--open" : ""}`}>
+			<div
+				className={`navbar__links ${
+					mobileMenuOpen ? "navbar__links--open" : ""
+				}`}
+			>
 				{!isBookingPage ? (
 					<>
 						<a href="#rooms" className="navbar__link">
@@ -181,8 +185,8 @@ const Navbar: React.FC = () => {
 					</div>
 				)}
 
-				<div 
-					className="navbar__account" 
+				<div
+					className="navbar__account"
 					ref={accountMenuRef}
 					onMouseEnter={handleAccountMouseEnter}
 					onMouseLeave={handleAccountMouseLeave}

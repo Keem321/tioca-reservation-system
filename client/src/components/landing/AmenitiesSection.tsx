@@ -1,13 +1,13 @@
 import React from "react";
-import { 
-	Wifi, 
-	Wind, 
-	Lock, 
-	Lightbulb, 
-	BatteryCharging, 
-	Coffee, 
-	Droplets, 
-	BellOff 
+import {
+	Wifi,
+	Wind,
+	Lock,
+	Lightbulb,
+	BatteryCharging,
+	Coffee,
+	Droplets,
+	BellOff,
 } from "lucide-react";
 import "./AmenitiesSection.css";
 
@@ -55,4 +55,3 @@ const AmenitiesSection: React.FC = () => {
 };
 
 export default AmenitiesSection;
-

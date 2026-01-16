@@ -1,6 +1,10 @@
 .location-section {
 	padding: 6rem 2rem;
-	background: linear-gradient(135deg, var(--color-milk-tea) 0%, var(--color-bone) 100%);
+	background: linear-gradient(
+		135deg,
+		var(--color-milk-tea) 0%,
+		var(--color-bone) 100%
+	);
 }
 
 .location-section__container {
@@ -52,7 +56,11 @@
 	gap: 1rem;
 	margin-bottom: 2rem;
 	padding: 1.5rem;
-	background: linear-gradient(135deg, rgba(255, 246, 235, 0.9) 0%, rgba(242, 231, 216, 0.9) 100%);
+	background: linear-gradient(
+		135deg,
+		rgba(255, 246, 235, 0.9) 0%,
+		rgba(242, 231, 216, 0.9) 100%
+	);
 	border-radius: 12px;
 	border: 1px solid rgba(168, 100, 52, 0.15);
 	box-shadow: 0 2px 8px rgba(168, 100, 52, 0.08);
@@ -105,7 +113,7 @@
 
 .location-section__button:hover {
 	background: var(--color-cinnamon-wood);
-	color: #CCE0A8;
+	color: #cce0a8;
 	transform: translateY(-1px);
 	box-shadow: 0 6px 18px rgba(44, 22, 7, 0.12);
 }
@@ -129,4 +137,3 @@
 		font-size: 2rem;
 	}
 }
-

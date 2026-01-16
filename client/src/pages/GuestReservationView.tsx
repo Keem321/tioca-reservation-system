@@ -258,7 +258,9 @@ const GuestReservationView: React.FC = () => {
 									</div>
 									<div className="detail-item">
 										<span className="detail-label">Floor:</span>
-										<span className="detail-value">{formatFloor(roomInfo.floor)}</span>
+										<span className="detail-value">
+											{formatFloor(roomInfo.floor)}
+										</span>
 									</div>
 								</div>
 							</div>
@@ -300,7 +302,8 @@ const GuestReservationView: React.FC = () => {
 								{/* Base Room Cost */}
 								<div className="payment-row">
 									<span>
-										{roomInfo ? formatQuality(roomInfo.quality) : "Pod"} × {nights} night
+										{roomInfo ? formatQuality(roomInfo.quality) : "Pod"} ×{" "}
+										{nights} night
 										{nights > 1 ? "s" : ""}
 									</span>
 									<span>{formatMoney(reservation.baseRoomPrice * nights)}</span>
