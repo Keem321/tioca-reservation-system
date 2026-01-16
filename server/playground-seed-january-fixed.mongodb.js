@@ -257,20 +257,48 @@ try {
 	}
 }
 
-Object.entries(offeringIds).forEach(([idx, id]) => {
-	const off = ROOM_OFFERINGS[parseInt(idx)];
-	if (!off) return;
-	off.variant === "twin"
-		? (twinOfferingMap[off.quality] = id)
-		: (offeringMap[off.quality] = id);
+// Build offering maps directly from insertMany result to avoid DocumentDB read-after-write issues
+// DocumentDB has replica set replication lag - reads may not see writes immediately
+const allOfferingsArray = [...ROOM_OFFERINGS, ...AMENITY_OFFERINGS];
+const insertedOfferingIds = Object.values(offeringIds || {});
+print(
+	`Building offering maps from ${
+		allOfferingsArray.length
+	} inserted offerings (id keys: ${
+		Object.keys(offeringIds || {}).length
+	}, id values: ${insertedOfferingIds.length})...`
+);
+
+insertedOfferingIds.forEach((offeringId, idx) => {
+	const offeringData = allOfferingsArray[idx];
+	if (!offeringData || offeringData.type !== "room") return;
+
+	const isTwin = offeringData.variant === "twin";
+	const quality = offeringData.quality;
+
+	if (isTwin) {
+		twinOfferingMap[quality] = offeringId;
+	} else {
+		offeringMap[quality] = offeringId;
+	}
 });
 
-if (
-	Object.keys(offeringMap).length === 0 &&
-	Object.keys(twinOfferingMap).length === 0
-) {
+const hasOfferingsMapped =
+	Object.keys(offeringMap).length > 0 ||
+	Object.keys(twinOfferingMap).length > 0;
+
+if (!hasOfferingsMapped) {
+	print(
+		"⚠️  Could not map offerings from insertMany result; aborting seeding."
+	);
 	throw new Error("Failed to map offerings");
 }
+
+print(
+	`✓ Offering lookup ready (single: ${Object.keys(offeringMap).length}, twin: ${
+		Object.keys(twinOfferingMap).length
+	})\n`
+);
 
 // ============================================
 // STEP 3: SEED ROOMS (100 pods)
