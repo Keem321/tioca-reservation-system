@@ -51,6 +51,16 @@
 	border-color: var(--color-primary, #bc8f67);
 }
 
+.booking-breadcrumb__circle.clickable {
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.booking-breadcrumb__circle.clickable:hover {
+	transform: scale(1.1);
+	box-shadow: 0 4px 12px rgba(188, 143, 103, 0.4);
+}
+
 .booking-breadcrumb__circle.inactive {
 	background-color: white;
 	color: rgba(44, 22, 7, 0.3);
@@ -69,6 +79,15 @@
 
 .booking-breadcrumb__label.active {
 	color: var(--color-deep-walnut, #2c1607);
+}
+
+.booking-breadcrumb__label.clickable {
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.booking-breadcrumb__label.clickable:hover {
+	color: var(--color-primary, #bc8f67);
 }
 
 .booking-breadcrumb__line {

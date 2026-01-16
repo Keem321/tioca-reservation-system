@@ -80,6 +80,14 @@ const BookingConfirmation: React.FC = () => {
 	);
 	const { user } = useAppSelector((state) => state.auth);
 
+	// Handle breadcrumb navigation
+	const handleBreadcrumbClick = (step: number) => {
+		if (step === 1) {
+			// Navigate back to booking/search page
+			navigate("/booking");
+		}
+	};
+
 	// Check if this is a group booking from location state
 	const isGroupBooking = location.state?.isGroupBooking || false;
 	const groupResults: GroupSearchResults | undefined =
@@ -791,11 +799,11 @@ const BookingConfirmation: React.FC = () => {
 			return sum + (member?.numberOfGuests || 1);
 		}, 0);
 
-	return (
-		<>
-			<Navbar />
-			<BookingBreadcrumb currentStep={2} />
-			<div className="booking-confirmation">
+		return (
+			<>
+				<Navbar />
+				<BookingBreadcrumb currentStep={2} onStepClick={handleBreadcrumbClick} />
+				<div className="booking-confirmation">
 				<div className="booking-confirmation__container">
 					<div className="booking-confirmation__header">
 						<h1>Confirm Group Booking</h1>
@@ -1126,11 +1134,11 @@ const BookingConfirmation: React.FC = () => {
 	const roomLabel = getRoomDisplayLabel(room.quality, room.floor);
 	const roomDescription = getRoomQualityDescription(room.quality);
 
-	return (
-		<>
-			<Navbar />
-			<BookingBreadcrumb currentStep={2} />
-			<div className="booking-confirmation">
+		return (
+			<>
+				<Navbar />
+				<BookingBreadcrumb currentStep={2} onStepClick={handleBreadcrumbClick} />
+				<div className="booking-confirmation">
 				<div className="booking-confirmation__container">
 					<div className="booking-confirmation__header">
 						<h1>Confirm Your Booking</h1>

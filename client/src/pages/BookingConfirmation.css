@@ -8,7 +8,7 @@
 .booking-confirmation__container {
 	max-width: 900px;
 	margin: 0 auto;
-	background-color: var(--color-linen);
+	background-color: color-mix(in srgb, var(--color-linen) 97%, var(--color-primary) 3%);
 	border: 1px solid rgba(44, 22, 7, 0.08);
 	border-radius: 16px;
 	padding: 2rem;
@@ -131,7 +131,7 @@
 }
 
 .booking-confirmation__section {
-	background-color: var(--color-bone);
+	background-color: var(--color-linen);
 	border: 1px solid rgba(44, 22, 7, 0.08);
 	border-radius: 12px;
 	padding: 1.5rem;
@@ -182,7 +182,7 @@
 	border-radius: 8px;
 	cursor: pointer;
 	transition: all 0.2s ease;
-	background-color: #fff;
+	background-color: var(--color-linen);
 }
 
 .amenity-card:hover {
@@ -192,7 +192,7 @@
 }
 
 .amenity-card.selected {
-	background-color: rgba(188, 143, 103, 0.08);
+	background-color: rgba(188, 143, 103, 0.15);
 	border-color: var(--color-primary);
 	box-shadow: 0 2px 8px rgba(119, 71, 38, 0.15);
 }

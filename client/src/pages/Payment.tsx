@@ -500,6 +500,19 @@ const Payment: React.FC = () => {
 	const reservation: Reservation | null =
 		location.state?.reservation || pendingReservation || null;
 
+	// Handle breadcrumb navigation
+	const handleBreadcrumbClick = (step: number) => {
+		if (step === 1) {
+			// Navigate back to booking/search page
+			navigate("/booking");
+		} else if (step === 2) {
+			// Navigate back to confirmation page
+			navigate("/booking/confirm", {
+				state: location.state,
+			});
+		}
+	};
+
 	// Note: We don't extend the hold here because:
 	// - The reservation was already created on the confirmation page
 	// - The hold was converted and linked to the reservation
@@ -518,13 +531,13 @@ const Payment: React.FC = () => {
 
 	// Check if Stripe is configured
 	if (!STRIPE_PUBLISHABLE_KEY) {
-	return (
-		<>
-			<Navbar />
-			<BookingBreadcrumb currentStep={3} />
-			<div className="payment-page">
-				<div className="payment-page__container">
-					<div className="payment-page__error">
+		return (
+			<>
+				<Navbar />
+				<BookingBreadcrumb currentStep={3} onStepClick={handleBreadcrumbClick} />
+				<div className="payment-page">
+					<div className="payment-page__container">
+						<div className="payment-page__error">
 						<h2>Stripe Not Configured</h2>
 						<p>
 							Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your{" "}
@@ -567,7 +580,7 @@ const Payment: React.FC = () => {
 	return (
 		<>
 			<Navbar />
-			<BookingBreadcrumb currentStep={3} />
+			<BookingBreadcrumb currentStep={3} onStepClick={handleBreadcrumbClick} />
 			<div className="payment-page">
 				<div className="payment-page__container">
 					<div className="payment-page__header">
