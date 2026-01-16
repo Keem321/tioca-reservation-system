@@ -19,6 +19,7 @@ import GroupBookingTimeslot from "../components/booking/GroupBookingTimeslot";
 import SearchResults from "../components/booking/SearchResults";
 import Navbar from "../components/landing/Navbar";
 import PodCard from "../components/booking/PodCard";
+import BookingBreadcrumb from "../components/booking/BookingBreadcrumb";
 import { Plus } from "lucide-react";
 import "./Booking.css";
 
@@ -182,6 +183,7 @@ const Booking: React.FC = () => {
 	return (
 		<div className="booking-page">
 			<Navbar />
+			<BookingBreadcrumb currentStep={1} />
 			<div className="booking-page__container">
 				<div className="booking-page__header">
 					<h1 className="booking-page__title">Book Your Stay</h1>

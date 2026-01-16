@@ -19,6 +19,7 @@ import { resetBooking } from "../features/bookingSlice";
 import type { BookingState } from "../features/bookingSlice";
 import type { Reservation } from "../types/reservation";
 import Navbar from "../components/landing/Navbar";
+import BookingBreadcrumb from "../components/booking/BookingBreadcrumb";
 import { formatMoney } from "../utils/money";
 import "./Payment.css";
 
@@ -189,9 +190,10 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 						state: { reservation: confirmResult.reservation },
 						replace: true,
 					});
+					// Delay reset to ensure navigation completes and success page mounts
 					setTimeout(() => {
 						dispatch(resetBooking());
-					}, 100);
+					}, 1000);
 				} else {
 					setError(confirmResult.message || "Payment confirmation failed");
 					setIsProcessing(false);
@@ -276,10 +278,10 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 						state: { reservation: confirmResult.reservation },
 						replace: true, // Replace current history entry to prevent back button issues
 					});
-					// Reset booking state after a brief delay to ensure navigation completes
+					// Reset booking state after delay to ensure navigation completes and success page mounts
 					setTimeout(() => {
 						dispatch(resetBooking());
-					}, 100);
+					}, 1000);
 				} else {
 					setError(confirmResult.message || "Payment confirmation failed");
 					setIsProcessing(false);
@@ -516,16 +518,17 @@ const Payment: React.FC = () => {
 
 	// Check if Stripe is configured
 	if (!STRIPE_PUBLISHABLE_KEY) {
-		return (
-			<>
-				<Navbar />
-				<div className="payment-page">
-					<div className="payment-page__container">
-						<div className="payment-page__error">
-							<h2>Stripe Not Configured</h2>
-							<p>
-								Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your{" "}
-								<code>client/.env</code> or <code>client/.env.development</code>{" "}
+	return (
+		<>
+			<Navbar />
+			<BookingBreadcrumb currentStep={3} />
+			<div className="payment-page">
+				<div className="payment-page__container">
+					<div className="payment-page__error">
+						<h2>Stripe Not Configured</h2>
+						<p>
+							Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your{" "}
+							<code>client/.env</code> or <code>client/.env.development</code>{" "}
 								file.
 							</p>
 							<p>
@@ -564,6 +567,7 @@ const Payment: React.FC = () => {
 	return (
 		<>
 			<Navbar />
+			<BookingBreadcrumb currentStep={3} />
 			<div className="payment-page">
 				<div className="payment-page__container">
 					<div className="payment-page__header">
