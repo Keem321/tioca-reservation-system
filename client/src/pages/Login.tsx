@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUser } from "../features/authSlice";
+import { isManagerOrAbove, type UserRole } from "../utils/roleUtils";
 import type { AppDispatch } from "../store";
 import "./Login.css";
 
@@ -20,6 +21,7 @@ const Login: React.FC = () => {
 
 	const handleGoogleLogin = () => {
 		const apiUrl = import.meta.env.VITE_API_URL || "";
+		// Google OAuth will redirect to home, then we check role on landing
 		window.location.href = `${apiUrl}/api/auth/google?redirect=/`;
 	};
 
@@ -44,7 +46,12 @@ const Login: React.FC = () => {
 			// Update Redux store with user info
 			dispatch(setUser(data.user));
 			setSuccess("Logged in successfully");
-			setTimeout(() => navigate("/"), 600);
+			
+			// Redirect based on user role
+			const redirectPath = isManagerOrAbove(data.user?.role as UserRole) 
+				? "/manage/rooms" 
+				: "/";
+			setTimeout(() => navigate(redirectPath), 600);
 		} catch (err) {
 			const message = err instanceof Error ? err.message : "Login failed";
 			setError(message);

@@ -55,6 +55,8 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 	} | null>(null);
 	const [paymentRequest, setPaymentRequest] =
 		useState<StripePaymentRequest | null>(null);
+	const [agreeToTerms, setAgreeToTerms] = useState(false);
+	const [subscribeToMarketing, setSubscribeToMarketing] = useState(false);
 	const [createPaymentIntent, { isLoading: isCreatingIntent }] =
 		useCreatePaymentIntentMutation();
 	const [confirmPayment, { isLoading: isConfirming }] =
@@ -218,6 +220,11 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		e.stopPropagation(); // Prevent any form bubbling
+
+		if (!agreeToTerms) {
+			setError("Please agree to the terms and conditions to proceed.");
+			return;
+		}
 
 		if (!stripe || !elements) {
 			setError("Payment form is not ready. Please wait for Stripe to load.");
@@ -383,6 +390,52 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 				</div>
 			</div>
 
+			{/* Terms and Marketing Checkboxes */}
+			<div className="payment-form__section">
+				<label className="payment-form__checkbox-label">
+					<input
+						type="checkbox"
+						checked={agreeToTerms}
+						onChange={(e) => setAgreeToTerms(e.target.checked)}
+						className="payment-form__checkbox"
+					/>
+					<span className="payment-form__checkbox-text">
+						I agree to the{" "}
+						<a
+							href="/terms"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="payment-form__link"
+						>
+							Terms & Conditions
+						</a>{" "}
+						and{" "}
+						<a
+							href="/privacy"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="payment-form__link"
+						>
+							Privacy Policy
+						</a>{" "}
+						<span className="payment-form__required">*</span>
+					</span>
+				</label>
+
+				<label className="payment-form__checkbox-label">
+					<input
+						type="checkbox"
+						checked={subscribeToMarketing}
+						onChange={(e) => setSubscribeToMarketing(e.target.checked)}
+						className="payment-form__checkbox"
+					/>
+					<span className="payment-form__checkbox-text">
+						I would like to receive promotional emails and special offers from
+						Tapioca
+					</span>
+				</label>
+			</div>
+
 			{error && (
 				<div className="payment-form__error">
 					<h3>Payment Error</h3>
@@ -415,6 +468,7 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 				disabled={
 					!stripe ||
 					!paymentIntentData ||
+					!agreeToTerms ||
 					isProcessing ||
 					isCreatingIntent ||
 					isConfirming
@@ -423,7 +477,7 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 			>
 				{isProcessing || isCreatingIntent || isConfirming
 					? "Processing..."
-					: `Pay $${reservation.totalPrice.toFixed(2)}`}
+					: `Pay ${formatMoney(reservation.totalPrice)}`}
 			</button>
 		</form>
 	);

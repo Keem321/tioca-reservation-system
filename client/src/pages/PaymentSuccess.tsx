@@ -86,6 +86,26 @@ const PaymentSuccess: React.FC = () => {
 		});
 	};
 
+	// Truncate email in the middle for display
+	const truncateEmail = (email: string, maxLength: number = 25) => {
+		if (email.length <= maxLength) return email;
+		
+		const [localPart, domain] = email.split('@');
+		if (!domain) return email;
+		
+		// Always show full domain
+		const domainLength = domain.length + 1; // +1 for @
+		const availableForLocal = maxLength - domainLength - 3; // -3 for ...
+		
+		if (availableForLocal <= 0) {
+			// If domain is too long, just truncate normally
+			return email.substring(0, maxLength - 3) + '...';
+		}
+		
+		const truncatedLocal = localPart.substring(0, availableForLocal);
+		return `${truncatedLocal}...@${domain}`;
+	};
+
 	return (
 		<>
 			<Navbar />
@@ -100,7 +120,12 @@ const PaymentSuccess: React.FC = () => {
 						<p className="payment-success__message">
 							Your reservation has been confirmed and payment has been processed
 							successfully. A confirmation email has been sent to{" "}
-							<strong>{reservation?.guestEmail}</strong>.
+							<strong 
+								title={reservation?.guestEmail}
+								style={{ cursor: 'help' }}
+							>
+								{reservation?.guestEmail && truncateEmail(reservation.guestEmail)}
+							</strong>.
 						</p>
 					</div>
 
@@ -219,7 +244,12 @@ const PaymentSuccess: React.FC = () => {
 								</div>
 								<div className="payment-success__detail-item">
 									<span className="detail-label">Email:</span>
-									<span className="detail-value">{reservation.guestEmail}</span>
+									<span 
+										className="detail-value detail-value--email" 
+										title={reservation.guestEmail}
+									>
+										{reservation.guestEmail}
+									</span>
 								</div>
 								{reservation.guestPhone && (
 									<div className="payment-success__detail-item">
@@ -238,7 +268,10 @@ const PaymentSuccess: React.FC = () => {
 						<h3>What's Next?</h3>
 						<ul>
 							<li>
-								A confirmation email has been sent to {reservation?.guestEmail}
+								A confirmation email has been sent to{" "}
+								<span title={reservation?.guestEmail} style={{ cursor: 'help' }}>
+									{reservation?.guestEmail && truncateEmail(reservation.guestEmail)}
+								</span>
 							</li>
 							<li>
 								Your confirmation code is{" "}
