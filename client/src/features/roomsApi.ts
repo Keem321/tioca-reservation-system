@@ -49,7 +49,7 @@ export interface GroupSearchResponse {
 export const roomsApi = createApi({
 	reducerPath: "roomsApi",
 	baseQuery: createBaseQueryWithReauth(
-		`${import.meta.env.VITE_API_URL || ""}/api/rooms`
+		`${import.meta.env.VITE_API_URL || ""}/rooms`
 	),
 	tagTypes: ["Room"],
 	endpoints: (builder) => ({

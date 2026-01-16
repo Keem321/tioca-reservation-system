@@ -5,7 +5,7 @@ import "./ReservationVerify.css";
 
 /**
  * ReservationVerify Component
- * 
+ *
  * Handles verification of email magic links
  * Automatically verifies the token and redirects to reservation view
  */
@@ -28,7 +28,7 @@ const ReservationVerify: React.FC = () => {
 		const verifyToken = async () => {
 			try {
 				const response = await fetch(
-					`${import.meta.env.VITE_API_URL || ""}/api/reservations/verify/${token}`
+					`${import.meta.env.VITE_API_URL || ""}/reservations/verify/${token}`
 				);
 
 				const data = await response.json();
@@ -48,9 +48,7 @@ const ReservationVerify: React.FC = () => {
 				}, 1000);
 			} catch (err) {
 				setStatus("error");
-				setError(
-					err instanceof Error ? err.message : "Verification failed"
-				);
+				setError(err instanceof Error ? err.message : "Verification failed");
 			}
 		};
 

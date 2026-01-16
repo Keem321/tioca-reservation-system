@@ -22,7 +22,7 @@ const Login: React.FC = () => {
 	const handleGoogleLogin = () => {
 		const apiUrl = import.meta.env.VITE_API_URL || "";
 		// Google OAuth will redirect to home, then we check role on landing
-		window.location.href = `${apiUrl}/api/auth/google?redirect=/`;
+		window.location.href = `${apiUrl}/auth/google?redirect=/`;
 	};
 
 	const handleLocalLogin = async (e: React.FormEvent) => {
@@ -32,7 +32,7 @@ const Login: React.FC = () => {
 		setIsSubmitting(true);
 		try {
 			const apiUrl = import.meta.env.VITE_API_URL || "";
-			const res = await fetch(`${apiUrl}/api/auth/login`, {
+			const res = await fetch(`${apiUrl}/auth/login`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				credentials: "include",
@@ -46,10 +46,10 @@ const Login: React.FC = () => {
 			// Update Redux store with user info
 			dispatch(setUser(data.user));
 			setSuccess("Logged in successfully");
-			
+
 			// Redirect based on user role
-			const redirectPath = isManagerOrAbove(data.user?.role as UserRole) 
-				? "/manage/rooms" 
+			const redirectPath = isManagerOrAbove(data.user?.role as UserRole)
+				? "/manage/rooms"
 				: "/";
 			setTimeout(() => navigate(redirectPath), 600);
 		} catch (err) {

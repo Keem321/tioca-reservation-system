@@ -19,9 +19,9 @@ const LocationSection: React.FC = () => {
 							<span>3-14-8 Kabukicho, Shinjuku-ku, Tokyo 160-0021</span>
 						</div>
 						<p className="location-section__description">
-							Located in the vibrant heart of Shinjuku, Tapioca offers
-							immediate access to public transportation, dining, and cultural
-							attractions while maintaining a tranquil atmosphere for rest.
+							Located in the vibrant heart of Shinjuku, Tapioca offers immediate
+							access to public transportation, dining, and cultural attractions
+							while maintaining a tranquil atmosphere for rest.
 						</p>
 						<div className="location-section__highlights">
 							<div className="location-section__highlight">
@@ -77,4 +77,3 @@ const LocationSection: React.FC = () => {
 };
 
 export default LocationSection;
-

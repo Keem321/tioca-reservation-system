@@ -12,7 +12,7 @@ interface RoleGuardProps {
 /**
  * RoleGuard component - conditionally renders children based on user's role
  * Supports role hierarchy where admin can access manager content.
- * 
+ *
  * Usage:
  *   <RoleGuard requiredRoles="manager">
  *     <ManagerPanel />
@@ -21,7 +21,7 @@ interface RoleGuardProps {
  *   <RoleGuard requiredRoles={["manager", "admin"]} fallback={<AccessDenied />}>
  *     <ProtectedContent />
  *   </RoleGuard>
- * 
+ *
  *   <RoleGuard requiredRoles="admin">
  *     <DeleteButton />
  *   </RoleGuard>

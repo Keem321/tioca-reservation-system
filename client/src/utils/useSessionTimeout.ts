@@ -63,19 +63,23 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 	const handleLogout = useCallback(async () => {
 		console.log("[SessionTimeout] 🚪 Logging out due to inactivity");
 		console.log("[SessionTimeout] Setting isLoggedOutRef.current = true");
-		console.log("[SessionTimeout] Setting showWarning = true (keep modal visible)");
+		console.log(
+			"[SessionTimeout] Setting showWarning = true (keep modal visible)"
+		);
 		console.log("[SessionTimeout] Setting isLoggedOut state = true");
-		
+
 		cleanupTimers();
-		
+
 		// Set logged out state (modal stays visible with "Logged Out" message)
 		isLoggedOutRef.current = true; // Set ref immediately to prevent race conditions
 		setShowWarning(true); // Keep modal visible
 		setIsLoggedOut(true);
-		
+
 		console.log("[SessionTimeout] Dispatching logout action...");
 		await dispatch(logout());
-		console.log("[SessionTimeout] Logout complete - modal should stay visible!");
+		console.log(
+			"[SessionTimeout] Logout complete - modal should stay visible!"
+		);
 		// Navigation will be handled by ProtectedRoute when user state becomes null
 	}, [dispatch, cleanupTimers]);
 
@@ -155,9 +159,15 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 
 	// Set up activity listeners (only when auth changes, not when showWarning changes)
 	useEffect(() => {
-		console.log("[SessionTimeout] ⚙️ Effect running - isAuthenticated:", isAuthenticated);
-		console.log("[SessionTimeout] ⚙️ isLoggedOutRef.current:", isLoggedOutRef.current);
-		
+		console.log(
+			"[SessionTimeout] ⚙️ Effect running - isAuthenticated:",
+			isAuthenticated
+		);
+		console.log(
+			"[SessionTimeout] ⚙️ isLoggedOutRef.current:",
+			isLoggedOutRef.current
+		);
+
 		if (!isAuthenticated) {
 			// If we just logged out due to inactivity, keep the modal visible
 			// Check the ref (synchronous) to avoid race conditions with state
@@ -172,13 +182,13 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 				"[SessionTimeout] ❌ User not authenticated (manual logout or other reason) - cleaning up"
 			);
 			cleanupTimers();
-			setShowWarning(false);
-			setIsLoggedOut(false);
 			isLoggedOutRef.current = false;
 			return;
 		}
-		
-		console.log("[SessionTimeout] User is authenticated - setting up activity tracking");
+
+		console.log(
+			"[SessionTimeout] User is authenticated - setting up activity tracking"
+		);
 		// Reset logged out state when authenticated
 		isLoggedOutRef.current = false;
 

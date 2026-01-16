@@ -25,7 +25,7 @@ const Dashboard: React.FC = () => {
 		const check = async () => {
 			try {
 				const apiUrl = import.meta.env.VITE_API_URL || "";
-				const res = await fetch(`${apiUrl}/api/auth/loggedin`, {
+				const res = await fetch(`${apiUrl}/auth/loggedin`, {
 					credentials: "include",
 				});
 				if (res.ok) {

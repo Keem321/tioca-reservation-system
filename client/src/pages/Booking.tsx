@@ -1,6 +1,16 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+
+interface RoomWithAvailability extends Room {
+	availabilityInfo?: {
+		totalDays: number;
+		availableDays: number;
+		availablePercent: number;
+		isAlternativeFloor: boolean;
+	};
+}
+
 import {
 	useSearchAvailableRoomsQuery,
 	useGetRecommendedRoomsQuery,
@@ -241,8 +251,9 @@ const Booking: React.FC = () => {
 										</p>
 										<div className="search-results__grid search-results__grid--recommendations">
 											{recommendedGroups.map((group) => {
-												const availInfo = (group.representative as any)
-													.availabilityInfo;
+												const availInfo = (
+													group.representative as RoomWithAvailability
+												).availabilityInfo;
 												let badgeText = "";
 												let descriptionText = "";
 

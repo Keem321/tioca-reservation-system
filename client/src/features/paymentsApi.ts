@@ -86,7 +86,7 @@ interface PaymentFilter {
 export const paymentsApi = createApi({
 	reducerPath: "paymentsApi",
 	baseQuery: createBaseQueryWithReauth(
-		`${import.meta.env.VITE_API_URL || ""}/api/payments`
+		`${import.meta.env.VITE_API_URL || ""}/payments`
 	),
 	tagTypes: ["Payment", "PaymentStats", "RevenueReport", "Reservation"],
 	endpoints: (builder) => ({

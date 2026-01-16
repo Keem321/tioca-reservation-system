@@ -21,7 +21,7 @@ const PaymentSuccess: React.FC = () => {
 	);
 	const user = useSelector((state: RootState) => state.auth.user);
 	const hasChecked = useSelector((state: RootState) => state.auth.hasChecked);
-	
+
 	// Track if this is the initial mount (to detect page refresh)
 	const isInitialMount = useRef(true);
 
@@ -40,7 +40,9 @@ const PaymentSuccess: React.FC = () => {
 
 		// Only check redirect logic on initial mount (page refresh/load)
 		if (!isInitialMount.current) {
-			console.log("[PaymentSuccess] Not initial mount - skipping redirect check");
+			console.log(
+				"[PaymentSuccess] Not initial mount - skipping redirect check"
+			);
 			return;
 		}
 
@@ -65,7 +67,13 @@ const PaymentSuccess: React.FC = () => {
 			// Has reservation data - allow viewing (for both logged in and guest users)
 			console.log("[PaymentSuccess] Reservation data found, staying on page (user:", user ? "logged in" : "guest", ")");
 		}
-	}, [location.state?.reservation, pendingReservation, navigate, user, hasChecked]);
+	}, [
+		location.state?.reservation,
+		pendingReservation,
+		navigate,
+		user,
+		hasChecked,
+	]);
 
 	// Calculate number of nights
 	const nights = reservation
@@ -118,19 +126,19 @@ const PaymentSuccess: React.FC = () => {
 	// Truncate email in the middle for display
 	const truncateEmail = (email: string, maxLength: number = 25) => {
 		if (email.length <= maxLength) return email;
-		
-		const [localPart, domain] = email.split('@');
+
+		const [localPart, domain] = email.split("@");
 		if (!domain) return email;
-		
+
 		// Always show full domain
 		const domainLength = domain.length + 1; // +1 for @
 		const availableForLocal = maxLength - domainLength - 3; // -3 for ...
-		
+
 		if (availableForLocal <= 0) {
 			// If domain is too long, just truncate normally
-			return email.substring(0, maxLength - 3) + '...';
+			return email.substring(0, maxLength - 3) + "...";
 		}
-		
+
 		const truncatedLocal = localPart.substring(0, availableForLocal);
 		return `${truncatedLocal}...@${domain}`;
 	};
@@ -149,12 +157,14 @@ const PaymentSuccess: React.FC = () => {
 						<p className="payment-success__message">
 							Your reservation has been confirmed and payment has been processed
 							successfully. A confirmation email has been sent to{" "}
-							<strong 
+							<strong
 								title={reservation?.guestEmail}
-								style={{ cursor: 'help' }}
+								style={{ cursor: "help" }}
 							>
-								{reservation?.guestEmail && truncateEmail(reservation.guestEmail)}
-							</strong>.
+								{reservation?.guestEmail &&
+									truncateEmail(reservation.guestEmail)}
+							</strong>
+							.
 						</p>
 					</div>
 
@@ -273,8 +283,8 @@ const PaymentSuccess: React.FC = () => {
 								</div>
 								<div className="payment-success__detail-item">
 									<span className="detail-label">Email:</span>
-									<span 
-										className="detail-value detail-value--email" 
+									<span
+										className="detail-value detail-value--email"
 										title={reservation.guestEmail}
 									>
 										{reservation.guestEmail}
@@ -298,8 +308,12 @@ const PaymentSuccess: React.FC = () => {
 						<ul>
 							<li>
 								A confirmation email has been sent to{" "}
-								<span title={reservation?.guestEmail} style={{ cursor: 'help' }}>
-									{reservation?.guestEmail && truncateEmail(reservation.guestEmail)}
+								<span
+									title={reservation?.guestEmail}
+									style={{ cursor: "help" }}
+								>
+									{reservation?.guestEmail &&
+										truncateEmail(reservation.guestEmail)}
 								</span>
 							</li>
 							<li>
