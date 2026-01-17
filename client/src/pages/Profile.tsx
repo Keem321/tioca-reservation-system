@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Navbar from "../components/landing/Navbar";
+import Pagination from "../components/Pagination";
 import {
 	useGetProfileQuery,
 	useUpdateProfileMutation,
@@ -56,6 +57,10 @@ export default function Profile() {
 		specialRequests: "",
 	});
 
+	// Pagination state
+	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage, setItemsPerPage] = useState(5);
+
 	// Queries
 	const {
 		data: profile,
@@ -69,6 +74,12 @@ export default function Profile() {
 	} = useGetActiveReservationsQuery();
 
 	const currency = getDefaultCurrency(profile?.currencyPreference || "USD");
+
+	// Pagination calculations
+	const totalPages = Math.ceil(activeReservations.length / itemsPerPage);
+	const startIndex = (currentPage - 1) * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
+	const paginatedReservations = activeReservations.slice(startIndex, endIndex);
 
 	// Mutations
 	const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
@@ -421,8 +432,9 @@ export default function Profile() {
 						)}
 
 						{!reservationsLoading && activeReservations.length > 0 && (
-							<div className="reservations-list">
-								{activeReservations.map((res) => (
+							<>
+								<div className="reservations-list">
+									{paginatedReservations.map((res) => (
 									<div key={res._id} className="reservation-card">
 										<div className="card-header">
 											<h3>
@@ -500,8 +512,17 @@ export default function Profile() {
 												</div>
 											)}
 									</div>
-								))}
-							</div>
+									))}
+								</div>
+								<Pagination
+									currentPage={currentPage}
+									totalPages={totalPages}
+									onPageChange={setCurrentPage}
+									totalItems={activeReservations.length}
+									itemsPerPage={itemsPerPage}
+									onItemsPerPageChange={setItemsPerPage}
+								/>
+							</>
 						)}
 					</div>
 				</div>

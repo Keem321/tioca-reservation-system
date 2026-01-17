@@ -229,6 +229,7 @@ const Booking: React.FC = () => {
 							onSearch={handleSearch}
 							isSearching={isSearching}
 							onValuesChange={handleFormChange}
+							isCompact={shouldSearch && !isSearching}
 						/>
 
 						{shouldSearch && !isSearching && (

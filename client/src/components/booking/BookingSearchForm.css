@@ -5,12 +5,36 @@
 	padding: 2rem;
 	box-shadow: 0 6px 18px rgba(44, 22, 7, 0.08);
 	margin-bottom: 3rem;
+	transition: all 0.3s ease;
+}
+
+/* Compact horizontal layout after search */
+.booking-search-form--compact {
+	padding: 1rem 1.5rem;
+	border-radius: 12px;
+	margin-bottom: 2rem;
+	background-color: rgba(255, 246, 235, 0.95);
+	box-shadow: 0 2px 8px rgba(44, 22, 7, 0.06);
+	display: flex;
+	align-items: flex-end;
+	gap: 1rem;
 }
 
 .booking-search-form__fields {
 	display: grid;
 	gap: 1.5rem;
 	margin-bottom: 2rem;
+	transition: all 0.3s ease;
+}
+
+/* Horizontal layout for compact mode */
+.booking-search-form--compact .booking-search-form__fields {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 1rem;
+	margin-bottom: 0;
+	align-items: end;
+	flex: 1;
 }
 
 .booking-search-form__field {
@@ -24,6 +48,13 @@
 	color: #5a3a24;
 	margin-bottom: 0.5rem;
 	font-weight: 500;
+	transition: all 0.3s ease;
+}
+
+/* Smaller labels in compact mode */
+.booking-search-form--compact .booking-search-form__label {
+	font-size: 0.75rem;
+	margin-bottom: 0.375rem;
 }
 
 .booking-search-form__required {
@@ -48,6 +79,12 @@
 	opacity: 0.6;
 	pointer-events: none;
 	z-index: 1;
+	transition: all 0.3s ease;
+}
+
+/* Smaller icon in compact mode */
+.booking-search-form--compact .booking-search-form__icon {
+	left: 0.75rem;
 }
 
 .booking-search-form__input {
@@ -60,7 +97,14 @@
 	color: #2c1607;
 	outline: none;
 	font-family: inherit;
-	transition: border-color 0.2s, box-shadow 0.2s;
+	transition: all 0.3s ease;
+}
+
+/* Smaller inputs in compact mode */
+.booking-search-form--compact .booking-search-form__input {
+	padding: 0.625rem 0.875rem;
+	font-size: 0.875rem;
+	border-radius: 8px;
 }
 
 .booking-search-form__input:focus {
@@ -77,6 +121,12 @@
 /* DatePicker Styling */
 .booking-search-form__datepicker {
 	padding: 0.875rem 1rem !important;
+}
+
+/* Compact datepicker */
+.booking-search-form--compact .booking-search-form__datepicker {
+	padding: 0.625rem 0.875rem !important;
+	font-size: 0.875rem !important;
 }
 
 .react-datepicker-wrapper {
@@ -173,6 +223,14 @@
 	font-weight: 500;
 }
 
+/* Compact select */
+.booking-search-form--compact .booking-search-form__select {
+	padding-right: 2.5rem;
+	padding-left: 2.5rem;
+	background-position: right 0.75rem center;
+	background-size: 12px;
+}
+
 .booking-search-form__select:hover {
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23BC8F67' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
 }
@@ -218,4 +276,53 @@
 	cursor: not-allowed;
 	opacity: 0.6;
 	transform: none;
+}
+
+/* Clear Button (shown in compact mode) */
+.booking-search-form__clear-button {
+	padding: 0.625rem 1rem;
+	background: transparent;
+	color: #a86434;
+	border: 1px solid rgba(168, 100, 52, 0.3);
+	border-radius: 8px;
+	cursor: pointer;
+	font-size: 0.875rem;
+	font-weight: 600;
+	font-family: inherit;
+	transition: all 0.2s ease;
+	display: flex;
+	align-items: center;
+	gap: 0.375rem;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.booking-search-form__clear-button:hover {
+	background: rgba(168, 100, 52, 0.08);
+	border-color: #a86434;
+	color: #8d4f2a;
+	transform: translateY(-1px);
+}
+
+.booking-search-form__clear-button:active {
+	transform: translateY(0);
+}
+
+/* Responsive: Mobile - Keep vertical layout in compact mode on smaller screens */
+@media (max-width: 768px) {
+	.booking-search-form--compact {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 1rem;
+	}
+
+	.booking-search-form--compact .booking-search-form__fields {
+		grid-template-columns: 1fr;
+		gap: 1rem;
+	}
+
+	.booking-search-form__clear-button {
+		width: 100%;
+		justify-content: center;
+	}
 }

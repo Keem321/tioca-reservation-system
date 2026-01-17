@@ -62,6 +62,15 @@ const Navbar: React.FC = () => {
 		setAccountMenuOpen(false);
 	};
 
+	// Handle mouse enter/leave for manager menu
+	const handleManagerMouseEnter = () => {
+		setManagerMenuOpen(true);
+	};
+
+	const handleManagerMouseLeave = () => {
+		setManagerMenuOpen(false);
+	};
+
 	const handleSignOut = async () => {
 		console.log("[Navbar] Signing out user...");
 		// Dispatch logout and wait for completion
@@ -128,7 +137,12 @@ const Navbar: React.FC = () => {
 
 				{/* Management dropdown - show for managers and admins */}
 				{isManagerOrAdmin && (
-					<div className="navbar__manager" ref={managerMenuRef}>
+					<div
+						className="navbar__manager"
+						ref={managerMenuRef}
+						onMouseEnter={handleManagerMouseEnter}
+						onMouseLeave={handleManagerMouseLeave}
+					>
 						<button
 							onClick={() => setManagerMenuOpen(!managerMenuOpen)}
 							className="navbar__manager-button"

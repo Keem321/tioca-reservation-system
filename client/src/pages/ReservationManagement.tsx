@@ -1,5 +1,10 @@
 import { useMemo, useState } from "react";
+import React from "react";
 import Navbar from "../components/landing/Navbar";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { Calendar, Mail, Search, SlidersHorizontal, Plus, X } from "lucide-react";
+import Pagination from "../components/Pagination";
 import {
 	useGetReservationsQuery,
 	useCreateReservationMutation,
@@ -30,6 +35,15 @@ export default function ReservationManagement() {
 	const [guestEmailFilter, setGuestEmailFilter] = useState<string>("");
 	const [podIdFilter, setPodIdFilter] = useState<string>("");
 
+	// Calculate active filter count
+	const activeFilterCount = [
+		statusFilter,
+		dateFromFilter,
+		dateToFilter,
+		guestEmailFilter,
+		podIdFilter,
+	].filter(Boolean).length;
+
 	// UI state
 	const [showForm, setShowForm] = useState(false);
 	const [editingReservation, setEditingReservation] = useState<string | null>(
@@ -40,6 +54,10 @@ export default function ReservationManagement() {
 	const [selectedReservations, setSelectedReservations] = useState<Set<string>>(
 		new Set()
 	);
+
+	// Pagination state
+	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage, setItemsPerPage] = useState(10);
 
 	const [formData, setFormData] = useState<ReservationFormData>({
 		roomId: "",
@@ -135,22 +153,56 @@ export default function ReservationManagement() {
 	]);
 
 	// Sorting
-	const reservations = [...(allReservations as Reservation[])].sort((a, b) => {
-		let compareValue = 0;
-		switch (sortBy) {
-			case "date":
-				compareValue =
-					new Date(a.checkInDate).getTime() - new Date(b.checkInDate).getTime();
-				break;
-			case "status":
-				compareValue = a.status.localeCompare(b.status);
-				break;
-			case "guest":
-				compareValue = a.guestName.localeCompare(b.guestName);
-				break;
+	const sortedReservations = [...(allReservations as Reservation[])].sort(
+		(a, b) => {
+			let compareValue = 0;
+			switch (sortBy) {
+				case "date":
+					compareValue =
+						new Date(a.checkInDate).getTime() -
+						new Date(b.checkInDate).getTime();
+					break;
+				case "status":
+					compareValue = a.status.localeCompare(b.status);
+					break;
+				case "guest":
+					compareValue = a.guestName.localeCompare(b.guestName);
+					break;
+			}
+			return sortOrder === "asc" ? compareValue : -compareValue;
 		}
-		return sortOrder === "asc" ? compareValue : -compareValue;
-	});
+	);
+
+	// Pagination
+	const totalPages = Math.ceil(sortedReservations.length / itemsPerPage);
+	const startIndex = (currentPage - 1) * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
+	const reservations = sortedReservations.slice(startIndex, endIndex);
+
+	// Reset to page 1 when filters change
+	React.useEffect(() => {
+		setCurrentPage(1);
+	}, [statusFilter, dateFromFilter, dateToFilter, guestEmailFilter, podIdFilter]);
+
+	// Handle ESC key to close modal
+	React.useEffect(() => {
+		const handleEscape = (e: KeyboardEvent) => {
+			if (e.key === "Escape" && showForm) {
+				setShowForm(false);
+			}
+		};
+
+		if (showForm) {
+			document.addEventListener("keydown", handleEscape);
+			// Prevent body scroll when modal is open
+			document.body.style.overflow = "hidden";
+		}
+
+		return () => {
+			document.removeEventListener("keydown", handleEscape);
+			document.body.style.overflow = "unset";
+		};
+	}, [showForm]);
 
 	const handleInputChange = (
 		e: React.ChangeEvent<
@@ -384,9 +436,16 @@ export default function ReservationManagement() {
 				<h1>Reservation Management</h1>
 
 				{/* Advanced Filters */}
-				<div className="filters">
+				<div className={`filters ${activeFilterCount > 0 ? "filters--active" : ""}`}>
 					<div className="filters__header">
-						<h3>Search & Filter</h3>
+						<div className="filters__header-content">
+							<Search size={32} className="filters__icon filters__icon--main" />
+							{activeFilterCount > 0 && (
+								<span className="filters__badge">
+									{activeFilterCount} {activeFilterCount === 1 ? "filter" : "filters"} active
+								</span>
+							)}
+						</div>
 						<button
 							className="filters__clear"
 							onClick={() => {
@@ -396,108 +455,155 @@ export default function ReservationManagement() {
 								setGuestEmailFilter("");
 								setPodIdFilter("");
 							}}
+							disabled={activeFilterCount === 0}
 						>
 							Clear All Filters
 						</button>
 					</div>
-					<div className="filters__grid">
-						<label>
-							Status:
-							<select
-								value={statusFilter}
-								onChange={(e) => setStatusFilter(e.target.value)}
-							>
-								<option value="">All Statuses</option>
-								<option value="pending">Pending</option>
-								<option value="confirmed">Confirmed</option>
-								<option value="checked-in">Checked In</option>
-								<option value="checked-out">Checked Out</option>
-								<option value="cancelled">Cancelled</option>
-							</select>
-						</label>
-						<label>
-							Check-in From:
-							<input
-								type="date"
-								value={dateFromFilter}
-								onChange={(e) => setDateFromFilter(e.target.value)}
-							/>
-						</label>
-						<label>
-							Check-in To:
-							<input
-								type="date"
-								value={dateToFilter}
-								onChange={(e) => setDateToFilter(e.target.value)}
-							/>
-						</label>
-						<label>
-							Guest Email:
-							<input
-								type="email"
-								value={guestEmailFilter}
-								onChange={(e) => setGuestEmailFilter(e.target.value)}
-								placeholder="Search email..."
-							/>
-						</label>
-						<label>
-							Pod ID:
-							<input
-								type="text"
-								value={podIdFilter}
-								onChange={(e) => setPodIdFilter(e.target.value)}
-								placeholder="e.g., A101"
-							/>
-						</label>
-						<label>
-							Sort By:
-							<div style={{ display: "flex", gap: "0.5rem" }}>
+
+					<div className="filters__content">
+						<div className="filter-group">
+							<label className="filter-label">
+								<span className="filter-label-text">Status</span>
 								<select
-									value={sortBy}
-									onChange={(e) =>
-										setSortBy(e.target.value as "date" | "status" | "guest")
-									}
+									value={statusFilter}
+									onChange={(e) => setStatusFilter(e.target.value)}
+									className={`filter-input ${statusFilter ? "filter-input--active" : ""}`}
 								>
-									<option value="date">Check-in Date</option>
-									<option value="status">Status</option>
-									<option value="guest">Guest Name</option>
+									<option value="">All Statuses</option>
+									<option value="pending">Pending</option>
+									<option value="confirmed">Confirmed</option>
+									<option value="checked-in">Checked In</option>
+									<option value="checked-out">Checked Out</option>
+									<option value="cancelled">Cancelled</option>
 								</select>
-								<button
-									onClick={() =>
-										setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+							</label>
+						</div>
+
+						<div className="filter-group">
+							<label className="filter-label">
+								<span className="filter-label-text">
+									<Mail size={14} /> Guest Email
+								</span>
+								<input
+									type="email"
+									value={guestEmailFilter}
+									onChange={(e) => setGuestEmailFilter(e.target.value)}
+									placeholder="Search by email..."
+									className={`filter-input ${guestEmailFilter ? "filter-input--active" : ""}`}
+								/>
+							</label>
+						</div>
+
+						<div className="filter-group">
+							<label className="filter-label">
+								<span className="filter-label-text">
+									<Search size={14} /> Pod ID
+								</span>
+								<input
+									type="text"
+									value={podIdFilter}
+									onChange={(e) => setPodIdFilter(e.target.value)}
+									placeholder="e.g., A101"
+									className={`filter-input ${podIdFilter ? "filter-input--active" : ""}`}
+								/>
+							</label>
+						</div>
+
+						<div className="filter-group">
+							<label className="filter-label">
+								<span className="filter-label-text">
+									<Calendar size={14} /> Check-in From
+								</span>
+								<DatePicker
+									selected={dateFromFilter ? new Date(dateFromFilter) : null}
+									onChange={(date) =>
+										setDateFromFilter(
+											date ? date.toISOString().split("T")[0] : ""
+										)
 									}
-									title={`Sort ${
-										sortOrder === "asc" ? "descending" : "ascending"
-									}`}
-									style={{ padding: "0.5rem 1rem" }}
-								>
-									{sortOrder === "asc" ? "↑" : "↓"}
-								</button>
-							</div>
-						</label>
+									dateFormat="MMM d, yyyy"
+									className={`filter-input ${dateFromFilter ? "filter-input--active" : ""}`}
+									placeholderText="From date"
+									isClearable
+								/>
+							</label>
+						</div>
+
+						<div className="filter-group">
+							<label className="filter-label">
+								<span className="filter-label-text">
+									<Calendar size={14} /> Check-in To
+								</span>
+								<DatePicker
+									selected={dateToFilter ? new Date(dateToFilter) : null}
+									onChange={(date) =>
+										setDateToFilter(date ? date.toISOString().split("T")[0] : "")
+									}
+									minDate={
+										dateFromFilter ? new Date(dateFromFilter) : undefined
+									}
+									dateFormat="MMM d, yyyy"
+									className={`filter-input ${dateToFilter ? "filter-input--active" : ""}`}
+									placeholderText="To date"
+									isClearable
+								/>
+							</label>
+						</div>
+
+						<div className="filter-group filter-group--sort">
+							<label className="filter-label">
+								<span className="filter-label-text">Sort By</span>
+								<div className="sort-controls">
+									<select
+										value={sortBy}
+										onChange={(e) =>
+											setSortBy(e.target.value as "date" | "status" | "guest")
+										}
+										className="filter-input"
+									>
+										<option value="date">Check-in Date</option>
+										<option value="status">Status</option>
+										<option value="guest">Guest Name</option>
+									</select>
+									<button
+										className="sort-toggle"
+										onClick={() =>
+											setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+										}
+										title={`Sort ${
+											sortOrder === "asc" ? "descending" : "ascending"
+										}`}
+									>
+										{sortOrder === "asc" ? "↑" : "↓"}
+									</button>
+								</div>
+							</label>
+						</div>
 					</div>
 				</div>
 
-				{/* Results Count */}
-				<div className="results-info">
-					<p>Showing {reservations.length} reservation(s)</p>
-					<button
-						onClick={() => setShowForm(!showForm)}
-						className="btn-primary"
-					>
-						{showForm ? "Cancel" : "Add New Reservation"}
-					</button>
-				</div>
-
-				{/* Form */}
+				{/* Form Modal */}
 				{showForm && (
-					<div className="reservation-form">
-						<h2>
-							{editingReservation
-								? "Edit Reservation"
-								: "Create New Reservation"}
-						</h2>
-						<form onSubmit={handleSubmit}>
+					<>
+						<div className="modal-overlay" onClick={() => setShowForm(false)}></div>
+						<div className="modal" onClick={(e) => e.stopPropagation()}>
+							<div className="modal__header">
+								<h2>
+									{editingReservation
+										? "Edit Reservation"
+										: "Create New Reservation"}
+								</h2>
+								<button
+									type="button"
+									className="modal__close"
+									onClick={() => setShowForm(false)}
+									aria-label="Close modal"
+								>
+									<X size={24} />
+								</button>
+							</div>
+							<form onSubmit={handleSubmit}>
 							<div className="form-grid">
 								<label>
 									Room:
@@ -703,43 +809,61 @@ export default function ReservationManagement() {
 							</div>
 						</form>
 					</div>
+					</>
 				)}
-
-				{/* Bulk actions */}
-				<div className="bulk-actions">
-					<div className="bulk-actions__left">
-						<label>
-							<input
-								type="checkbox"
-								onChange={(e) => toggleSelectAll(e.target.checked)}
-								checked={
-									selectedReservations.size > 0 &&
-									selectedReservations.size === reservations.length
-								}
-							/>
-							Select All
-						</label>
-						<span>{selectedReservations.size} selected</span>
-					</div>
-					<div className="bulk-actions__right">
-						<button
-							onClick={bulkCheckIn}
-							disabled={selectedReservations.size === 0}
-						>
-							Bulk Check-in
-						</button>
-						<button
-							onClick={bulkCheckOut}
-							disabled={selectedReservations.size === 0}
-						>
-							Bulk Check-out
-						</button>
-					</div>
-				</div>
 
 				{/* Reservations List */}
 				<div className="reservation-list">
-					<h2>Reservations</h2>
+					<div className="reservation-list__header">
+						<div className="reservation-list__header-left">
+							<h2>Reservations</h2>
+							<button
+								onClick={() => setShowForm(!showForm)}
+								className="btn-add-reservation"
+								title={showForm ? "Cancel" : "Add New Reservation"}
+							>
+								<Plus size={28} />
+							</button>
+							{reservations.length > 0 && (
+								<>
+									<label className="select-all-label">
+										<input
+											type="checkbox"
+											onChange={(e) => toggleSelectAll(e.target.checked)}
+											checked={
+												selectedReservations.size > 0 &&
+												selectedReservations.size === reservations.length
+											}
+										/>
+										Select All
+										{selectedReservations.size > 0 && (
+											<span className="selected-count">
+												({selectedReservations.size} selected)
+											</span>
+										)}
+									</label>
+									{selectedReservations.size > 0 && (
+										<div className="bulk-actions-inline">
+											<button
+												onClick={bulkCheckIn}
+												disabled={selectedReservations.size === 0}
+												className="bulk-action-btn"
+											>
+												Bulk Check-in
+											</button>
+											<button
+												onClick={bulkCheckOut}
+												disabled={selectedReservations.size === 0}
+												className="bulk-action-btn"
+											>
+												Bulk Check-out
+											</button>
+										</div>
+									)}
+								</>
+							)}
+						</div>
+					</div>
 					{isLoading && <p>Loading reservations...</p>}
 					{error && <p className="error">Failed to load reservations.</p>}
 
@@ -860,6 +984,18 @@ export default function ReservationManagement() {
 								</tbody>
 							</table>
 						</div>
+					)}
+
+					{/* Pagination */}
+					{!isLoading && sortedReservations.length > 0 && (
+						<Pagination
+							currentPage={currentPage}
+							totalPages={totalPages}
+							onPageChange={setCurrentPage}
+							totalItems={sortedReservations.length}
+							itemsPerPage={itemsPerPage}
+							onItemsPerPageChange={setItemsPerPage}
+						/>
 					)}
 				</div>
 			</div>

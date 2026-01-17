@@ -34,10 +34,23 @@ export const createBaseQueryWithReauth = (
 			// This prevents infinite logout loops when unauthenticated users
 			// try to access protected endpoints
 			if (user !== null) {
-				console.log(
-					"[API] 🚨 Received 401 - User was authenticated, session expired, logging out"
-				);
-				api.dispatch(logout());
+				// Check if this is a session timeout 401
+				// If so, let the frontend session timeout logic handle it gracefully
+				// (show warning modal, countdown, etc.)
+				const errorData = result.error.data as { code?: string } | undefined;
+				if (errorData?.code === "SESSION_TIMEOUT") {
+					console.log(
+						"[API] ⏱️ Received SESSION_TIMEOUT 401 - letting frontend session timeout handle it gracefully"
+					);
+					// Don't immediately logout - the useSessionTimeout hook will handle this
+					// and show the warning modal before logging out
+				} else {
+					// For other 401s (invalid credentials, etc.), logout immediately
+					console.log(
+						"[API] 🚨 Received 401 - User was authenticated, session expired, logging out"
+					);
+					api.dispatch(logout());
+				}
 			} else {
 				console.log(
 					"[API] ℹ️ Received 401 - User not authenticated (expected for public endpoints)"

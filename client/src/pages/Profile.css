@@ -146,7 +146,12 @@
 .reservations-list {
 	display: flex;
 	flex-direction: column;
-	gap: var(--spacing-lg);
+	gap: var(--spacing-md);
+	margin-bottom: var(--spacing-lg);
+}
+
+.reservations-section .pagination {
+	margin-top: var(--spacing-md);
 }
 
 .reservation-card {
@@ -158,7 +163,7 @@
 
 .card-header {
 	background: var(--color-bone);
-	padding: var(--spacing-md);
+	padding: var(--spacing-sm) var(--spacing-md);
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -205,31 +210,34 @@
 }
 
 .card-details {
-	padding: var(--spacing-md);
+	padding: var(--spacing-sm) var(--spacing-md);
 	display: flex;
 	flex-direction: column;
-	gap: var(--spacing-sm);
+	gap: 0;
 }
 
 .detail-row {
 	display: flex;
 	justify-content: space-between;
-	padding: var(--spacing-sm) 0;
+	padding: var(--spacing-xs) 0;
 	border-bottom: 1px solid rgba(44, 22, 7, 0.08);
 }
 
 .detail-row label {
 	font-weight: 600;
 	color: var(--color-text-primary);
+	margin: 0;
+	flex-shrink: 0;
 }
 
 .detail-row span {
 	color: var(--color-text-secondary);
 	text-align: right;
+	flex-shrink: 0;
 }
 
 .special-requests {
-	padding: var(--spacing-md);
+	padding: var(--spacing-sm) var(--spacing-md);
 	background: rgba(232, 221, 207, 0.3);
 	border-top: 1px solid var(--color-border);
 }
@@ -238,7 +246,7 @@
 	display: block;
 	font-weight: 600;
 	color: var(--color-text-primary);
-	margin-bottom: var(--spacing-sm);
+	margin-bottom: var(--spacing-xs);
 }
 
 .special-requests p {
@@ -251,8 +259,8 @@
 /* Reservation Actions */
 .reservation-actions {
 	display: flex;
-	gap: var(--spacing-md);
-	padding: var(--spacing-md);
+	gap: var(--spacing-sm);
+	padding: var(--spacing-sm) var(--spacing-md);
 	background: rgba(232, 221, 207, 0.3);
 	border-top: 1px solid var(--color-border);
 }
@@ -457,13 +465,4 @@
 		padding: var(--spacing-md);
 	}
 
-	.detail-row {
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 4px;
-	}
-
-	.detail-row span {
-		text-align: left;
-	}
 }
