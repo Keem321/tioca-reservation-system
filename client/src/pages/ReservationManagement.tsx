@@ -3,7 +3,14 @@ import React from "react";
 import Navbar from "../components/landing/Navbar";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { Calendar, Mail, Search, SlidersHorizontal, Plus, X } from "lucide-react";
+import {
+	Calendar,
+	Mail,
+	Search,
+	SlidersHorizontal,
+	Plus,
+	X,
+} from "lucide-react";
 import Pagination from "../components/Pagination";
 import {
 	useGetReservationsQuery,
@@ -19,7 +26,7 @@ import {
 	useGetAmenityOfferingsQuery,
 	useGetRoomOfferingsQuery,
 } from "../features/offeringsApi";
-import { formatMoney, formatPricePerNight } from "../utils/money";
+import { useFormatMoney } from "../hooks/useFormatMoney";
 import type { ReservationFormData, Reservation } from "../types/reservation";
 import type { Room } from "../types/room";
 import "./ReservationManagement.css";
@@ -28,6 +35,7 @@ import "./ReservationManagement.css";
  * ReservationManagement - Manager page for CRUD operations on reservations
  */
 export default function ReservationManagement() {
+	const { formatMoney, formatPricePerNight } = useFormatMoney();
 	// Filters
 	const [statusFilter, setStatusFilter] = useState<string>("");
 	const [dateFromFilter, setDateFromFilter] = useState<string>("");
@@ -75,9 +83,6 @@ export default function ReservationManagement() {
 		paymentStatus: "unpaid",
 		specialRequests: "",
 	});
-
-	// Display currency (manager view stays in USD for now)
-	const displayCurrency = "USD";
 
 	// Fetch data with filters
 	const { data: rooms = [] } = useGetRoomsQuery(undefined);
@@ -182,7 +187,13 @@ export default function ReservationManagement() {
 	// Reset to page 1 when filters change
 	React.useEffect(() => {
 		setCurrentPage(1);
-	}, [statusFilter, dateFromFilter, dateToFilter, guestEmailFilter, podIdFilter]);
+	}, [
+		statusFilter,
+		dateFromFilter,
+		dateToFilter,
+		guestEmailFilter,
+		podIdFilter,
+	]);
 
 	// Handle ESC key to close modal
 	React.useEffect(() => {
@@ -436,13 +447,18 @@ export default function ReservationManagement() {
 				<h1>Reservation Management</h1>
 
 				{/* Advanced Filters */}
-				<div className={`filters ${activeFilterCount > 0 ? "filters--active" : ""}`}>
+				<div
+					className={`filters ${
+						activeFilterCount > 0 ? "filters--active" : ""
+					}`}
+				>
 					<div className="filters__header">
 						<div className="filters__header-content">
 							<Search size={32} className="filters__icon filters__icon--main" />
 							{activeFilterCount > 0 && (
 								<span className="filters__badge">
-									{activeFilterCount} {activeFilterCount === 1 ? "filter" : "filters"} active
+									{activeFilterCount}{" "}
+									{activeFilterCount === 1 ? "filter" : "filters"} active
 								</span>
 							)}
 						</div>
@@ -468,7 +484,9 @@ export default function ReservationManagement() {
 								<select
 									value={statusFilter}
 									onChange={(e) => setStatusFilter(e.target.value)}
-									className={`filter-input ${statusFilter ? "filter-input--active" : ""}`}
+									className={`filter-input ${
+										statusFilter ? "filter-input--active" : ""
+									}`}
 								>
 									<option value="">All Statuses</option>
 									<option value="pending">Pending</option>
@@ -490,7 +508,9 @@ export default function ReservationManagement() {
 									value={guestEmailFilter}
 									onChange={(e) => setGuestEmailFilter(e.target.value)}
 									placeholder="Search by email..."
-									className={`filter-input ${guestEmailFilter ? "filter-input--active" : ""}`}
+									className={`filter-input ${
+										guestEmailFilter ? "filter-input--active" : ""
+									}`}
 								/>
 							</label>
 						</div>
@@ -505,7 +525,9 @@ export default function ReservationManagement() {
 									value={podIdFilter}
 									onChange={(e) => setPodIdFilter(e.target.value)}
 									placeholder="e.g., A101"
-									className={`filter-input ${podIdFilter ? "filter-input--active" : ""}`}
+									className={`filter-input ${
+										podIdFilter ? "filter-input--active" : ""
+									}`}
 								/>
 							</label>
 						</div>
@@ -523,7 +545,9 @@ export default function ReservationManagement() {
 										)
 									}
 									dateFormat="MMM d, yyyy"
-									className={`filter-input ${dateFromFilter ? "filter-input--active" : ""}`}
+									className={`filter-input ${
+										dateFromFilter ? "filter-input--active" : ""
+									}`}
 									placeholderText="From date"
 									isClearable
 								/>
@@ -538,13 +562,17 @@ export default function ReservationManagement() {
 								<DatePicker
 									selected={dateToFilter ? new Date(dateToFilter) : null}
 									onChange={(date) =>
-										setDateToFilter(date ? date.toISOString().split("T")[0] : "")
+										setDateToFilter(
+											date ? date.toISOString().split("T")[0] : ""
+										)
 									}
 									minDate={
 										dateFromFilter ? new Date(dateFromFilter) : undefined
 									}
 									dateFormat="MMM d, yyyy"
-									className={`filter-input ${dateToFilter ? "filter-input--active" : ""}`}
+									className={`filter-input ${
+										dateToFilter ? "filter-input--active" : ""
+									}`}
 									placeholderText="To date"
 									isClearable
 								/>
@@ -586,7 +614,10 @@ export default function ReservationManagement() {
 				{/* Form Modal */}
 				{showForm && (
 					<>
-						<div className="modal-overlay" onClick={() => setShowForm(false)}></div>
+						<div
+							className="modal-overlay"
+							onClick={() => setShowForm(false)}
+						></div>
 						<div className="modal" onClick={(e) => e.stopPropagation()}>
 							<div className="modal__header">
 								<h2>
@@ -604,211 +635,208 @@ export default function ReservationManagement() {
 								</button>
 							</div>
 							<form onSubmit={handleSubmit}>
-							<div className="form-grid">
-								<label>
-									Room:
-									<select
-										name="roomId"
-										value={formData.roomId}
-										onChange={handleInputChange}
-										required
-									>
-										<option value="">Select Room</option>
-										{getAvailableRooms().map((room: Room) => (
-											<option key={room._id} value={room._id}>
-												{room.podId ? `Pod ${room.podId}` : "Room"} -{" "}
-												{room.quality} ({room.floor})
-												{room.offering?.basePrice
-													? ` • ${formatPricePerNight(
-															room.offering.basePrice,
-															displayCurrency
-													  )}`
-													: ""}
-											</option>
-										))}
-									</select>
-								</label>
+								<div className="form-grid">
+									<label>
+										Room:
+										<select
+											name="roomId"
+											value={formData.roomId}
+											onChange={handleInputChange}
+											required
+										>
+											<option value="">Select Room</option>
+											{getAvailableRooms().map((room: Room) => (
+												<option key={room._id} value={room._id}>
+													{room.podId ? `Pod ${room.podId}` : "Room"} -{" "}
+													{room.quality} ({room.floor})
+													{room.offering?.basePrice
+														? ` • ${formatPricePerNight(
+																room.offering.basePrice
+														  )}`
+														: ""}
+												</option>
+											))}
+										</select>
+									</label>
 
-								{selectedRoomOffering && (
-									<div className="price-hint">
-										Base rate:{" "}
-										{formatPricePerNight(
-											selectedRoomOffering.basePrice,
-											displayCurrency
+									{selectedRoomOffering && (
+										<div className="price-hint">
+											Base rate:{" "}
+											{formatPricePerNight(selectedRoomOffering.basePrice)}
+											{nights > 0 && <span> × {nights} night(s)</span>}
+										</div>
+									)}
+
+									<label>
+										Guest Name:
+										<input
+											type="text"
+											name="guestName"
+											value={formData.guestName}
+											onChange={handleInputChange}
+											required
+										/>
+									</label>
+
+									<label>
+										Guest Email:
+										<input
+											type="email"
+											name="guestEmail"
+											value={formData.guestEmail}
+											onChange={handleInputChange}
+											required
+										/>
+									</label>
+
+									<label>
+										Guest Phone:
+										<input
+											type="tel"
+											name="guestPhone"
+											value={formData.guestPhone}
+											onChange={handleInputChange}
+											placeholder="Optional"
+										/>
+									</label>
+
+									<label>
+										Check-in Date:
+										<input
+											type="date"
+											name="checkInDate"
+											value={formData.checkInDate}
+											onChange={handleInputChange}
+											required
+										/>
+									</label>
+
+									<label>
+										Check-out Date:
+										<input
+											type="date"
+											name="checkOutDate"
+											value={formData.checkOutDate}
+											onChange={handleInputChange}
+											required
+										/>
+									</label>
+
+									<label>
+										Number of Guests:
+										<input
+											type="number"
+											name="numberOfGuests"
+											value={formData.numberOfGuests}
+											min={1}
+											onChange={handleInputChange}
+											required
+										/>
+									</label>
+
+									<label>
+										Status:
+										<select
+											name="status"
+											value={formData.status}
+											onChange={handleInputChange}
+										>
+											<option value="pending">Pending</option>
+											<option value="confirmed">Confirmed</option>
+											<option value="checked-in">Checked In</option>
+											<option value="checked-out">Checked Out</option>
+											<option value="cancelled">Cancelled</option>
+										</select>
+									</label>
+
+									<label>
+										Payment Status:
+										<select
+											name="paymentStatus"
+											value={formData.paymentStatus}
+											onChange={handleInputChange}
+										>
+											<option value="unpaid">Unpaid</option>
+											<option value="partial">Partial</option>
+											<option value="paid">Paid</option>
+											<option value="refunded">Refunded</option>
+										</select>
+									</label>
+
+									<label className="full-width">
+										Special Requests:
+										<textarea
+											name="specialRequests"
+											value={formData.specialRequests}
+											onChange={handleInputChange}
+											rows={2}
+											placeholder="Any special notes for the stay"
+										/>
+									</label>
+								</div>
+
+								<div className="amenities">
+									<h4>Add Amenities</h4>
+									<div className="amenities__list">
+										{amenityOfferings.map((amenity) => (
+											<label key={amenity._id} className="amenity-item">
+												<input
+													type="checkbox"
+													name="selectedAmenities"
+													value={amenity._id}
+													checked={formData.selectedAmenities.includes(
+														amenity._id
+													)}
+													onChange={handleInputChange}
+												/>
+												<div>
+													<div className="amenity-item__name">
+														{amenity.name}
+													</div>
+													<div className="amenity-item__price">
+														{formatMoney(amenity.basePrice)}
+														{amenity.priceType === "per-night"
+															? " per night"
+															: " flat"}
+													</div>
+												</div>
+											</label>
+										))}
+										{amenityOfferings.length === 0 && (
+											<p className="muted">No amenities configured.</p>
 										)}
+									</div>
+								</div>
+
+								<div className="price-summary">
+									<div>
+										<strong>Base rate:</strong>{" "}
+										{formatPricePerNight(pricing.basePerNight)}
 										{nights > 0 && <span> × {nights} night(s)</span>}
 									</div>
-								)}
+									<div>
+										<strong>Amenities:</strong>{" "}
+										{formatMoney(pricing.amenitiesTotal)}
+									</div>
+									<div className="price-summary__total">
+										<strong>Total:</strong> {formatMoney(pricing.total)}
+									</div>
+								</div>
 
-								<label>
-									Guest Name:
-									<input
-										type="text"
-										name="guestName"
-										value={formData.guestName}
-										onChange={handleInputChange}
-										required
-									/>
-								</label>
-
-								<label>
-									Guest Email:
-									<input
-										type="email"
-										name="guestEmail"
-										value={formData.guestEmail}
-										onChange={handleInputChange}
-										required
-									/>
-								</label>
-
-								<label>
-									Guest Phone:
-									<input
-										type="tel"
-										name="guestPhone"
-										value={formData.guestPhone}
-										onChange={handleInputChange}
-										placeholder="Optional"
-									/>
-								</label>
-
-								<label>
-									Check-in Date:
-									<input
-										type="date"
-										name="checkInDate"
-										value={formData.checkInDate}
-										onChange={handleInputChange}
-										required
-									/>
-								</label>
-
-								<label>
-									Check-out Date:
-									<input
-										type="date"
-										name="checkOutDate"
-										value={formData.checkOutDate}
-										onChange={handleInputChange}
-										required
-									/>
-								</label>
-
-								<label>
-									Number of Guests:
-									<input
-										type="number"
-										name="numberOfGuests"
-										value={formData.numberOfGuests}
-										min={1}
-										onChange={handleInputChange}
-										required
-									/>
-								</label>
-
-								<label>
-									Status:
-									<select
-										name="status"
-										value={formData.status}
-										onChange={handleInputChange}
+								<div className="form-actions">
+									<button
+										type="submit"
+										className="btn-primary"
+										disabled={isCreating || isUpdating}
 									>
-										<option value="pending">Pending</option>
-										<option value="confirmed">Confirmed</option>
-										<option value="checked-in">Checked In</option>
-										<option value="checked-out">Checked Out</option>
-										<option value="cancelled">Cancelled</option>
-									</select>
-								</label>
-
-								<label>
-									Payment Status:
-									<select
-										name="paymentStatus"
-										value={formData.paymentStatus}
-										onChange={handleInputChange}
-									>
-										<option value="unpaid">Unpaid</option>
-										<option value="partial">Partial</option>
-										<option value="paid">Paid</option>
-										<option value="refunded">Refunded</option>
-									</select>
-								</label>
-
-								<label className="full-width">
-									Special Requests:
-									<textarea
-										name="specialRequests"
-										value={formData.specialRequests}
-										onChange={handleInputChange}
-										rows={2}
-										placeholder="Any special notes for the stay"
-									/>
-								</label>
-							</div>
-
-							<div className="amenities">
-								<h4>Add Amenities</h4>
-								<div className="amenities__list">
-									{amenityOfferings.map((amenity) => (
-										<label key={amenity._id} className="amenity-item">
-											<input
-												type="checkbox"
-												name="selectedAmenities"
-												value={amenity._id}
-												checked={formData.selectedAmenities.includes(
-													amenity._id
-												)}
-												onChange={handleInputChange}
-											/>
-											<div>
-												<div className="amenity-item__name">{amenity.name}</div>
-												<div className="amenity-item__price">
-													{formatMoney(amenity.basePrice, displayCurrency)}
-													{amenity.priceType === "per-night"
-														? " per night"
-														: " flat"}
-												</div>
-											</div>
-										</label>
-									))}
-									{amenityOfferings.length === 0 && (
-										<p className="muted">No amenities configured.</p>
-									)}
+										{editingReservation ? "Update" : "Create"} Reservation
+									</button>
+									<button type="button" onClick={resetForm}>
+										Reset
+									</button>
 								</div>
-							</div>
-
-							<div className="price-summary">
-								<div>
-									<strong>Base rate:</strong>{" "}
-									{formatPricePerNight(pricing.basePerNight, displayCurrency)}
-									{nights > 0 && <span> × {nights} night(s)</span>}
-								</div>
-								<div>
-									<strong>Amenities:</strong>{" "}
-									{formatMoney(pricing.amenitiesTotal, displayCurrency)}
-								</div>
-								<div className="price-summary__total">
-									<strong>Total:</strong>{" "}
-									{formatMoney(pricing.total, displayCurrency)}
-								</div>
-							</div>
-
-							<div className="form-actions">
-								<button
-									type="submit"
-									className="btn-primary"
-									disabled={isCreating || isUpdating}
-								>
-									{editingReservation ? "Update" : "Create"} Reservation
-								</button>
-								<button type="button" onClick={resetForm}>
-									Reset
-								</button>
-							</div>
-						</form>
-					</div>
+							</form>
+						</div>
 					</>
 				)}
 
@@ -946,9 +974,7 @@ export default function ReservationManagement() {
 														{reservation.paymentStatus}
 													</span>
 												</td>
-												<td>
-													{formatMoney(reservation.totalPrice, displayCurrency)}
-												</td>
+												<td>{formatMoney(reservation.totalPrice)}</td>
 												<td className="actions">
 													<button onClick={() => handleEdit(reservation)}>
 														Edit

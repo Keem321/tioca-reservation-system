@@ -5,7 +5,7 @@ import { CheckCircle, Calendar, Users, CreditCard, MapPin } from "lucide-react";
 import Navbar from "../components/landing/Navbar";
 import type { Reservation } from "../types/reservation";
 import type { RootState } from "../store";
-import { formatMoney } from "../utils/money";
+import { useFormatMoney } from "../hooks/useFormatMoney";
 import "./PaymentSuccess.css";
 
 /**
@@ -16,6 +16,7 @@ import "./PaymentSuccess.css";
 const PaymentSuccess: React.FC = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
+	const { formatMoney } = useFormatMoney();
 	const { pendingReservation } = useSelector(
 		(state: RootState) => state.booking
 	);
@@ -50,22 +51,32 @@ const PaymentSuccess: React.FC = () => {
 		isInitialMount.current = false;
 
 		// Check if we have valid reservation data (works for both logged in and guest users)
-		const hasReservation = !!(location.state?.reservation || pendingReservation);
-		
+		const hasReservation = !!(
+			location.state?.reservation || pendingReservation
+		);
+
 		if (!hasReservation) {
 			// No reservation data - redirect based on auth status
 			if (!user) {
 				// Guest user with no reservation data - redirect to landing
-				console.log("[PaymentSuccess] No reservation data and not logged in - redirecting to landing page");
+				console.log(
+					"[PaymentSuccess] No reservation data and not logged in - redirecting to landing page"
+				);
 				navigate("/", { replace: true });
 			} else {
 				// Logged in user with no reservation data - redirect to booking
-				console.log("[PaymentSuccess] No reservation data but logged in - redirecting to booking");
+				console.log(
+					"[PaymentSuccess] No reservation data but logged in - redirecting to booking"
+				);
 				navigate("/booking", { replace: true });
 			}
 		} else {
 			// Has reservation data - allow viewing (for both logged in and guest users)
-			console.log("[PaymentSuccess] Reservation data found, staying on page (user:", user ? "logged in" : "guest", ")");
+			console.log(
+				"[PaymentSuccess] Reservation data found, staying on page (user:",
+				user ? "logged in" : "guest",
+				")"
+			);
 		}
 	}, [
 		location.state?.reservation,

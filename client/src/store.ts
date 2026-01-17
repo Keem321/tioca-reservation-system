@@ -10,6 +10,7 @@ import { offeringsApi } from "./features/offeringsApi";
 import bookingReducer from "./features/bookingSlice";
 import groupBookingReducer from "./features/groupBookingSlice";
 import authReducer, { logout } from "./features/authSlice";
+import currencyReducer from "./features/currencySlice";
 
 /**
  * Redux Store Configuration
@@ -26,6 +27,7 @@ import authReducer, { logout } from "./features/authSlice";
 export const store = configureStore({
 	reducer: {
 		auth: authReducer,
+		currency: currencyReducer,
 		booking: bookingReducer,
 		groupBooking: groupBookingReducer,
 		[roomsApi.reducerPath]: roomsApi.reducer,

@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuth } from "./features/authSlice";
+import { setCurrency } from "./features/currencySlice";
+import { useGetProfileQuery } from "./features/userApi";
 import type { AppDispatch, RootState } from "./store";
 import "./App.css";
 import Landing from "./pages/Landing";
@@ -38,6 +40,11 @@ function App() {
 	const hasChecked = useSelector((state: RootState) => state.auth.hasChecked);
 	const user = useSelector((state: RootState) => state.auth.user);
 
+	// Fetch user profile only when authenticated to sync currency preference
+	const { data: profile } = useGetProfileQuery(undefined, {
+		skip: !user,
+	});
+
 	// Check authentication status on mount
 	useEffect(() => {
 		if (!hasChecked) {
@@ -46,6 +53,13 @@ function App() {
 			});
 		}
 	}, [dispatch, hasChecked]);
+
+	// Sync currency preference from user profile to Redux store
+	useEffect(() => {
+		if (profile?.currencyPreference) {
+			dispatch(setCurrency(profile.currencyPreference));
+		}
+	}, [profile?.currencyPreference, dispatch]);
 
 	// Session timeout hook - only active when user is authenticated
 	const isAuthenticated = user !== null;

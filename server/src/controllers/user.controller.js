@@ -31,7 +31,7 @@ class UserController {
 	 */
 	async updateProfile(req, res) {
 		try {
-			const { name, email } = req.body;
+			const { name, email, currencyPreference } = req.body;
 
 			// Prevent updating sensitive fields
 			const updateData = {};
@@ -47,6 +47,14 @@ class UserController {
 					return res.status(400).json({ error: "Email already in use" });
 				}
 				updateData.email = email;
+			}
+
+			// Currency preference update
+			if (currencyPreference !== undefined) {
+				const validCurrencies = ["USD", "JPY"];
+				if (validCurrencies.includes(currencyPreference)) {
+					updateData.currencyPreference = currencyPreference;
+				}
 			}
 
 			const user = await User.findByIdAndUpdate(req.user._id, updateData, {

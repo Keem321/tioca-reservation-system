@@ -9,7 +9,7 @@ import {
 	getRoomQualityDescription,
 	getRoomDimensions,
 } from "../../utils/roomImages";
-import { formatMoney } from "../../utils/money";
+import { useFormatMoney } from "../../hooks";
 import "./PodCard.css";
 
 /**
@@ -46,6 +46,7 @@ const PodCard: React.FC<PodCardProps> = ({
 }) => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
+	const { formatMoney } = useFormatMoney();
 
 	// Get price from offering (in cents)
 	const assignablePool = assignableRooms?.length ? assignableRooms : [pod];
@@ -115,13 +116,11 @@ const PodCard: React.FC<PodCardProps> = ({
 			</div>
 			<div className="pod-card__pricing">
 				<div className="pod-card__price-info">
-					<div className="pod-card__price">
-						{formatMoney(pricePerNight, "USD")}
-					</div>
+					<div className="pod-card__price">{formatMoney(pricePerNight)}</div>
 					<div className="pod-card__price-label">per night</div>
 					{nights > 1 && (
 						<div className="pod-card__total-price">
-							{formatMoney(totalPrice, "USD")} total
+							{formatMoney(totalPrice)} total
 						</div>
 					)}
 				</div>

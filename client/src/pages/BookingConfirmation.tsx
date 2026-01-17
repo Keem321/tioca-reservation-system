@@ -25,6 +25,7 @@ import type { Room } from "../types/room";
 import type { AmenityOffering } from "../types/offering";
 import Navbar from "../components/landing/Navbar";
 import BookingBreadcrumb from "../components/booking/BookingBreadcrumb";
+import { useFormatMoney } from "../hooks/useFormatMoney";
 import {
 	getRoomImage,
 	getRoomDisplayLabel,
@@ -75,6 +76,7 @@ const BookingConfirmation: React.FC = () => {
 	const location = useLocation();
 	const dispatch = useDispatch();
 	const toast = useToast();
+	const { formatMoney } = useFormatMoney();
 	const { checkIn, checkOut, guests, selectedRoom, holdId } = useAppSelector(
 		(state) => state.booking as BookingState
 	);
@@ -802,12 +804,15 @@ const BookingConfirmation: React.FC = () => {
 		return (
 			<>
 				<Navbar />
-				<BookingBreadcrumb currentStep={2} onStepClick={handleBreadcrumbClick} />
+				<BookingBreadcrumb
+					currentStep={2}
+					onStepClick={handleBreadcrumbClick}
+				/>
 				<div className="booking-confirmation">
-				<div className="booking-confirmation__container">
-					<div className="booking-confirmation__header">
-						<h1>Confirm Group Booking</h1>
-						<p className="booking-confirmation__subtitle">
+					<div className="booking-confirmation__container">
+						<div className="booking-confirmation__header">
+							<h1>Confirm Group Booking</h1>
+							<p className="booking-confirmation__subtitle">
 								{totalRooms} room{totalRooms > 1 ? "s" : ""} for {totalGuests}{" "}
 								guest{totalGuests > 1 ? "s" : ""}
 							</p>
@@ -1134,11 +1139,11 @@ const BookingConfirmation: React.FC = () => {
 	const roomLabel = getRoomDisplayLabel(room.quality, room.floor);
 	const roomDescription = getRoomQualityDescription(room.quality);
 
-		return (
-			<>
-				<Navbar />
-				<BookingBreadcrumb currentStep={2} onStepClick={handleBreadcrumbClick} />
-				<div className="booking-confirmation">
+	return (
+		<>
+			<Navbar />
+			<BookingBreadcrumb currentStep={2} onStepClick={handleBreadcrumbClick} />
+			<div className="booking-confirmation">
 				<div className="booking-confirmation__container">
 					<div className="booking-confirmation__header">
 						<h1>Confirm Your Booking</h1>
@@ -1439,7 +1444,7 @@ const BookingConfirmation: React.FC = () => {
 														</div>
 													)}
 													<div className="amenity-price">
-														${(amenity.basePrice / 100).toFixed(2)}
+														{formatMoney(amenity.basePrice)}
 														{amenity.priceType === "per-night"
 															? " /night"
 															: " (flat)"}
@@ -1457,7 +1462,7 @@ const BookingConfirmation: React.FC = () => {
 								<div className="detail-item">
 									<span className="detail-label">Price per Night:</span>
 									<span className="detail-value">
-										${((room.offering?.basePrice || 0) / 100).toFixed(2)}
+										{formatMoney(room.offering?.basePrice || 0)}
 									</span>
 								</div>
 								<div className="detail-item">
@@ -1506,7 +1511,7 @@ const BookingConfirmation: React.FC = () => {
 								<div className="detail-item detail-item--total">
 									<span className="detail-label">Total Price:</span>
 									<span className="detail-value">
-										${(totalPrice / 100).toFixed(2)}
+										{formatMoney(totalPrice)}
 									</span>
 								</div>
 							</div>

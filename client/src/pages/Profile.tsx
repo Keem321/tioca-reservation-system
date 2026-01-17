@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import Navbar from "../components/landing/Navbar";
 import Pagination from "../components/Pagination";
 import {
@@ -12,7 +13,8 @@ import {
 	useCancelReservationMutation,
 } from "../features/reservationsApi";
 import { useGetRoomsQuery } from "../features/roomsApi";
-import { formatMoney, getDefaultCurrency } from "../utils/money";
+import { useFormatMoney } from "../hooks/useFormatMoney";
+import { setCurrency } from "../features/currencySlice";
 import type { Reservation } from "../types/reservation";
 import "./Profile.css";
 
@@ -21,11 +23,15 @@ import "./Profile.css";
  *
  * Features:
  * - View profile information (name, email)
- * - Edit profile (name, email)
+ * - Edit profile (name, email, currency preference)
  * - Change password (for local strategy users)
  * - View active/upcoming reservations
+ * - Currency preference syncs to Redux store for app-wide display formatting
  */
 export default function Profile() {
+	const dispatch = useDispatch();
+	const { formatMoney } = useFormatMoney();
+
 	const [isEditing, setIsEditing] = useState(false);
 	const [showPasswordForm, setShowPasswordForm] = useState(false);
 	const [editFormData, setEditFormData] = useState<{
@@ -66,6 +72,7 @@ export default function Profile() {
 		data: profile,
 		isLoading: profileLoading,
 		error: profileError,
+		refetch: refetchProfile,
 	} = useGetProfileQuery();
 	const {
 		data: activeReservations = [],
@@ -73,7 +80,12 @@ export default function Profile() {
 		refetch: refetchReservations,
 	} = useGetActiveReservationsQuery();
 
-	const currency = getDefaultCurrency(profile?.currencyPreference || "USD");
+	// Sync profile currency preference to Redux store
+	useEffect(() => {
+		if (profile?.currencyPreference) {
+			dispatch(setCurrency(profile.currencyPreference));
+		}
+	}, [profile?.currencyPreference, dispatch]);
 
 	// Pagination calculations
 	const totalPages = Math.ceil(activeReservations.length / itemsPerPage);
@@ -117,7 +129,13 @@ export default function Profile() {
 	const handleSaveProfile = async (e: React.FormEvent) => {
 		e.preventDefault();
 		try {
-			await updateProfile(editFormData).unwrap();
+			const updatedProfile = await updateProfile(editFormData).unwrap();
+			// Explicitly sync the currency preference to Redux
+			if (updatedProfile.currencyPreference) {
+				dispatch(setCurrency(updatedProfile.currencyPreference));
+			}
+			// Refetch profile to ensure cache is updated
+			await refetchProfile();
 			alert("Profile updated successfully!");
 			setIsEditing(false);
 		} catch (err) {
@@ -288,7 +306,11 @@ export default function Profile() {
 								</div>
 								<div className="profile-field">
 									<label>Currency Preference:</label>
-									<span>{currency}</span>
+									<span>
+										{profile?.currencyPreference === "JPY"
+											? "JPY (¥)"
+											: "USD ($)"}
+									</span>
 								</div>
 								<div className="profile-actions">
 									<button
@@ -435,83 +457,83 @@ export default function Profile() {
 							<>
 								<div className="reservations-list">
 									{paginatedReservations.map((res) => (
-									<div key={res._id} className="reservation-card">
-										<div className="card-header">
-											<h3>
-												Pod{" "}
-												{typeof res.roomId === "string"
-													? res.roomId
-													: res.roomId?.podId}
-											</h3>
-											<span className={`status-badge status-${res.status}`}>
-												{res.status}
-											</span>
-										</div>
-										<div className="card-details">
-											<div className="detail-row">
-												<label>Guest:</label>
-												<span>{res.guestName}</span>
+										<div key={res._id} className="reservation-card">
+											<div className="card-header">
+												<h3>
+													Pod{" "}
+													{typeof res.roomId === "string"
+														? res.roomId
+														: res.roomId?.podId}
+												</h3>
+												<span className={`status-badge status-${res.status}`}>
+													{res.status}
+												</span>
 											</div>
-											<div className="detail-row">
-												<label>Email:</label>
-												<span>{res.guestEmail}</span>
-											</div>
-											{res.guestPhone && (
+											<div className="card-details">
 												<div className="detail-row">
-													<label>Phone:</label>
-													<span>{res.guestPhone}</span>
+													<label>Guest:</label>
+													<span>{res.guestName}</span>
+												</div>
+												<div className="detail-row">
+													<label>Email:</label>
+													<span>{res.guestEmail}</span>
+												</div>
+												{res.guestPhone && (
+													<div className="detail-row">
+														<label>Phone:</label>
+														<span>{res.guestPhone}</span>
+													</div>
+												)}
+												<div className="detail-row">
+													<label>Check-In:</label>
+													<span>
+														{new Date(res.checkInDate).toLocaleDateString()}
+													</span>
+												</div>
+												<div className="detail-row">
+													<label>Check-Out:</label>
+													<span>
+														{new Date(res.checkOutDate).toLocaleDateString()}
+													</span>
+												</div>
+												<div className="detail-row">
+													<label>Guests:</label>
+													<span>{res.numberOfGuests}</span>
+												</div>
+												<div className="detail-row">
+													<label>Total Price:</label>
+													<span>{formatMoney(res.totalPrice)}</span>
+												</div>
+											</div>
+											{res.specialRequests && (
+												<div className="special-requests">
+													<label>Special Requests:</label>
+													<p>{res.specialRequests}</p>
 												</div>
 											)}
-											<div className="detail-row">
-												<label>Check-In:</label>
-												<span>
-													{new Date(res.checkInDate).toLocaleDateString()}
-												</span>
-											</div>
-											<div className="detail-row">
-												<label>Check-Out:</label>
-												<span>
-													{new Date(res.checkOutDate).toLocaleDateString()}
-												</span>
-											</div>
-											<div className="detail-row">
-												<label>Guests:</label>
-												<span>{res.numberOfGuests}</span>
-											</div>
-											<div className="detail-row">
-												<label>Total Price:</label>
-												<span>{formatMoney(res.totalPrice, currency)}</span>
-											</div>
+											{/* Action buttons for active reservations */}
+											{res.status !== "cancelled" &&
+												res.status !== "checked-out" && (
+													<div className="reservation-actions">
+														<button
+															onClick={() => handleOpenModifyModal(res)}
+															className="btn-modify btn-primary"
+															disabled={
+																res.status === "checked-in" || isModifying
+															}
+														>
+															Modify
+														</button>
+														<button
+															onClick={() => handleCancelReservation(res._id)}
+															className="btn-cancel-reservation btn-danger"
+															disabled={isCancelling}
+														>
+															Cancel Reservation
+														</button>
+													</div>
+												)}
 										</div>
-										{res.specialRequests && (
-											<div className="special-requests">
-												<label>Special Requests:</label>
-												<p>{res.specialRequests}</p>
-											</div>
-										)}
-										{/* Action buttons for active reservations */}
-										{res.status !== "cancelled" &&
-											res.status !== "checked-out" && (
-												<div className="reservation-actions">
-													<button
-														onClick={() => handleOpenModifyModal(res)}
-														className="btn-modify btn-primary"
-														disabled={
-															res.status === "checked-in" || isModifying
-														}
-													>
-														Modify
-													</button>
-													<button
-														onClick={() => handleCancelReservation(res._id)}
-														className="btn-cancel-reservation btn-danger"
-														disabled={isCancelling}
-													>
-														Cancel Reservation
-													</button>
-												</div>
-											)}
-									</div>
 									))}
 								</div>
 								<Pagination

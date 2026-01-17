@@ -20,7 +20,7 @@ import type { BookingState } from "../features/bookingSlice";
 import type { Reservation } from "../types/reservation";
 import Navbar from "../components/landing/Navbar";
 import BookingBreadcrumb from "../components/booking/BookingBreadcrumb";
-import { formatMoney } from "../utils/money";
+import { useFormatMoney } from "../hooks/useFormatMoney";
 import "./Payment.css";
 
 // Initialize Stripe with publishable key
@@ -46,6 +46,7 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 	const elements = useElements();
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
+	const { formatMoney } = useFormatMoney();
 
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -534,14 +535,17 @@ const Payment: React.FC = () => {
 		return (
 			<>
 				<Navbar />
-				<BookingBreadcrumb currentStep={3} onStepClick={handleBreadcrumbClick} />
+				<BookingBreadcrumb
+					currentStep={3}
+					onStepClick={handleBreadcrumbClick}
+				/>
 				<div className="payment-page">
 					<div className="payment-page__container">
 						<div className="payment-page__error">
-						<h2>Stripe Not Configured</h2>
-						<p>
-							Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your{" "}
-							<code>client/.env</code> or <code>client/.env.development</code>{" "}
+							<h2>Stripe Not Configured</h2>
+							<p>
+								Please set <code>VITE_STRIPE_PUBLISHABLE_KEY</code> in your{" "}
+								<code>client/.env</code> or <code>client/.env.development</code>{" "}
 								file.
 							</p>
 							<p>

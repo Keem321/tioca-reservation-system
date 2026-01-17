@@ -13,6 +13,7 @@ import {
 } from "../features/roomsApi";
 import { useGetReservationsQuery } from "../features/reservationsApi";
 import { useGetRoomOfferingsQuery } from "../features/offeringsApi";
+import { useFormatMoney } from "../hooks/useFormatMoney";
 import type { Room, RoomFormData, PodQuality, PodFloor } from "../types/room";
 import RoleGuard from "../components/RoleGuard";
 import "./RoomManagement.css";
@@ -65,6 +66,8 @@ const QUALITY_DIMENSIONS: Record<
  */
 
 export default function RoomManagement() {
+	const { formatPricePerNight, formatMoney } = useFormatMoney();
+
 	// UI mode: tabs
 	const [tab, setTab] = useState<"booked" | "all" | "floor">("booked");
 
@@ -123,8 +126,14 @@ export default function RoomManagement() {
 	};
 
 	// Compute booked roomIds for the selected window
-	const windowStart = useMemo(() => startDate ? new Date(startDate) : null, [startDate]);
-	const windowEnd = useMemo(() => endDate ? new Date(endDate) : null, [endDate]);
+	const windowStart = useMemo(
+		() => (startDate ? new Date(startDate) : null),
+		[startDate]
+	);
+	const windowEnd = useMemo(
+		() => (endDate ? new Date(endDate) : null),
+		[endDate]
+	);
 	const activeStatuses = useMemo(
 		() => new Set(["pending", "confirmed", "checked-in"]),
 		[]
@@ -132,22 +141,22 @@ export default function RoomManagement() {
 	const bookedRoomIds = useMemo(() => {
 		return new Set(
 			reservations
-				.filter(
-					(r) => {
-						// Only filter by active status if dates are not set
-						if (!windowStart || !windowEnd) {
-							return activeStatuses.has(r.status);
-						}
-						// Filter by date range if dates are set
-						return activeStatuses.has(r.status) &&
-							overlaps(
-								new Date(r.checkInDate),
-								new Date(r.checkOutDate),
-								windowStart,
-								windowEnd
-							);
+				.filter((r) => {
+					// Only filter by active status if dates are not set
+					if (!windowStart || !windowEnd) {
+						return activeStatuses.has(r.status);
 					}
-				)
+					// Filter by date range if dates are set
+					return (
+						activeStatuses.has(r.status) &&
+						overlaps(
+							new Date(r.checkInDate),
+							new Date(r.checkOutDate),
+							windowStart,
+							windowEnd
+						)
+					);
+				})
 				.map((r) => (typeof r.roomId === "string" ? r.roomId : r.roomId?._id))
 				.filter((id): id is string => id !== null && id !== undefined)
 		);
@@ -369,226 +378,228 @@ export default function RoomManagement() {
 						<div className="room-form">
 							<h2>{editingRoom ? "Edit Pod" : "Create New Pod"}</h2>
 							<form onSubmit={handleSubmit}>
-							<div className="form-grid">
-								<label>
-									Floor (Zone):
-									<select
-										name="floor"
-										value={formData.floor}
-										onChange={handleInputChange}
-										required
-									>
-										<option value="women-only">Women-Only Floor</option>
-										<option value="men-only">Men-Only Floor</option>
-										<option value="couples">Couples Floor</option>
-										<option value="business">Business/Quiet Floor</option>
-									</select>
-								</label>
+								<div className="form-grid">
+									<label>
+										Floor (Zone):
+										<select
+											name="floor"
+											value={formData.floor}
+											onChange={handleInputChange}
+											required
+										>
+											<option value="women-only">Women-Only Floor</option>
+											<option value="men-only">Men-Only Floor</option>
+											<option value="couples">Couples Floor</option>
+											<option value="business">Business/Quiet Floor</option>
+										</select>
+									</label>
 
-								<label>
-									Pod ID:
-									<input
-										type="text"
-										value={formData.podId || "(auto-generated)"}
-										disabled
-										readOnly
-										style={{
-											backgroundColor: "#f0f0f0",
-											color: "#666",
-											cursor: "not-allowed",
-										}}
-									/>
-									<small
-										style={{
-											display: "block",
-											marginTop: "0.25rem",
-											color: "#666",
-										}}
-									>
-										Auto-generated as FloorNum + 2-digit sequence (e.g., 301)
-									</small>
-								</label>
+									<label>
+										Pod ID:
+										<input
+											type="text"
+											value={formData.podId || "(auto-generated)"}
+											disabled
+											readOnly
+											style={{
+												backgroundColor: "#f0f0f0",
+												color: "#666",
+												cursor: "not-allowed",
+											}}
+										/>
+										<small
+											style={{
+												display: "block",
+												marginTop: "0.25rem",
+												color: "#666",
+											}}
+										>
+											Auto-generated as FloorNum + 2-digit sequence (e.g., 301)
+										</small>
+									</label>
 
-								<label>
-									Pod Quality Level:
-									<select
-										name="quality"
-										value={formData.quality}
-										onChange={handleInputChange}
-										required
-									>
-										<option value="classic">Classic Pearl (Standard)</option>
-										<option value="milk">Milk Pearl (Standard+)</option>
-										<option value="golden">Golden Pearl (Premium)</option>
-										<option value="crystal">
-											Crystal Boba Suite (First Class)
-										</option>
-										<option value="matcha">
-											Matcha Pearl (Women-Only Exclusive)
-										</option>
-									</select>
-								</label>
-
-								<label>
-									Capacity (Auto):
-									<input
-										type="text"
-										value={
-											formData.floor === "couples" ? "2 guests" : "1 guest"
-										}
-										disabled
-										readOnly
-										style={{
-											backgroundColor: "#f0f0f0",
-											color: "#666",
-											cursor: "not-allowed",
-										}}
-									/>
-									<small
-										style={{
-											display: "block",
-											marginTop: "0.25rem",
-											color: "#666",
-										}}
-									>
-										Auto-determined by floor: couples floors = 2, others = 1
-									</small>
-								</label>
-
-								<label>
-									Price Per Night ($): Room Offering (Pricing Tier):
-									<select
-										name="offeringId"
-										value={formData.offeringId}
-										onChange={handleInputChange}
-										required
-									>
-										<option value="">Select offering...</option>
-										{offerings.map((offering) => (
-											<option key={offering._id} value={offering._id}>
-												{offering.name} - $
-												{(offering.basePrice / 100).toFixed(2)}/night (
-												{offering.quality})
+									<label>
+										Pod Quality Level:
+										<select
+											name="quality"
+											value={formData.quality}
+											onChange={handleInputChange}
+											required
+										>
+											<option value="classic">Classic Pearl (Standard)</option>
+											<option value="milk">Milk Pearl (Standard+)</option>
+											<option value="golden">Golden Pearl (Premium)</option>
+											<option value="crystal">
+												Crystal Boba Suite (First Class)
 											</option>
-										))}
-									</select>
-									<small
-										style={{
-											display: "block",
-											marginTop: "0.25rem",
-											color: "#666",
-										}}
-									>
-										Select the pricing tier for this room. Manage offerings in
-										Offering Management.
-									</small>
-								</label>
+											<option value="matcha">
+												Matcha Pearl (Women-Only Exclusive)
+											</option>
+										</select>
+									</label>
+
+									<label>
+										Capacity (Auto):
+										<input
+											type="text"
+											value={
+												formData.floor === "couples" ? "2 guests" : "1 guest"
+											}
+											disabled
+											readOnly
+											style={{
+												backgroundColor: "#f0f0f0",
+												color: "#666",
+												cursor: "not-allowed",
+											}}
+										/>
+										<small
+											style={{
+												display: "block",
+												marginTop: "0.25rem",
+												color: "#666",
+											}}
+										>
+											Auto-determined by floor: couples floors = 2, others = 1
+										</small>
+									</label>
+
+									<label>
+										Price Per Night ($): Room Offering (Pricing Tier):
+										<select
+											name="offeringId"
+											value={formData.offeringId}
+											onChange={handleInputChange}
+											required
+										>
+											<option value="">Select offering...</option>
+											{offerings.map((offering) => (
+												<option key={offering._id} value={offering._id}>
+													{offering.name} -{" "}
+													{formatPricePerNight(offering.basePrice)} (
+													{offering.quality})
+												</option>
+											))}
+										</select>
+										<small
+											style={{
+												display: "block",
+												marginTop: "0.25rem",
+												color: "#666",
+											}}
+										>
+											Select the pricing tier for this room. Manage offerings in
+											Offering Management.
+										</small>
+									</label>
+
+									<label>
+										Length (inches):
+										<input
+											type="number"
+											name="dimensions.length"
+											value={formData.dimensions?.length || 80}
+											onChange={handleInputChange}
+											min="0"
+										/>
+										<small
+											style={{
+												display: "block",
+												marginTop: "0.25rem",
+												color: "#666",
+											}}
+										>
+											Auto-set by quality level (edit to customize)
+										</small>
+									</label>
+
+									<label>
+										Width (inches):
+										<input
+											type="number"
+											name="dimensions.width"
+											value={formData.dimensions?.width || 40}
+											onChange={handleInputChange}
+											min="0"
+										/>
+										<small
+											style={{
+												display: "block",
+												marginTop: "0.25rem",
+												color: "#666",
+											}}
+										>
+											Auto-set by quality level (edit to customize)
+										</small>
+									</label>
+
+									<label>
+										Height (inches):
+										<input
+											type="number"
+											name="dimensions.height"
+											value={formData.dimensions?.height || 40}
+											onChange={handleInputChange}
+											min="0"
+										/>
+										<small
+											style={{
+												display: "block",
+												marginTop: "0.25rem",
+												color: "#666",
+											}}
+										>
+											Auto-set by quality level (edit to customize)
+										</small>
+									</label>
+
+									<label>
+										Status:
+										<select
+											name="status"
+											value={formData.status}
+											onChange={handleInputChange}
+										>
+											<option value="available">Available</option>
+											<option value="occupied">Occupied</option>
+											<option value="maintenance">Maintenance</option>
+											<option value="reserved">Reserved</option>
+										</select>
+									</label>
+								</div>
 
 								<label>
-									Length (inches):
-									<input
-										type="number"
-										name="dimensions.length"
-										value={formData.dimensions?.length || 80}
+									Description:
+									<textarea
+										name="description"
+										value={formData.description}
 										onChange={handleInputChange}
-										min="0"
+										rows={3}
 									/>
-									<small
-										style={{
-											display: "block",
-											marginTop: "0.25rem",
-											color: "#666",
-										}}
-									>
-										Auto-set by quality level (edit to customize)
-									</small>
 								</label>
 
-								<label>
-									Width (inches):
-									<input
-										type="number"
-										name="dimensions.width"
-										value={formData.dimensions?.width || 40}
-										onChange={handleInputChange}
-										min="0"
-									/>
-									<small
-										style={{
-											display: "block",
-											marginTop: "0.25rem",
-											color: "#666",
-										}}
-									>
-										Auto-set by quality level (edit to customize)
-									</small>
-								</label>
-
-								<label>
-									Height (inches):
-									<input
-										type="number"
-										name="dimensions.height"
-										value={formData.dimensions?.height || 40}
-										onChange={handleInputChange}
-										min="0"
-									/>
-									<small
-										style={{
-											display: "block",
-											marginTop: "0.25rem",
-											color: "#666",
-										}}
-									>
-										Auto-set by quality level (edit to customize)
-									</small>
-								</label>
-
-								<label>
-									Status:
-									<select
-										name="status"
-										value={formData.status}
-										onChange={handleInputChange}
-									>
-										<option value="available">Available</option>
-										<option value="occupied">Occupied</option>
-										<option value="maintenance">Maintenance</option>
-										<option value="reserved">Reserved</option>
-									</select>
-								</label>
-							</div>
-
-							<label>
-								Description:
-								<textarea
-									name="description"
-									value={formData.description}
-									onChange={handleInputChange}
-									rows={3}
-								/>
-							</label>
-
-							<div className="form-actions">
-								<button type="submit" disabled={isCreating || isUpdating}>
-									{isCreating || isUpdating
-										? "Saving..."
-										: editingRoom
-										? "Update Pod"
-										: "Create Pod"}
-								</button>
-								<button type="button" onClick={resetForm}>
-									Cancel
-								</button>
-							</div>
-						</form>
-					</div>
+								<div className="form-actions">
+									<button type="submit" disabled={isCreating || isUpdating}>
+										{isCreating || isUpdating
+											? "Saving..."
+											: editingRoom
+											? "Update Pod"
+											: "Create Pod"}
+									</button>
+									<button type="button" onClick={resetForm}>
+										Cancel
+									</button>
+								</div>
+							</form>
+						</div>
 					)}
 				</RoleGuard>
 
 				{/* Filters shared (search, floor, status) */}
 				<div
-					className={`filters ${activeFilterCount > 0 ? "filters--active" : ""}`}
+					className={`filters ${
+						activeFilterCount > 0 ? "filters--active" : ""
+					}`}
 				>
 					<div className="filters__header">
 						<div className="filters__header-content">
@@ -627,7 +638,9 @@ export default function RoomManagement() {
 									placeholder="Search by Pod ID (e.g., 201)"
 									value={search}
 									onChange={(e) => setSearch(e.target.value)}
-									className={`filter-input ${search ? "filter-input--active" : ""}`}
+									className={`filter-input ${
+										search ? "filter-input--active" : ""
+									}`}
 								/>
 							</label>
 						</div>
@@ -640,7 +653,9 @@ export default function RoomManagement() {
 									onChange={(e) =>
 										setFilterFloor(e.target.value as "" | PodFloor)
 									}
-									className={`filter-input ${filterFloor ? "filter-input--active" : ""}`}
+									className={`filter-input ${
+										filterFloor ? "filter-input--active" : ""
+									}`}
 								>
 									<option value="">All Floors</option>
 									<option value="women-only">Women-Only</option>
@@ -659,7 +674,9 @@ export default function RoomManagement() {
 									onChange={(e) =>
 										setFilterStatus(e.target.value as "" | Room["status"])
 									}
-									className={`filter-input ${filterStatus ? "filter-input--active" : ""}`}
+									className={`filter-input ${
+										filterStatus ? "filter-input--active" : ""
+									}`}
 								>
 									<option value="">All Statuses</option>
 									<option value="available">Available</option>
@@ -685,7 +702,9 @@ export default function RoomManagement() {
 												)
 											}
 											dateFormat="MMM d, yyyy"
-											className={`filter-input ${startDate ? "filter-input--active" : ""}`}
+											className={`filter-input ${
+												startDate ? "filter-input--active" : ""
+											}`}
 											placeholderText="Select start date"
 										/>
 									</label>
@@ -703,7 +722,9 @@ export default function RoomManagement() {
 											}
 											minDate={startDate ? new Date(startDate) : undefined}
 											dateFormat="MMM d, yyyy"
-											className={`filter-input ${endDate ? "filter-input--active" : ""}`}
+											className={`filter-input ${
+												endDate ? "filter-input--active" : ""
+											}`}
 											placeholderText="Select end date"
 										/>
 									</label>
@@ -789,7 +810,9 @@ export default function RoomManagement() {
 												</td>
 												<td className="actions">
 													<RoleGuard requiredRoles="admin">
-														<button onClick={() => handleEdit(room)}>Edit</button>
+														<button onClick={() => handleEdit(room)}>
+															Edit
+														</button>
 													</RoleGuard>
 												</td>
 											</tr>
@@ -856,10 +879,9 @@ export default function RoomManagement() {
 											</td>
 											<td>{room.capacity}</td>
 											<td>
-												$
 												{room.offering?.basePrice
-													? (room.offering.basePrice / 100).toFixed(2)
-													: "0.00"}
+													? formatMoney(room.offering.basePrice)
+													: formatMoney(0)}
 											</td>
 											<td>
 												<select
