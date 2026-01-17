@@ -40,6 +40,7 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 	const warningTimerRef = useRef<number | null>(null);
 	const countdownIntervalRef = useRef<number | null>(null);
 	const lastActivityRef = useRef<number>(0);
+	const lastKeepAliveRef = useRef<number>(0);
 	const warningStartTimeRef = useRef<number | null>(null);
 	const isLoggedOutRef = useRef<boolean>(false);
 
@@ -140,6 +141,7 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 		// Ping the server to refresh the session activity timestamp
 		try {
 			await dispatch(keepAlive()).unwrap();
+			lastKeepAliveRef.current = now;
 			console.log("[SessionTimeout] ✅ Server session refreshed successfully");
 		} catch (error) {
 			console.error(
@@ -196,6 +198,7 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 		// Initial timer setup
 		const now = Date.now();
 		lastActivityRef.current = now;
+		lastKeepAliveRef.current = now;
 
 		// Start initial inactivity timer
 		inactivityTimerRef.current = setTimeout(() => {
@@ -222,6 +225,23 @@ export const useSessionTimeout = (isAuthenticated: boolean) => {
 
 			console.log("[SessionTimeout] Activity detected, resetting timers");
 			lastActivityRef.current = currentTime;
+
+			// Periodically ping the backend to keep the server session alive
+			// Call keepAlive every 20 seconds of activity (throttled)
+			// This ensures the backend session doesn't expire while user is active
+			const timeSinceLastKeepAlive = currentTime - lastKeepAliveRef.current;
+			if (timeSinceLastKeepAlive > 20 * 1000) {
+				console.log(
+					"[SessionTimeout] 🔄 Pinging backend keepalive (20s since last ping)"
+				);
+				lastKeepAliveRef.current = currentTime;
+				dispatch(keepAlive()).catch((error) => {
+					console.error(
+						"[SessionTimeout] ❌ Failed to ping backend keepalive:",
+						error
+					);
+				});
+			}
 
 			// Clean up existing timers
 			if (inactivityTimerRef.current) {

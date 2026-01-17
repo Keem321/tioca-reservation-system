@@ -1,0 +1,161 @@
+/* Pagination - TIOCA Design System */
+
+.pagination {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: var(--spacing-lg);
+	padding: var(--spacing-lg);
+	background: #f2e7d8;
+	border-radius: var(--border-radius-lg);
+	box-shadow: var(--shadow-sm);
+	margin-top: var(--spacing-lg);
+	flex-wrap: wrap;
+}
+
+.pagination__info {
+	color: var(--color-text-secondary);
+	font-size: 0.875rem;
+	font-weight: 500;
+}
+
+.pagination__controls {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-sm);
+}
+
+.pagination__button {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-xs);
+	padding: var(--spacing-sm) var(--spacing-md);
+	background: white;
+	color: var(--color-text-primary);
+	border: 1px solid var(--color-border);
+	border-radius: var(--border-radius-md);
+	cursor: pointer;
+	font-size: 0.875rem;
+	font-weight: 600;
+	transition: all 0.2s ease;
+	box-shadow: var(--shadow-sm);
+}
+
+.pagination__button:hover:not(:disabled) {
+	background: var(--color-primary);
+	color: white;
+	border-color: var(--color-primary);
+	transform: translateY(-1px);
+	box-shadow: var(--shadow-md);
+}
+
+.pagination__button:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+	background: var(--color-bone);
+}
+
+.pagination__pages {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+.pagination__page {
+	min-width: 40px;
+	height: 40px;
+	padding: 0 var(--spacing-sm);
+	background: white;
+	color: var(--color-text-primary);
+	border: 1px solid var(--color-border);
+	border-radius: var(--border-radius-md);
+	cursor: pointer;
+	font-size: 0.875rem;
+	font-weight: 600;
+	transition: all 0.2s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.pagination__page:hover {
+	background: var(--color-bone);
+	border-color: var(--color-primary);
+}
+
+.pagination__page--active {
+	background: var(--color-primary);
+	color: white;
+	border-color: var(--color-primary);
+	box-shadow: var(--shadow-sm);
+}
+
+.pagination__ellipsis {
+	padding: 0 var(--spacing-xs);
+	color: var(--color-text-secondary);
+	font-weight: 600;
+}
+
+.pagination__per-page {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-sm);
+}
+
+.pagination__per-page label {
+	color: var(--color-text-secondary);
+	font-size: 0.875rem;
+	font-weight: 500;
+}
+
+.pagination__per-page select {
+	padding: var(--spacing-sm) var(--spacing-md);
+	background: white;
+	color: var(--color-text-primary);
+	border: 1px solid var(--color-border);
+	border-radius: var(--border-radius-md);
+	cursor: pointer;
+	font-size: 0.875rem;
+	font-weight: 600;
+	transition: all 0.2s ease;
+}
+
+.pagination__per-page select:focus {
+	outline: none;
+	border-color: var(--color-primary);
+	box-shadow: 0 0 0 3px rgba(168, 100, 52, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	.pagination {
+		flex-direction: column;
+		align-items: stretch;
+		gap: var(--spacing-md);
+	}
+
+	.pagination__info {
+		text-align: center;
+	}
+
+	.pagination__controls {
+		flex-wrap: wrap;
+		justify-content: center;
+	}
+
+	.pagination__button {
+		flex: 1;
+		justify-content: center;
+	}
+
+	.pagination__pages {
+		width: 100%;
+		justify-content: center;
+		order: -1;
+	}
+
+	.pagination__per-page {
+		justify-content: center;
+		width: 100%;
+	}
+}
