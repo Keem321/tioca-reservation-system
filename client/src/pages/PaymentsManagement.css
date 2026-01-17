@@ -171,6 +171,325 @@
 	font-weight: 600;
 }
 
+/* Revenue Summary Table */
+.revenue-summary-table {
+	width: 100%;
+	border-collapse: collapse;
+	table-layout: fixed;
+	margin-top: var(--spacing-lg);
+}
+
+.revenue-summary-table thead {
+	background: var(--color-linen);
+	border-bottom: 2px solid var(--color-border);
+}
+
+.revenue-summary-table th {
+	padding: var(--spacing-md);
+	text-align: left;
+	font-weight: 600;
+	color: var(--color-text-secondary);
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.revenue-summary-table th:nth-child(1) {
+	width: 30%;
+}
+
+.revenue-summary-table th:nth-child(2) {
+	width: 20%;
+}
+
+.revenue-summary-table th:nth-child(3) {
+	width: 25%;
+}
+
+.revenue-summary-table th:nth-child(4) {
+	width: 25%;
+}
+
+.revenue-summary-table td {
+	padding: var(--spacing-md);
+	border-bottom: 1px solid var(--color-border);
+	color: var(--color-text-primary);
+	font-size: 0.875rem;
+}
+
+.revenue-summary-table tbody tr {
+	transition: background-color 0.2s ease;
+}
+
+.revenue-summary-table tbody tr:hover {
+	background: var(--color-linen);
+}
+
+.revenue-summary-table td strong {
+	color: var(--color-success);
+	font-size: 1rem;
+}
+
+/* Revenue Chart Visualization */
+.revenue-chart {
+	margin-bottom: var(--spacing-xl);
+	padding: var(--spacing-xl);
+	background: var(--color-linen);
+	border-radius: var(--border-radius-md);
+}
+
+.revenue-chart__bars-container {
+	overflow-x: auto;
+	margin-bottom: var(--spacing-lg);
+	padding-bottom: var(--spacing-sm);
+	position: relative;
+}
+
+/* Scrollbar styling for chart */
+.revenue-chart__bars-container::-webkit-scrollbar {
+	height: 8px;
+}
+
+.revenue-chart__bars-container::-webkit-scrollbar-track {
+	background: var(--color-bone);
+	border-radius: 4px;
+}
+
+.revenue-chart__bars-container::-webkit-scrollbar-thumb {
+	background: var(--color-primary);
+	border-radius: 4px;
+}
+
+.revenue-chart__bars-container::-webkit-scrollbar-thumb:hover {
+	background: var(--color-secondary);
+}
+
+.revenue-chart__bars {
+	display: flex;
+	align-items: flex-end;
+	gap: 3px;
+	height: 400px;
+	padding: var(--spacing-lg) var(--spacing-sm);
+	border-bottom: 2px solid var(--color-border);
+	width: 100%;
+	position: relative;
+}
+
+.revenue-chart__bar-wrapper {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	flex: 1;
+	min-width: 0;
+}
+
+.revenue-chart__bar-container {
+	width: 100%;
+	height: 360px;
+	display: flex;
+	align-items: flex-end;
+	justify-content: center;
+	position: relative;
+}
+
+.revenue-chart__bar {
+	width: 100%;
+	max-width: 60px;
+	background: linear-gradient(to top, var(--color-secondary), var(--color-primary));
+	border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+	position: relative;
+	transition: all 0.2s ease;
+	cursor: pointer;
+	min-height: 2%;
+}
+
+/* Daily bar specific styles */
+.revenue-chart__bar--daily {
+	width: 100%;
+	max-width: none;
+	border-radius: 2px 2px 0 0;
+	min-height: 20px;
+	position: relative;
+	cursor: pointer;
+}
+
+.revenue-chart__bar--empty {
+	cursor: default;
+	opacity: 0.4;
+}
+
+.revenue-chart__bar:hover:not(.revenue-chart__bar--empty) {
+	filter: brightness(1.2);
+	box-shadow: 0 -4px 12px rgba(168, 100, 52, 0.5);
+	transform: scaleY(1.03);
+	transform-origin: bottom;
+	z-index: 10;
+	position: relative;
+}
+
+.revenue-chart__bar-value {
+	font-size: 0.625rem;
+	font-weight: 700;
+	color: white;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+	white-space: nowrap;
+	transform: rotate(-45deg);
+	transform-origin: center;
+	position: absolute;
+	top: 8px;
+	left: 50%;
+	margin-left: -20px;
+}
+
+.revenue-chart__label {
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--color-text-secondary);
+	text-align: center;
+	padding-top: var(--spacing-xs);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.revenue-chart__label--daily {
+	font-size: 0.875rem;
+	font-weight: 700;
+	color: var(--color-text-primary);
+	text-align: center;
+	padding-top: 6px;
+	min-height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	overflow: hidden;
+}
+
+/* Custom Tooltip */
+.revenue-chart__tooltip {
+	background: var(--color-deep-walnut);
+	color: white;
+	padding: var(--spacing-sm) var(--spacing-md);
+	border-radius: var(--border-radius-md);
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+	pointer-events: none;
+	z-index: 1000;
+	white-space: nowrap;
+	font-size: 0.875rem;
+	animation: tooltipFadeIn 0.15s ease;
+}
+
+@keyframes tooltipFadeIn {
+	from {
+		opacity: 0;
+		transform: translate(-50%, -90%);
+	}
+	to {
+		opacity: 1;
+		transform: translate(-50%, -100%);
+	}
+}
+
+.revenue-chart__tooltip-date {
+	font-weight: 700;
+	margin-bottom: 4px;
+	font-size: 0.75rem;
+	opacity: 0.9;
+}
+
+.revenue-chart__tooltip-amount {
+	font-size: 1.125rem;
+	font-weight: 700;
+	color: var(--color-linen);
+	margin-bottom: 2px;
+}
+
+.revenue-chart__tooltip-count {
+	font-size: 0.75rem;
+	opacity: 0.85;
+}
+
+/* Legend for months */
+.revenue-chart__legend {
+	padding: var(--spacing-lg);
+	background: white;
+	border-radius: var(--border-radius-md);
+	border: 2px solid var(--color-border);
+}
+
+.revenue-chart__legend-title {
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: var(--color-text-secondary);
+	margin-bottom: var(--spacing-md);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.revenue-chart__legend-items {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--spacing-sm);
+}
+
+.revenue-chart__legend-item {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-sm);
+	padding: var(--spacing-sm) var(--spacing-md);
+	background: var(--color-linen);
+	border-radius: var(--border-radius-md);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	border: 2px solid transparent;
+}
+
+.revenue-chart__legend-item:hover {
+	background: white;
+	border-color: var(--color-primary);
+	box-shadow: 0 2px 8px rgba(188, 143, 103, 0.2);
+	transform: translateY(-1px);
+}
+
+.revenue-chart__legend-item--active {
+	background: var(--color-primary);
+	border-color: var(--color-primary);
+	box-shadow: 0 4px 12px rgba(188, 143, 103, 0.3);
+}
+
+.revenue-chart__legend-item--active .revenue-chart__legend-label,
+.revenue-chart__legend-item--active .revenue-chart__legend-value {
+	color: white;
+}
+
+.revenue-chart__legend-color {
+	width: 18px;
+	height: 18px;
+	border-radius: 4px;
+	flex-shrink: 0;
+	border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.revenue-chart__legend-item--active .revenue-chart__legend-color {
+	border-color: white;
+}
+
+.revenue-chart__legend-label {
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: var(--color-text-primary);
+	white-space: nowrap;
+}
+
+.revenue-chart__legend-value {
+	font-size: 0.875rem;
+	font-weight: 700;
+	color: var(--color-success);
+	margin-left: auto;
+}
+
 .revenue-table {
 	width: 100%;
 	border-collapse: collapse;
@@ -430,8 +749,10 @@
 
 .detail-row {
 	display: flex;
-	flex-direction: column;
-	gap: var(--spacing-sm);
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	gap: var(--spacing-md);
 }
 
 .detail-row.full-width {
@@ -456,11 +777,15 @@
 	font-size: 0.75rem;
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
+	white-space: nowrap;
+	flex-shrink: 0;
 }
 
 .detail-row span {
 	color: var(--color-text-primary);
 	font-size: 0.875rem;
+	text-align: right;
+	word-break: break-word;
 }
 
 /* Reservation Details Section */
@@ -468,6 +793,8 @@
 	margin-top: var(--spacing-xl);
 	padding-top: var(--spacing-xl);
 	border-top: 2px solid var(--color-border);
+	grid-column: 1 / -1;
+	width: 100%;
 }
 
 .reservation-details-section h3 {
@@ -477,36 +804,90 @@
 	font-weight: 600;
 }
 
+/* 2x2 Grid layout for subsections */
+.reservation-details-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: var(--spacing-md);
+	align-items: start;
+	width: 100%;
+}
+
 .details-subsection {
-	margin-bottom: var(--spacing-lg);
-	padding: var(--spacing-lg);
+	padding: var(--spacing-md) var(--spacing-lg);
 	background: var(--color-linen);
 	border-radius: var(--border-radius-md);
+	border-left: 4px solid var(--color-primary);
+	transition: all 0.2s ease;
+	height: 100%;
+}
+
+.details-subsection:hover {
+	background: white;
+	box-shadow: 0 2px 8px rgba(188, 143, 103, 0.15);
 }
 
 .details-subsection h4 {
 	color: var(--color-text-primary);
-	font-size: 1rem;
-	margin-bottom: var(--spacing-md);
-	font-weight: 600;
-	border-bottom: 1px solid var(--color-border);
-	padding-bottom: var(--spacing-sm);
+	font-size: 0.875rem;
+	margin-bottom: var(--spacing-sm);
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	display: inline-block;
+	margin-right: var(--spacing-lg);
+	min-width: 140px;
 }
 
 .details-subsection .details-grid {
-	display: grid;
-	grid-template-columns: 1fr;
-	gap: var(--spacing-md);
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: var(--spacing-lg);
+	align-items: center;
 	margin-bottom: 0;
+}
+
+.details-subsection .details-grid .detail-row {
+	display: inline-flex;
+	flex-direction: row;
+	gap: var(--spacing-xs);
+	align-items: center;
+	margin-bottom: 0;
+	max-width: 100%;
+	overflow: hidden;
+}
+
+.details-subsection .details-grid .detail-row label {
+	font-size: 0.8125rem;
+	margin-bottom: 0;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.details-subsection .details-grid .detail-row span {
+	font-size: 0.8125rem;
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.details-subsection .details-grid .detail-row span.monospace {
+	min-width: 0;
+	flex-shrink: 1;
 }
 
 .monospace {
 	font-family: "Monaco", "Courier New", monospace;
-	font-size: 0.75rem;
+	font-size: 0.7rem;
 	background: var(--color-linen);
 	padding: 4px 8px;
 	border-radius: var(--border-radius-sm);
 	word-break: break-all;
+	max-width: 100%;
+	overflow-wrap: anywhere;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: block;
 }
 
 /* Edit Form */
@@ -719,6 +1100,86 @@
 
 	.tabs {
 		flex-wrap: wrap;
+	}
+
+	/* Revenue Chart Mobile Adjustments */
+	.revenue-chart__bars {
+		height: 280px;
+		gap: 2px;
+		padding: var(--spacing-md) var(--spacing-sm);
+	}
+
+	.revenue-chart__bar-container {
+		height: 240px;
+	}
+
+	.revenue-chart__bar-wrapper {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.revenue-chart__bar--daily {
+		width: 100%;
+		min-height: 15px;
+	}
+
+	.revenue-chart__label--daily {
+		font-size: 0.75rem;
+		min-height: 20px;
+	}
+
+	.revenue-chart__tooltip {
+		font-size: 0.75rem;
+		padding: var(--spacing-xs) var(--spacing-sm);
+	}
+
+	.revenue-chart__tooltip-amount {
+		font-size: 1rem;
+	}
+
+	.revenue-chart__legend-items {
+		flex-direction: column;
+	}
+
+	.revenue-chart__legend-item {
+		width: 100%;
+	}
+
+	/* Reservation Details Subsections - Stack on Mobile */
+	.details-subsection h4 {
+		display: block;
+		margin-bottom: var(--spacing-sm);
+		min-width: auto;
+	}
+
+	.details-subsection .details-grid {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--spacing-sm);
+	}
+
+	.details-subsection .details-grid .detail-row {
+		width: 100%;
+	}
+
+	/* Main detail rows - Keep horizontal on mobile */
+	.details-grid > .detail-row {
+		flex-direction: row;
+		justify-content: space-between;
+	}
+
+	.details-grid > .detail-row label {
+		font-size: 0.6875rem;
+	}
+
+	.details-grid > .detail-row span {
+		font-size: 0.8125rem;
+	}
+
+	/* Reservation Details Grid - Single column on mobile */
+	.reservation-details-grid {
+		grid-template-columns: 1fr;
 	}
 }
 
