@@ -1,6 +1,6 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Building } from "lucide-react";
+import { Building, X } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { setCheckIn, setCheckOut, setZone } from "../../features/bookingSlice";
@@ -26,12 +26,14 @@ interface BookingSearchFormProps {
 	onSearch: () => void;
 	isSearching: boolean;
 	onValuesChange?: () => void;
+	isCompact?: boolean; // New prop to control compact horizontal layout
 }
 
 const BookingSearchForm: React.FC<BookingSearchFormProps> = ({
 	onSearch,
 	isSearching,
 	onValuesChange,
+	isCompact = false,
 }) => {
 	const dispatch = useDispatch();
 	const { checkIn, checkOut, zone } = useSelector(
@@ -64,8 +66,15 @@ const BookingSearchForm: React.FC<BookingSearchFormProps> = ({
 		onValuesChange?.();
 	};
 
+	const handleClearFields = () => {
+		dispatch(setCheckIn(""));
+		dispatch(setCheckOut(""));
+		dispatch(setZone(""));
+		onValuesChange?.();
+	};
+
 	return (
-		<div className="booking-search-form">
+		<div className={`booking-search-form ${isCompact ? "booking-search-form--compact" : ""}`}>
 			<div className="booking-search-form__fields">
 				{/* Check In */}
 				<div className="booking-search-form__field">
@@ -120,13 +129,26 @@ const BookingSearchForm: React.FC<BookingSearchFormProps> = ({
 				</div>
 			</div>
 
-			<button
-				onClick={onSearch}
-				disabled={!isValid || isSearching}
-				className="booking-search-form__button"
-			>
-				{isSearching ? "Searching..." : "Search Available Pods"}
-			</button>
+			{isCompact && (
+				<button
+					onClick={handleClearFields}
+					className="booking-search-form__clear-button"
+					title="Clear search"
+				>
+					<X size={18} />
+					Clear
+				</button>
+			)}
+
+			{!isCompact && (
+				<button
+					onClick={onSearch}
+					disabled={!isValid || isSearching}
+					className="booking-search-form__button"
+				>
+					{isSearching ? "Searching..." : "Search Available Pods"}
+				</button>
+			)}
 		</div>
 	);
 };

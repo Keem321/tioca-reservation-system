@@ -148,20 +148,33 @@ class PaymentService {
 	 * @returns {Promise<Object>} Detailed reservation information
 	 */
 	async _buildReservationDetailsSnapshot(reservation) {
-		// Extract room details
+		// Extract room details - need to populate if not already populated
 		const rooms = [];
 		const roomIds =
 			reservation.roomIds || (reservation.roomId ? [reservation.roomId] : []);
 
+		// Import RoomRepository to fetch room details if needed
+		const RoomRepository = (await import("../repositories/room.repository.js"))
+			.default;
+
 		for (const room of roomIds) {
-			if (room && typeof room === "object") {
-				rooms.push({
-					roomId: room._id,
-					podId: room.podId,
-					quality: room.quality,
-					floor: room.floor,
-					basePrice: reservation.baseRoomPrice, // Store the base price per night
-				});
+			if (room) {
+				// If room is just an ID (string or ObjectId), fetch the full room object
+				let roomData = room;
+				if (typeof room === "string" || !room.podId) {
+					const roomId = typeof room === "object" ? room._id || room : room;
+					roomData = await RoomRepository.findById(roomId);
+				}
+
+				if (roomData) {
+					rooms.push({
+						roomId: roomData._id,
+						podId: roomData.podId,
+						quality: roomData.quality,
+						floor: roomData.floor,
+						basePrice: reservation.baseRoomPrice, // Store the base price per night
+					});
+				}
 			}
 		}
 
