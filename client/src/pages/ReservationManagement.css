@@ -498,7 +498,12 @@
 }
 
 .reservation-list__header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: var(--spacing-md);
 	margin-bottom: var(--spacing-lg);
+	flex-wrap: wrap;
 }
 
 .reservation-list__header-left {
@@ -506,6 +511,7 @@
 	align-items: center;
 	gap: var(--spacing-md);
 	flex-wrap: wrap;
+	flex: 1;
 }
 
 .reservation-list h2 {
@@ -514,26 +520,16 @@
 	font-size: 1.5rem;
 }
 
-.select-all-label {
-	display: flex;
-	align-items: center;
-	gap: var(--spacing-sm);
-	font-size: 0.9rem;
-	color: var(--color-text-secondary);
-	cursor: pointer;
-	user-select: none;
-}
-
-.select-all-label input[type="checkbox"] {
-	cursor: pointer;
-	width: 18px;
-	height: 18px;
-}
-
 .selected-count {
-	margin-left: var(--spacing-xs);
-	color: var(--color-primary);
-	font-weight: 500;
+	padding: 0.375rem 0.875rem;
+	background: var(--color-primary);
+	color: white;
+	border-radius: 999px;
+	font-size: 0.75rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	white-space: nowrap;
 }
 
 .bulk-actions-inline {
@@ -582,8 +578,13 @@
 	flex-shrink: 0;
 }
 
+.btn-add-reservation svg {
+	width: 28px;
+	height: 28px;
+	stroke-width: 2.5;
+}
+
 .btn-add-reservation:hover {
-	background: var(--color-primary-dark);
 	transform: translateY(-2px);
 	box-shadow: var(--shadow-md);
 }
@@ -707,27 +708,95 @@
 	color: var(--color-secondary);
 }
 
-/* Actions */
-.actions {
-	display: flex;
-	gap: var(--spacing-sm);
-	flex-wrap: wrap;
+/* Actions Dropdown */
+.actions-cell {
+	position: relative;
 }
 
-.actions button {
-	padding: 6px 12px;
-	border: none;
-	border-radius: var(--border-radius-sm);
+.actions-dropdown {
+	position: relative;
+	display: inline-block;
+}
+
+.actions-dropdown__trigger {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	background: transparent;
+	border: 1px solid var(--color-border);
+	border-radius: var(--border-radius-md);
 	cursor: pointer;
-	font-size: 0.75rem;
-	font-weight: 500;
-	white-space: nowrap;
+	color: var(--color-text-secondary);
 	transition: all 0.2s ease;
 }
 
-.actions button:hover {
-	filter: brightness(1.1);
-	box-shadow: var(--shadow-sm);
+.actions-dropdown__trigger:hover {
+	background: var(--color-linen);
+	color: var(--color-primary);
+	border-color: var(--color-primary);
+}
+
+.actions-dropdown__menu {
+	position: absolute;
+	right: 0;
+	top: 100%;
+	margin-top: 4px;
+	min-width: 140px;
+	background: white;
+	border: 1px solid var(--color-border);
+	border-radius: var(--border-radius-md);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1);
+	z-index: 100;
+	overflow: hidden;
+	animation: dropdown-appear 0.15s ease;
+}
+
+@keyframes dropdown-appear {
+	from {
+		opacity: 0;
+		transform: translateY(-4px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.actions-dropdown__item {
+	display: block;
+	width: 100%;
+	padding: 10px 16px;
+	background: white;
+	border: none;
+	text-align: left;
+	cursor: pointer;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--color-text-primary);
+	transition: all 0.15s ease;
+	border-bottom: 1px solid var(--color-border);
+}
+
+.actions-dropdown__item:last-child {
+	border-bottom: none;
+}
+
+.actions-dropdown__item:hover {
+	background: var(--color-linen);
+	color: var(--color-primary);
+}
+
+.actions-dropdown__item--delete:hover {
+	background: rgba(217, 83, 79, 0.1);
+	color: var(--color-error);
+}
+
+.actions-dropdown__item--cancel:hover {
+	background: rgba(240, 173, 78, 0.1);
+	color: var(--color-warning);
 }
 
 /* Error */
@@ -893,15 +962,9 @@ table input[type="checkbox"] {
 		font-size: 0.875rem;
 	}
 
-	.actions {
-		flex-direction: column;
-		gap: var(--spacing-xs);
-	}
-
-	.actions button {
-		width: 100%;
-		font-size: 0.75rem;
-		padding: 4px 8px;
+	.actions-dropdown__menu {
+		right: auto;
+		left: 0;
 	}
 
 	.stats-grid {
