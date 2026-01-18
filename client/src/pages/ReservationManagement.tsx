@@ -10,6 +10,7 @@ import {
 	SlidersHorizontal,
 	Plus,
 	X,
+	MoreVertical,
 } from "lucide-react";
 import Pagination from "../components/Pagination";
 import {
@@ -62,6 +63,7 @@ export default function ReservationManagement() {
 	const [selectedReservations, setSelectedReservations] = useState<Set<string>>(
 		new Set()
 	);
+	const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
 	// Pagination state
 	const [currentPage, setCurrentPage] = useState(1);
@@ -214,6 +216,19 @@ export default function ReservationManagement() {
 			document.body.style.overflow = "unset";
 		};
 	}, [showForm]);
+
+	// Close dropdown when clicking outside
+	React.useEffect(() => {
+		const handleClickOutside = (e: MouseEvent) => {
+			const target = e.target as HTMLElement;
+			if (openDropdownId && !target.closest('.actions-dropdown')) {
+				setOpenDropdownId(null);
+			}
+		};
+
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => document.removeEventListener('mousedown', handleClickOutside);
+	}, [openDropdownId]);
 
 	const handleInputChange = (
 		e: React.ChangeEvent<
@@ -845,52 +860,35 @@ export default function ReservationManagement() {
 					<div className="reservation-list__header">
 						<div className="reservation-list__header-left">
 							<h2>Reservations</h2>
-							<button
-								onClick={() => setShowForm(!showForm)}
-								className="btn-add-reservation"
-								title={showForm ? "Cancel" : "Add New Reservation"}
-							>
-								<Plus size={28} />
-							</button>
-							{reservations.length > 0 && (
-								<>
-									<label className="select-all-label">
-										<input
-											type="checkbox"
-											onChange={(e) => toggleSelectAll(e.target.checked)}
-											checked={
-												selectedReservations.size > 0 &&
-												selectedReservations.size === reservations.length
-											}
-										/>
-										Select All
-										{selectedReservations.size > 0 && (
-											<span className="selected-count">
-												({selectedReservations.size} selected)
-											</span>
-										)}
-									</label>
-									{selectedReservations.size > 0 && (
-										<div className="bulk-actions-inline">
-											<button
-												onClick={bulkCheckIn}
-												disabled={selectedReservations.size === 0}
-												className="bulk-action-btn"
-											>
-												Bulk Check-in
-											</button>
-											<button
-												onClick={bulkCheckOut}
-												disabled={selectedReservations.size === 0}
-												className="bulk-action-btn"
-											>
-												Bulk Check-out
-											</button>
-										</div>
-									)}
-								</>
+							{reservations.length > 0 && selectedReservations.size > 0 && (
+								<div className="bulk-actions-inline">
+									<span className="selected-count">
+										{selectedReservations.size} selected
+									</span>
+									<button
+										onClick={bulkCheckIn}
+										disabled={selectedReservations.size === 0}
+										className="bulk-action-btn"
+									>
+										Bulk Check-in
+									</button>
+									<button
+										onClick={bulkCheckOut}
+										disabled={selectedReservations.size === 0}
+										className="bulk-action-btn"
+									>
+										Bulk Check-out
+									</button>
+								</div>
 							)}
 						</div>
+						<button
+							onClick={() => setShowForm(!showForm)}
+							className="btn-add-reservation"
+							title={showForm ? "Cancel" : "Add New Reservation"}
+						>
+							<Plus />
+						</button>
 					</div>
 					{isLoading && <p>Loading reservations...</p>}
 					{error && <p className="error">Failed to load reservations.</p>}
@@ -904,14 +902,24 @@ export default function ReservationManagement() {
 							<table>
 								<thead>
 									<tr>
-										<th></th>
+										<th>
+											<input
+												type="checkbox"
+												onChange={(e) => toggleSelectAll(e.target.checked)}
+												checked={
+													selectedReservations.size > 0 &&
+													selectedReservations.size === reservations.length
+												}
+												title="Select All"
+											/>
+										</th>
 										<th>Guest</th>
 										<th>Room</th>
 										<th>Dates</th>
 										<th>Status</th>
 										<th>Payment</th>
 										<th>Total</th>
-										<th>Actions</th>
+										<th></th>
 									</tr>
 								</thead>
 								<tbody>
@@ -975,34 +983,77 @@ export default function ReservationManagement() {
 													</span>
 												</td>
 												<td>{formatMoney(reservation.totalPrice)}</td>
-												<td className="actions">
-													<button onClick={() => handleEdit(reservation)}>
-														Edit
-													</button>
-													<button onClick={() => handleDelete(reservation._id)}>
-														Delete
-													</button>
-													{reservation.status !== "cancelled" && (
+												<td className="actions-cell">
+													<div className="actions-dropdown">
 														<button
-															onClick={() => handleCancel(reservation._id)}
+															className="actions-dropdown__trigger"
+															onClick={() =>
+																setOpenDropdownId(
+																	openDropdownId === reservation._id
+																		? null
+																		: reservation._id
+																)
+															}
+															aria-label="Open actions menu"
 														>
-															Cancel
+															<MoreVertical size={20} />
 														</button>
-													)}
-													{canCheckIn && (
-														<button
-															onClick={() => handleCheckIn(reservation._id)}
-														>
-															Check-in
-														</button>
-													)}
-													{canCheckOut && (
-														<button
-															onClick={() => handleCheckOut(reservation._id)}
-														>
-															Check-out
-														</button>
-													)}
+														{openDropdownId === reservation._id && (
+															<div className="actions-dropdown__menu">
+																<button
+																	onClick={() => {
+																		handleEdit(reservation);
+																		setOpenDropdownId(null);
+																	}}
+																	className="actions-dropdown__item"
+																>
+																	Edit
+																</button>
+																<button
+																	onClick={() => {
+																		handleDelete(reservation._id);
+																		setOpenDropdownId(null);
+																	}}
+																	className="actions-dropdown__item actions-dropdown__item--delete"
+																>
+																	Delete
+																</button>
+																{reservation.status !== "cancelled" && (
+																	<button
+																		onClick={() => {
+																			handleCancel(reservation._id);
+																			setOpenDropdownId(null);
+																		}}
+																		className="actions-dropdown__item actions-dropdown__item--cancel"
+																	>
+																		Cancel
+																	</button>
+																)}
+																{canCheckIn && (
+																	<button
+																		onClick={() => {
+																			handleCheckIn(reservation._id);
+																			setOpenDropdownId(null);
+																		}}
+																		className="actions-dropdown__item"
+																	>
+																		Check-in
+																	</button>
+																)}
+																{canCheckOut && (
+																	<button
+																		onClick={() => {
+																			handleCheckOut(reservation._id);
+																			setOpenDropdownId(null);
+																		}}
+																		className="actions-dropdown__item"
+																	>
+																		Check-out
+																	</button>
+																)}
+															</div>
+														)}
+													</div>
 												</td>
 											</tr>
 										);
