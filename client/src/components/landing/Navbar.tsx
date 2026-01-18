@@ -21,10 +21,12 @@ const Navbar: React.FC = () => {
 	const location = useLocation();
 	const isBookingPage = location.pathname === "/booking";
 	const [managerMenuOpen, setManagerMenuOpen] = useState(false);
+	const [aboutMenuOpen, setAboutMenuOpen] = useState(false);
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
 	const accountMenuRef = useRef<HTMLDivElement>(null);
 	const managerMenuRef = useRef<HTMLDivElement>(null);
+	const aboutMenuRef = useRef<HTMLDivElement>(null);
 
 	const user = useSelector((state: RootState) => state.auth.user);
 	const isLoggedIn = user !== null;
@@ -44,6 +46,12 @@ const Navbar: React.FC = () => {
 				!managerMenuRef.current.contains(event.target as Node)
 			) {
 				setManagerMenuOpen(false);
+			}
+			if (
+				aboutMenuRef.current &&
+				!aboutMenuRef.current.contains(event.target as Node)
+			) {
+				setAboutMenuOpen(false);
 			}
 		};
 
@@ -69,6 +77,14 @@ const Navbar: React.FC = () => {
 
 	const handleManagerMouseLeave = () => {
 		setManagerMenuOpen(false);
+	};
+
+	const handleAboutMouseEnter = () => {
+		setAboutMenuOpen(true);
+	};
+
+	const handleAboutMouseLeave = () => {
+		setAboutMenuOpen(false);
 	};
 
 	const handleSignOut = async () => {
@@ -109,31 +125,70 @@ const Navbar: React.FC = () => {
 					mobileMenuOpen ? "navbar__links--open" : ""
 				}`}
 			>
-				{!isBookingPage ? (
-					<>
-						<a href="#rooms" className="navbar__link">
-							Rooms
-						</a>
-						<a href="#amenities" className="navbar__link">
-							Amenities
-						</a>
-						<a href="#location" className="navbar__link">
-							Location
-						</a>
-					</>
-				) : (
-					<>
-						<Link to="/#rooms" className="navbar__link">
-							Rooms
-						</Link>
-						<Link to="/#amenities" className="navbar__link">
-							Amenities
-						</Link>
-						<Link to="/#location" className="navbar__link">
-							Location
-						</Link>
-					</>
-				)}
+				{/* Primary navigation */}
+				<>
+					{/* Room showcase page */}
+					<Link to="/rooms" className="navbar__link">
+						Rooms
+					</Link>
+					{/* Keep amenities anchor on landing for now */}
+					<Link
+						to="/"
+						className="navbar__link"
+						state={{ scrollTo: "amenities" }}
+					>
+						Amenities
+					</Link>
+					{/* About menu with policy links */}
+					<div
+						className="navbar__manager"
+						ref={aboutMenuRef}
+						onMouseEnter={handleAboutMouseEnter}
+						onMouseLeave={handleAboutMouseLeave}
+					>
+						<button
+							onClick={() => setAboutMenuOpen(!aboutMenuOpen)}
+							className="navbar__manager-button"
+						>
+							About
+							<ChevronDown
+								size={16}
+								className={`navbar__chevron ${aboutMenuOpen ? "navbar__chevron--open" : ""}`}
+							/>
+						</button>
+						{aboutMenuOpen && (
+							<div className="navbar__dropdown">
+								<button
+									onClick={() => {
+										navigate("/about");
+										setAboutMenuOpen(false);
+									}}
+									className="navbar__dropdown-item"
+								>
+									About Us
+								</button>
+								<button
+									onClick={() => {
+										navigate("/privacy");
+										setAboutMenuOpen(false);
+									}}
+									className="navbar__dropdown-item"
+								>
+									Privacy Policy
+								</button>
+								<button
+									onClick={() => {
+										navigate("/terms");
+										setAboutMenuOpen(false);
+									}}
+									className="navbar__dropdown-item"
+								>
+									Terms & Conditions
+								</button>
+							</div>
+						)}
+					</div>
+				</>
 
 				{/* Management dropdown - show for managers and admins */}
 				{isManagerOrAdmin && (

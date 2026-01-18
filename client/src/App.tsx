@@ -8,6 +8,8 @@ import type { AppDispatch, RootState } from "./store";
 import "./App.css";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
+import About from "./pages/About";
+import Rooms from "./pages/Rooms";
 import Booking from "./pages/Booking";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
@@ -103,12 +105,22 @@ function App() {
 
 				<Routes>
 					<Route path="/" element={<Landing />} />
-					<Route path="/dashboard" element={<Dashboard />} />
+					{/* Dashboard should be accessible only to signed-in users */}
+					<Route
+						path="/dashboard"
+						element={
+							<ProtectedRoute>
+								<Dashboard />
+							</ProtectedRoute>
+						}
+					/>
+					<Route path="/rooms" element={<Rooms />} />
 					<Route path="/booking" element={<Booking />} />
 					<Route path="/login" element={<Login />} />
 					<Route path="/booking/confirm" element={<BookingConfirmation />} />
 					<Route path="/payment" element={<Payment />} />
 					<Route path="/payment/success" element={<PaymentSuccess />} />
+					<Route path="/about" element={<About />} />
 					<Route path="/privacy" element={<Privacy />} />
 					<Route path="/terms" element={<Terms />} />
 					<Route
