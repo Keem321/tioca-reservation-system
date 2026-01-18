@@ -719,8 +719,8 @@ function createReservationAndPayment({
 	const nights = nightsBetween(checkIn, checkOut);
 	const basePrice = getBasePrice(floor, quality);
 	const totalPrice = calculatePrice(basePrice, nights);
-	const actualPaymentAmount =
-		paymentAmount !== null ? paymentAmount : totalPrice;
+	// Ensure every seeded payment carries a numeric amount the dashboard can sum
+	const actualPaymentAmount = paymentAmount ?? totalPrice;
 	const createdAt = new Date(
 		checkIn.getTime() - (createdOffset || 0) * 24 * 60 * 60 * 1000
 	);
@@ -764,7 +764,7 @@ function createReservationAndPayment({
 		unpaid: "pending",
 		partial: "succeeded",
 		failed: "failed",
-		refunded: "succeeded",
+		refunded: "refunded",
 	};
 
 	payments.push({
@@ -1353,8 +1353,8 @@ users.slice(2).forEach((u) => {
 		u.provider === "google"
 			? "(Google OAuth)"
 			: u.provider === "guest"
-			? "(Guest)"
-			: "(Local)";
+				? "(Guest)"
+				: "(Local)";
 	print(`  - ${u.email} ${type}`);
 });
 
