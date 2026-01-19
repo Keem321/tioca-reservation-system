@@ -1,7 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-
 interface AnalyticsSummary {
 	success: boolean;
 	data: {
@@ -40,7 +38,7 @@ interface DailyTrends {
 export const analyticsApi = createApi({
 	reducerPath: "analyticsApi",
 	baseQuery: fetchBaseQuery({
-		baseUrl: `${API_BASE_URL}/api/analytics`,
+		baseUrl: "/api/analytics",
 		credentials: "include",
 	}),
 	endpoints: (builder) => ({

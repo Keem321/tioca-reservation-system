@@ -79,7 +79,7 @@ const BookingConfirmation: React.FC = () => {
 	const toast = useToast();
 	const { formatMoney } = useFormatMoney();
 	const { checkIn, checkOut, guests, selectedRoom, holdId } = useAppSelector(
-		(state) => state.booking as BookingState
+		(state) => state.booking as BookingState,
 	);
 	const { user } = useAppSelector((state) => state.auth);
 
@@ -111,7 +111,7 @@ const BookingConfirmation: React.FC = () => {
 					floor?: string;
 				}>;
 			}>,
-		[location.state?.timeslots]
+		[location.state?.timeslots],
 	);
 
 	// Guest information form state - primary guest
@@ -163,19 +163,19 @@ const BookingConfirmation: React.FC = () => {
 	const { data: checkInSlotsData, isFetching: loadingCheckInSlots } =
 		useGetAvailableSlotsQuery(
 			{ roomId: room?._id || "", date: checkIn || "" },
-			{ skip: !room || !checkIn }
+			{ skip: !room || !checkIn },
 		);
 
 	const { data: checkOutSlotsData, isFetching: loadingCheckOutSlots } =
 		useGetAvailableSlotsQuery(
 			{ roomId: room?._id || "", date: checkOut || "" },
-			{ skip: !room || !checkOut }
+			{ skip: !room || !checkOut },
 		);
 
 	// Fetch amenities
 	const { data: amenitiesData } = useGetAmenityOfferingsQuery(
 		{ activeOnly: true },
-		{ skip: isGroupBooking } // Only needed for individual bookings for now
+		{ skip: isGroupBooking }, // Only needed for individual bookings for now
 	);
 
 	// Helper to convert 24-hour time to 12-hour AM/PM format
@@ -275,7 +275,7 @@ const BookingConfirmation: React.FC = () => {
 					const slotIn24 = convertAmPmTo24(slot);
 					const checkInIn24 = convertAmPmTo24(checkInTime);
 					return slotIn24 > checkInIn24;
-			  })
+				})
 			: rawCheckOutSlots;
 
 	const [createReservation, { isLoading, error }] =
@@ -376,7 +376,7 @@ const BookingConfirmation: React.FC = () => {
 
 			// Extract all unique room IDs from group results
 			const roomIds = groupResults.primary.map(
-				(assignment) => assignment.roomId
+				(assignment) => assignment.roomId,
 			);
 
 			if (roomIds.length === 0) {
@@ -439,7 +439,7 @@ const BookingConfirmation: React.FC = () => {
 					toast.success(
 						`Reserved ${roomIds.length} room${
 							roomIds.length > 1 ? "s" : ""
-						} for group booking`
+						} for group booking`,
 					);
 				}
 			} catch (err) {
@@ -473,8 +473,8 @@ const BookingConfirmation: React.FC = () => {
 					holdsToRelease.map((holdId) =>
 						releaseHold(holdId).catch((err) => {
 							console.error("Failed to release hold:", err);
-						})
-					)
+						}),
+					),
 				);
 				setGroupHoldIds([]);
 			}
@@ -533,7 +533,8 @@ const BookingConfirmation: React.FC = () => {
 			const checkInDate = toLocalDate(checkIn);
 			const checkOutDate = toLocalDate(checkOut);
 			const nights = Math.ceil(
-				(checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
+				(checkOutDate.getTime() - checkInDate.getTime()) /
+					(1000 * 60 * 60 * 24),
 			);
 
 			// Calculate room price
@@ -543,7 +544,7 @@ const BookingConfirmation: React.FC = () => {
 			if (selectedAmenities.length > 0 && amenitiesData) {
 				for (const amenityId of selectedAmenities) {
 					const amenity = amenitiesData.find(
-						(a: AmenityOffering) => a._id === amenityId
+						(a: AmenityOffering) => a._id === amenityId,
 					);
 					if (amenity) {
 						if (amenity.priceType === "per-night") {
@@ -601,11 +602,11 @@ const BookingConfirmation: React.FC = () => {
 		const missingTimes = timeslots.some(
 			(ts: GroupBookingTimeslot) =>
 				!timeslotTimes[ts.id]?.checkInTime ||
-				!timeslotTimes[ts.id]?.checkOutTime
+				!timeslotTimes[ts.id]?.checkOutTime,
 		);
 		if (missingTimes) {
 			setTimeError(
-				"Please select arrival and departure times for all periods."
+				"Please select arrival and departure times for all periods.",
 			);
 			return;
 		}
@@ -632,7 +633,7 @@ const BookingConfirmation: React.FC = () => {
 			// Collect all rooms and calculate aggregated data
 			for (const timeslot of timeslots) {
 				const timeslotAssignments = groupResults!.primary.filter((assignment) =>
-					timeslot.members.some((m) => m.id === assignment.memberId)
+					timeslot.members.some((m) => m.id === assignment.memberId),
 				);
 
 				// Get times for this timeslot
@@ -660,12 +661,12 @@ const BookingConfirmation: React.FC = () => {
 				// Calculate nights for pricing
 				const nights = Math.ceil(
 					(timeslotCheckOut.getTime() - timeslotCheckIn.getTime()) /
-						(1000 * 60 * 60 * 24)
+						(1000 * 60 * 60 * 24),
 				);
 
 				for (const assignment of timeslotAssignments) {
 					const member = timeslot.members.find(
-						(m) => m.id === assignment.memberId
+						(m) => m.id === assignment.memberId,
 					);
 					if (!member) continue;
 
@@ -719,9 +720,8 @@ const BookingConfirmation: React.FC = () => {
 			};
 
 			// Create single group reservation
-			const reservation = await createReservation(
-				groupReservationData
-			).unwrap();
+			const reservation =
+				await createReservation(groupReservationData).unwrap();
 
 			console.log("[BookingConfirmation] Group reservation created:", {
 				reservationId: reservation._id,
@@ -771,7 +771,7 @@ const BookingConfirmation: React.FC = () => {
 	const handleSetTimeslotTime = (
 		timeslotId: string,
 		type: "checkIn" | "checkOut",
-		time: string
+		time: string,
 	) => {
 		setTimeslotTimes((prev) => ({
 			...prev,
@@ -802,7 +802,7 @@ const BookingConfirmation: React.FC = () => {
 		const totalRooms = groupResults.primary.length;
 		const totalGuests = groupResults.primary.reduce((sum, assignment) => {
 			const member = firstTimeslot.members.find(
-				(m: { id: string }) => m.id === assignment.memberId
+				(m: { id: string }) => m.id === assignment.memberId,
 			);
 			return sum + (member?.numberOfGuests || 1);
 		}, 0);
@@ -883,7 +883,7 @@ const BookingConfirmation: React.FC = () => {
 
 								groupResults.primary.forEach((assignment) => {
 									const member = firstTimeslot.members.find(
-										(m: { id: string }) => m.id === assignment.memberId
+										(m: { id: string }) => m.id === assignment.memberId,
 									);
 									const numGuests = member?.numberOfGuests || 1;
 
@@ -927,7 +927,7 @@ const BookingConfirmation: React.FC = () => {
 														onChange={(e) =>
 															handleSetGroupGuestName(
 																guest.memberId,
-																e.target.value
+																e.target.value,
 															)
 														}
 													/>
@@ -942,8 +942,8 @@ const BookingConfirmation: React.FC = () => {
 							const timeslotAssignments = groupResults.primary.filter(
 								(assignment) =>
 									timeslot.members.some(
-										(m: { id: string }) => m.id === assignment.memberId
-									)
+										(m: { id: string }) => m.id === assignment.memberId,
+									),
 							);
 
 							if (timeslotAssignments.length === 0) return null;
@@ -1001,7 +1001,7 @@ const BookingConfirmation: React.FC = () => {
 													handleSetTimeslotTime(
 														timeslot.id,
 														"checkIn",
-														e.target.value
+														e.target.value,
 													)
 												}
 												required
@@ -1022,7 +1022,7 @@ const BookingConfirmation: React.FC = () => {
 													handleSetTimeslotTime(
 														timeslot.id,
 														"checkOut",
-														e.target.value
+														e.target.value,
 													)
 												}
 												required
@@ -1120,7 +1120,7 @@ const BookingConfirmation: React.FC = () => {
 									timeslots.some(
 										(ts: GroupBookingTimeslot) =>
 											!timeslotTimes[ts.id]?.checkInTime ||
-											!timeslotTimes[ts.id]?.checkOutTime
+											!timeslotTimes[ts.id]?.checkOutTime,
 									)
 								}
 							>
@@ -1138,9 +1138,38 @@ const BookingConfirmation: React.FC = () => {
 	const checkInDate = toLocalDate(checkIn);
 	const checkOutDate = toLocalDate(checkOut);
 	const nights = Math.ceil(
-		(checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
+		(checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24),
 	);
-	const totalPrice = (room.offering?.basePrice || 0) * nights;
+
+	// Calculate total price including amenities
+	const totalPrice = useMemo(() => {
+		let price = (room.offering?.basePrice || 0) * nights;
+
+		// Add amenity prices
+		if (selectedAmenities.length > 0 && amenitiesData) {
+			selectedAmenities.forEach((amenityId) => {
+				const amenity = amenitiesData.find(
+					(a: AmenityOffering) => a._id === amenityId,
+				);
+				if (amenity) {
+					if (amenity.priceType === "per-night") {
+						price += amenity.basePrice * nights;
+					} else {
+						price += amenity.basePrice;
+					}
+				}
+			});
+		}
+
+		return price;
+	}, [
+		room.offering?.basePrice,
+		nights,
+		selectedAmenities.length,
+		selectedAmenities,
+		amenitiesData,
+	]);
+
 	const roomImage = getRoomImage(room.quality, room.floor);
 	const roomLabel = getRoomDisplayLabel(room.quality, room.floor);
 	const roomDescription = getRoomQualityDescription(room.quality);
@@ -1303,7 +1332,7 @@ const BookingConfirmation: React.FC = () => {
 									Departure Time on{" "}
 									{new Date(checkOut + "T00:00:00").toLocaleDateString(
 										"en-US",
-										{ month: "short", day: "numeric" }
+										{ month: "short", day: "numeric" },
 									)}{" "}
 									*
 								</label>
@@ -1436,8 +1465,8 @@ const BookingConfirmation: React.FC = () => {
 														} else {
 															setSelectedAmenities(
 																selectedAmenities.filter(
-																	(id) => id !== amenity._id
-																)
+																	(id) => id !== amenity._id,
+																),
 															);
 														}
 													}}
@@ -1489,7 +1518,7 @@ const BookingConfirmation: React.FC = () => {
 											</p>
 											{selectedAmenities.map((amenityId) => {
 												const amenity = amenitiesData.find(
-													(a: AmenityOffering) => a._id === amenityId
+													(a: AmenityOffering) => a._id === amenityId,
 												);
 												if (!amenity) return null;
 												const amenityTotal =
@@ -1550,8 +1579,8 @@ const BookingConfirmation: React.FC = () => {
 							{isLoading
 								? "Creating Reservation..."
 								: isCreatingHold
-								? "Reserving Room..."
-								: "Proceed to Payment"}
+									? "Reserving Room..."
+									: "Proceed to Payment"}
 						</button>
 					</div>
 					{(!guestName || !guestEmail || !checkInTime || !checkOutTime) && (

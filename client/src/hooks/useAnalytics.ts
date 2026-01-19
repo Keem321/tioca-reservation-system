@@ -11,8 +11,6 @@ import { useEffect, useRef, useCallback } from "react";
  * - success: User completed payment
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-
 // Simple UUID generator (v4)
 const generateUUID = (): string => {
 	return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
@@ -42,7 +40,7 @@ const trackEvent = async (
 	try {
 		const sessionId = getSessionId();
 		
-		await fetch(`${API_BASE_URL}/api/analytics/track`, {
+		await fetch("/api/analytics/track", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

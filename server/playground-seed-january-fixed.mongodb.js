@@ -269,7 +269,7 @@ print(
 		allOfferingsArray.length
 	} inserted offerings (id keys: ${
 		Object.keys(offeringIds || {}).length
-	}, id values: ${insertedOfferingIds.length})...`
+	}, id values: ${insertedOfferingIds.length})...`,
 );
 
 insertedOfferingIds.forEach((offeringId, idx) => {
@@ -292,7 +292,7 @@ const hasOfferingsMapped =
 
 if (!hasOfferingsMapped) {
 	print(
-		"⚠️  Could not map offerings from insertMany result; aborting seeding."
+		"⚠️  Could not map offerings from insertMany result; aborting seeding.",
 	);
 	throw new Error("Failed to map offerings");
 }
@@ -300,7 +300,7 @@ if (!hasOfferingsMapped) {
 print(
 	`✓ Offering lookup ready (single: ${Object.keys(offeringMap).length}, twin: ${
 		Object.keys(twinOfferingMap).length
-	})\n`
+	})\n`,
 );
 
 // ============================================
@@ -654,7 +654,8 @@ function getRandomRoom(floorKey, qualityKey) {
 function getBasePrice(floor, quality) {
 	const isTwin = floor === "couples";
 	const offering = ROOM_OFFERINGS.find(
-		(o) => o.quality === quality && (isTwin ? o.variant === "twin" : !o.variant)
+		(o) =>
+			o.quality === quality && (isTwin ? o.variant === "twin" : !o.variant),
 	);
 	return offering ? offering.basePrice : 6500;
 }
@@ -706,11 +707,11 @@ function createReservationAndPayment({
 	if (!isRoomAvailable(room._id, checkIn, checkOut)) {
 		const key = `${floor}-${quality}`;
 		const availableRooms = roomsByFloorQuality[key].filter((r) =>
-			isRoomAvailable(r._id, checkIn, checkOut)
+			isRoomAvailable(r._id, checkIn, checkOut),
 		);
 		if (availableRooms.length === 0) {
 			print(
-				`⚠️  No available ${floor}-${quality} rooms for ${checkIn.toDateString()}`
+				`⚠️  No available ${floor}-${quality} rooms for ${checkIn.toDateString()}`,
 			);
 			return;
 		}
@@ -725,17 +726,17 @@ function createReservationAndPayment({
 	// Ensure every seeded payment carries a numeric amount the dashboard can sum
 	const actualPaymentAmount = paymentAmount ?? totalPrice;
 	const createdAt = new Date(
-		checkIn.getTime() - (createdOffset || 0) * 24 * 60 * 60 * 1000
+		checkIn.getTime() - (createdOffset || 0) * 24 * 60 * 60 * 1000,
 	);
 	const updatedAt = new Date(createdAt.getTime() + 3600000);
 
 	const stripeCustomerId = `cus_jan_${String(reservationCounter).padStart(
 		4,
-		"0"
+		"0",
 	)}`;
 	const stripePaymentIntentId = `pi_jan_${String(paymentCounter).padStart(
 		4,
-		"0"
+		"0",
 	)}`;
 	const stripeChargeId =
 		paymentStatus === "paid"
@@ -1446,7 +1447,7 @@ for (let i = 0; i < 3; i++) {
 	const sessionId1 = genSessionId(`shopper${i}-visit1`);
 	addAnalyticsEvent(sessionId1, "search", "enter", baseDay, 10);
 	addAnalyticsEvent(sessionId1, "search", "exit", baseDay, 10);
-	
+
 	// Second visit - got to confirmation but bounced
 	const sessionId2 = genSessionId(`shopper${i}-visit2`);
 	addAnalyticsEvent(sessionId2, "search", "enter", baseDay + 1, 14);
@@ -1454,7 +1455,7 @@ for (let i = 0; i < 3; i++) {
 	addAnalyticsEvent(sessionId2, "search", "exit", baseDay + 1, 14);
 	addAnalyticsEvent(sessionId2, "confirm", "enter", baseDay + 1, 14);
 	addAnalyticsEvent(sessionId2, "confirm", "exit", baseDay + 1, 14);
-	
+
 	// Third visit - completed booking
 	const sessionId3 = genSessionId(`shopper${i}-visit3`);
 	addAnalyticsEvent(sessionId3, "search", "enter", baseDay + 2, 19);
@@ -1468,6 +1469,64 @@ for (let i = 0; i < 3; i++) {
 	addAnalyticsEvent(sessionId3, "payment", "exit", baseDay + 2, 19);
 	addAnalyticsEvent(sessionId3, "success", "enter", baseDay + 2, 19);
 }
+
+// Scenario 8: Recent week data (last 7 days) - for more current analytics
+// Add realistic data for days 12-18 (more recent for dashboard)
+const recentDays = [12, 13, 14, 15, 16, 17, 18];
+recentDays.forEach((day, index) => {
+	// Successful bookings (2-4 per day)
+	const successCount = 2 + Math.floor(Math.random() * 3);
+	for (let i = 0; i < successCount; i++) {
+		const sessionId = genSessionId(`recent-success-${day}-${i}`);
+		const hour = 9 + Math.floor(Math.random() * 12); // 9am-9pm
+		addAnalyticsEvent(sessionId, "search", "enter", day, hour);
+		addAnalyticsEvent(sessionId, "search", "complete", day, hour);
+		addAnalyticsEvent(sessionId, "search", "exit", day, hour);
+		addAnalyticsEvent(sessionId, "confirm", "enter", day, hour);
+		addAnalyticsEvent(sessionId, "confirm", "complete", day, hour);
+		addAnalyticsEvent(sessionId, "confirm", "exit", day, hour);
+		addAnalyticsEvent(sessionId, "payment", "enter", day, hour);
+		addAnalyticsEvent(sessionId, "payment", "complete", day, hour);
+		addAnalyticsEvent(sessionId, "payment", "exit", day, hour);
+		addAnalyticsEvent(sessionId, "success", "enter", day, hour);
+	}
+
+	// Search bounces (3-6 per day)
+	const searchBounces = 3 + Math.floor(Math.random() * 4);
+	for (let i = 0; i < searchBounces; i++) {
+		const sessionId = genSessionId(`recent-search-bounce-${day}-${i}`);
+		const hour = 8 + Math.floor(Math.random() * 14); // 8am-10pm
+		addAnalyticsEvent(sessionId, "search", "enter", day, hour);
+		addAnalyticsEvent(sessionId, "search", "exit", day, hour);
+	}
+
+	// Confirmation bounces (2-3 per day)
+	const confirmBounces = 2 + Math.floor(Math.random() * 2);
+	for (let i = 0; i < confirmBounces; i++) {
+		const sessionId = genSessionId(`recent-confirm-bounce-${day}-${i}`);
+		const hour = 10 + Math.floor(Math.random() * 10); // 10am-8pm
+		addAnalyticsEvent(sessionId, "search", "enter", day, hour);
+		addAnalyticsEvent(sessionId, "search", "complete", day, hour);
+		addAnalyticsEvent(sessionId, "search", "exit", day, hour);
+		addAnalyticsEvent(sessionId, "confirm", "enter", day, hour);
+		addAnalyticsEvent(sessionId, "confirm", "exit", day, hour);
+	}
+
+	// Payment bounces (1-2 per day)
+	const paymentBounces = 1 + Math.floor(Math.random() * 2);
+	for (let i = 0; i < paymentBounces; i++) {
+		const sessionId = genSessionId(`recent-payment-bounce-${day}-${i}`);
+		const hour = 11 + Math.floor(Math.random() * 8); // 11am-7pm
+		addAnalyticsEvent(sessionId, "search", "enter", day, hour);
+		addAnalyticsEvent(sessionId, "search", "complete", day, hour);
+		addAnalyticsEvent(sessionId, "search", "exit", day, hour);
+		addAnalyticsEvent(sessionId, "confirm", "enter", day, hour);
+		addAnalyticsEvent(sessionId, "confirm", "complete", day, hour);
+		addAnalyticsEvent(sessionId, "confirm", "exit", day, hour);
+		addAnalyticsEvent(sessionId, "payment", "enter", day, hour);
+		addAnalyticsEvent(sessionId, "payment", "exit", day, hour);
+	}
+});
 
 // Insert all analytics events
 if (analyticsEvents.length > 0) {
@@ -1560,15 +1619,17 @@ try {
 }
 
 try {
-	const analyticsSummary = db.analyticsevents.aggregate([
-		{ $group: { _id: "$stage", count: { $sum: 1 } } },
-		{ $sort: { _id: 1 } }
-	]).toArray();
+	const analyticsSummary = db.analyticsevents
+		.aggregate([
+			{ $group: { _id: "$stage", count: { $sum: 1 } } },
+			{ $sort: { _id: 1 } },
+		])
+		.toArray();
 	print("\n--- ANALYTICS EVENTS BY STAGE ---");
 	analyticsSummary.forEach((s) => {
 		print(`  ${s._id}: ${s.count} events`);
 	});
-	
+
 	const uniqueSessions = db.analyticsevents.distinct("sessionId").length;
 	print(`\nTotal unique sessions tracked: ${uniqueSessions}`);
 } catch (e) {
