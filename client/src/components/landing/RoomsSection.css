@@ -1,6 +1,6 @@
 .rooms-section {
 	padding: 6rem 2rem;
-	background-color: var(--color-bone);
+	background-color: var(--color-linen);
 }
 
 .rooms-section__container {
@@ -37,7 +37,9 @@
 	border-radius: 16px;
 	overflow: hidden;
 	box-shadow: 0 6px 18px rgba(44, 22, 7, 0.08);
-	transition: transform 0.3s, box-shadow 0.3s;
+	transition:
+		transform 0.3s,
+		box-shadow 0.3s;
 	background: linear-gradient(
 		135deg,
 		var(--color-linen) 0%,

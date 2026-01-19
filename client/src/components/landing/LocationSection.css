@@ -1,10 +1,6 @@
 .location-section {
 	padding: 6rem 2rem;
-	background: linear-gradient(
-		135deg,
-		var(--color-milk-tea) 0%,
-		var(--color-bone) 100%
-	);
+	background: var(--color-bone);
 }
 
 .location-section__container {
