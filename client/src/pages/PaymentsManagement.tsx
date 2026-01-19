@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -264,7 +264,7 @@ export default function PaymentsManagement() {
 								<label>From Date:</label>
 								<DatePicker
 									selected={dateFrom ? new Date(dateFrom) : null}
-									onChange={(date) =>
+									onChange={(date: Date | null) =>
 										setDateFrom(date ? date.toISOString().split("T")[0] : "")
 									}
 									dateFormat="MMM d, yyyy"
@@ -277,7 +277,7 @@ export default function PaymentsManagement() {
 								<label>To Date:</label>
 								<DatePicker
 									selected={dateTo ? new Date(dateTo) : null}
-									onChange={(date) =>
+									onChange={(date: Date | null) =>
 										setDateTo(date ? date.toISOString().split("T")[0] : "")
 									}
 									minDate={dateFrom ? new Date(dateFrom) : undefined}
@@ -460,7 +460,7 @@ export default function PaymentsManagement() {
 														count: number;
 														month: string;
 														year: number;
-													}
+													},
 												]
 											>
 										>();
@@ -484,7 +484,7 @@ export default function PaymentsManagement() {
 										const filteredDays = selectedMonth
 											? sortedDays.filter(
 													([_, data]) => data.month === selectedMonth
-											  )
+												)
 											: [];
 
 										// Generate all days for the selected month
@@ -496,7 +496,7 @@ export default function PaymentsManagement() {
 													count: number;
 													month: string;
 													year: number;
-												}
+												},
 											]
 										> = [];
 										if (selectedMonth) {
@@ -540,7 +540,7 @@ export default function PaymentsManagement() {
 											filteredDays.length > 0
 												? Math.max(
 														...filteredDays.map(([_, data]) => data.amount)
-												  )
+													)
 												: 1; // Avoid division by zero
 
 										// Color palette for different months
@@ -567,7 +567,7 @@ export default function PaymentsManagement() {
 											<>
 												<div className="revenue-chart__bars-container">
 													<div className="revenue-chart__bars">
-														{allDaysInMonth.map(([dateKey, data], index) => {
+														{allDaysInMonth.map(([dateKey, data]) => {
 															const date = new Date(dateKey);
 															const hasData = data.amount > 0;
 
@@ -669,7 +669,7 @@ export default function PaymentsManagement() {
 														{Array.from(monthGroups.keys())
 															.sort()
 															.reverse()
-															.map((monthKey, index) => {
+															.map((monthKey) => {
 																const [year, month] = monthKey.split("-");
 																const date = new Date(
 																	parseInt(year),
@@ -1030,7 +1030,7 @@ export default function PaymentsManagement() {
 																											room.basePrice != null
 																												? `$${(
 																														room.basePrice / 100
-																												  ).toFixed(2)}/night`
+																													).toFixed(2)}/night`
 																												: "Price N/A"
 																										}`
 																									) : (
@@ -1040,19 +1040,20 @@ export default function PaymentsManagement() {
 																													color: "#999",
 																												}}
 																											>
-																												Details incomplete -{" "}
+																												Details incomplete
+																												-{" "}
 																											</span>
 																											Room ID:{" "}
 																											{room.roomId
 																												? String(
 																														room.roomId
-																												  ).slice(-8)
+																													).slice(-8)
 																												: "Unknown"}{" "}
 																											@ $
 																											{room.basePrice != null
 																												? `$${(
 																														room.basePrice / 100
-																												  ).toFixed(2)}/night`
+																													).toFixed(2)}/night`
 																												: "N/A"}
 																										</>
 																									)}
@@ -1100,7 +1101,7 @@ export default function PaymentsManagement() {
 																									{amenity.price != null
 																										? `$${(
 																												amenity.price / 100
-																										  ).toFixed(2)}`
+																											).toFixed(2)}`
 																										: "N/A"}{" "}
 																									({amenity.priceType || "N/A"})
 																									{amenity.priceType ===
@@ -1149,7 +1150,7 @@ export default function PaymentsManagement() {
 																											payment.reservationDetails
 																												.priceBreakdown
 																												.baseRoomTotal
-																									  )
+																										)
 																									: "$0.00"}
 																							</span>
 																						</div>
@@ -1209,10 +1210,10 @@ export default function PaymentsManagement() {
 																									? formatCurrency(
 																											payment.reservationDetails
 																												.priceBreakdown.total
-																									  )
+																										)
 																									: formatCurrency(
 																											payment.amount
-																									  )}
+																										)}
 																							</span>
 																						</div>
 																					</>

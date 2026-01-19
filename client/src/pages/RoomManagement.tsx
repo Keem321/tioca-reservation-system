@@ -126,14 +126,22 @@ export default function RoomManagement() {
 	};
 
 	// Compute booked roomIds for the selected window
-	const windowStart = useMemo(
-		() => (startDate ? new Date(startDate) : null),
-		[startDate]
-	);
-	const windowEnd = useMemo(
-		() => (endDate ? new Date(endDate) : null),
-		[endDate]
-	);
+	const windowStart = useMemo(() => {
+		if (startDate) {
+			const parsed = new Date(startDate);
+			return isNaN(parsed.getTime()) ? new Date() : parsed;
+		}
+		return new Date();
+	}, [startDate]);
+	const windowEnd = useMemo(() => {
+		if (endDate) {
+			const parsed = new Date(endDate);
+			return isNaN(parsed.getTime()) ? new Date() : parsed;
+		}
+		const fallback = new Date(windowStart);
+		fallback.setDate(fallback.getDate() + 14);
+		return fallback;
+	}, [endDate, windowStart]);
 	const activeStatuses = useMemo(
 		() => new Set(["pending", "confirmed", "checked-in"]),
 		[]
@@ -583,8 +591,8 @@ export default function RoomManagement() {
 										{isCreating || isUpdating
 											? "Saving..."
 											: editingRoom
-											? "Update Pod"
-											: "Create Pod"}
+												? "Update Pod"
+												: "Create Pod"}
 									</button>
 									<button type="button" onClick={resetForm}>
 										Cancel
@@ -696,7 +704,7 @@ export default function RoomManagement() {
 										</span>
 										<DatePicker
 											selected={startDate ? new Date(startDate) : null}
-											onChange={(date) =>
+											onChange={(date: Date | null) =>
 												setStartDate(
 													date ? date.toISOString().split("T")[0] : ""
 												)
@@ -717,7 +725,7 @@ export default function RoomManagement() {
 										</span>
 										<DatePicker
 											selected={endDate ? new Date(endDate) : null}
-											onChange={(date) =>
+											onChange={(date: Date | null) =>
 												setEndDate(date ? date.toISOString().split("T")[0] : "")
 											}
 											minDate={startDate ? new Date(startDate) : undefined}
@@ -800,9 +808,9 @@ export default function RoomManagement() {
 													{next
 														? `${new Date(
 																next.checkInDate
-														  ).toLocaleDateString()} → ${new Date(
+															).toLocaleDateString()} → ${new Date(
 																next.checkOutDate
-														  ).toLocaleDateString()}`
+															).toLocaleDateString()}`
 														: "-"}
 												</td>
 												<td className={`status-${room.status}`}>

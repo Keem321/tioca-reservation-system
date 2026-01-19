@@ -3,15 +3,7 @@ import React from "react";
 import Navbar from "../components/landing/Navbar";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import {
-	Calendar,
-	Mail,
-	Search,
-	SlidersHorizontal,
-	Plus,
-	X,
-	MoreVertical,
-} from "lucide-react";
+import { Calendar, Mail, Search, Plus, X, MoreVertical } from "lucide-react";
 import Pagination from "../components/Pagination";
 import {
 	useGetReservationsQuery,
@@ -221,13 +213,13 @@ export default function ReservationManagement() {
 	React.useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
 			const target = e.target as HTMLElement;
-			if (openDropdownId && !target.closest('.actions-dropdown')) {
+			if (openDropdownId && !target.closest(".actions-dropdown")) {
 				setOpenDropdownId(null);
 			}
 		};
 
-		document.addEventListener('mousedown', handleClickOutside);
-		return () => document.removeEventListener('mousedown', handleClickOutside);
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => document.removeEventListener("mousedown", handleClickOutside);
 	}, [openDropdownId]);
 
 	const handleInputChange = (
@@ -554,7 +546,7 @@ export default function ReservationManagement() {
 								</span>
 								<DatePicker
 									selected={dateFromFilter ? new Date(dateFromFilter) : null}
-									onChange={(date) =>
+									onChange={(date: Date | null) =>
 										setDateFromFilter(
 											date ? date.toISOString().split("T")[0] : ""
 										)
@@ -576,7 +568,7 @@ export default function ReservationManagement() {
 								</span>
 								<DatePicker
 									selected={dateToFilter ? new Date(dateToFilter) : null}
-									onChange={(date) =>
+									onChange={(date: Date | null) =>
 										setDateToFilter(
 											date ? date.toISOString().split("T")[0] : ""
 										)
@@ -667,7 +659,7 @@ export default function ReservationManagement() {
 													{room.offering?.basePrice
 														? ` • ${formatPricePerNight(
 																room.offering.basePrice
-														  )}`
+															)}`
 														: ""}
 												</option>
 											))}
@@ -928,8 +920,8 @@ export default function ReservationManagement() {
 											typeof reservation.roomId === "string"
 												? reservation.roomId
 												: reservation.roomId && reservation.roomId.podId
-												? `Pod ${reservation.roomId.podId} (${reservation.roomId.quality})`
-												: "Unknown Room";
+													? `Pod ${reservation.roomId.podId} (${reservation.roomId.quality})`
+													: "Unknown Room";
 										const isChecked = selectedReservations.has(reservation._id);
 										const canCheckIn = reservation.status === "confirmed";
 										const canCheckOut = reservation.status === "checked-in";

@@ -1,17 +1,27 @@
 import React, { useState, useMemo } from "react";
-import { useGetAnalyticsSummaryQuery, useGetDailyTrendsQuery } from "../features/analyticsApi";
+import {
+	useGetAnalyticsSummaryQuery,
+	useGetDailyTrendsQuery,
+} from "../features/analyticsApi";
 import Navbar from "../components/landing/Navbar";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { TrendingDown, TrendingUp, Users, CheckCircle, Calendar, BarChart3 } from "lucide-react";
+import {
+	TrendingDown,
+	TrendingUp,
+	Users,
+	CheckCircle,
+	Calendar,
+	BarChart3,
+} from "lucide-react";
 import "./Analytics.css";
 
 /**
  * Analytics Dashboard Component
- * 
+ *
  * Displays booking funnel analytics including bounce rates
  * for each stage of the booking process.
- * 
+ *
  * Available to managers only.
  */
 const Analytics: React.FC = () => {
@@ -19,13 +29,21 @@ const Analytics: React.FC = () => {
 	const [endDate, setEndDate] = useState<Date | null>(null);
 
 	// Format dates for API
-	const dateRange = useMemo(() => ({
-		startDate: startDate ? startDate.toISOString().split('T')[0] : undefined,
-		endDate: endDate ? endDate.toISOString().split('T')[0] : undefined,
-	}), [startDate, endDate]);
+	const dateRange = useMemo(
+		() => ({
+			startDate: startDate ? startDate.toISOString().split("T")[0] : undefined,
+			endDate: endDate ? endDate.toISOString().split("T")[0] : undefined,
+		}),
+		[startDate, endDate]
+	);
 
-	const { data: summaryData, isLoading, error } = useGetAnalyticsSummaryQuery(dateRange);
-	const { data: trendsData, isLoading: trendsLoading } = useGetDailyTrendsQuery(dateRange);
+	const {
+		data: summaryData,
+		isLoading,
+		error,
+	} = useGetAnalyticsSummaryQuery(dateRange);
+	const { data: trendsData, isLoading: trendsLoading } =
+		useGetDailyTrendsQuery(dateRange);
 
 	// Process all data with hooks BEFORE any early returns
 	const metrics = summaryData?.data.metrics || {};
@@ -35,41 +53,47 @@ const Analytics: React.FC = () => {
 		conversionRate: 0,
 	};
 
-	const stages = useMemo(() => [
-		{
-			key: "search",
-			name: "Search",
-			description: "Users browsing available rooms",
-			icon: Users,
-			color: "#d97706", // Warm amber
-		},
-		{
-			key: "confirm",
-			name: "Confirmation",
-			description: "Users entering booking details",
-			icon: CheckCircle,
-			color: "#a86434", // TIOCA primary brown
-		},
-		{
-			key: "payment",
-			name: "Payment",
-			description: "Users completing payment",
-			icon: CheckCircle,
-			color: "#78350f", // Dark amber-brown (more distinct)
-		},
-	], []);
+	const stages = useMemo(
+		() => [
+			{
+				key: "search",
+				name: "Search",
+				description: "Users browsing available rooms",
+				icon: Users,
+				color: "#d97706", // Warm amber
+			},
+			{
+				key: "confirm",
+				name: "Confirmation",
+				description: "Users entering booking details",
+				icon: CheckCircle,
+				color: "#a86434", // TIOCA primary brown
+			},
+			{
+				key: "payment",
+				name: "Payment",
+				description: "Users completing payment",
+				icon: CheckCircle,
+				color: "#78350f", // Dark amber-brown (more distinct)
+			},
+		],
+		[]
+	);
 
 	// Process trends data for chart
 	const trendsChartData = useMemo(() => {
 		if (!trendsData?.data) return [];
-		
+
 		const data = trendsData.data;
 		const dates = Object.keys(data).sort();
-		
-		return dates.map(date => {
+
+		return dates.map((date) => {
 			const dayData = data[date];
 			return {
-				date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+				date: new Date(date).toLocaleDateString("en-US", {
+					month: "short",
+					day: "numeric",
+				}),
 				fullDate: date,
 				searchEntered: dayData.search?.enter || 0,
 				searchCompleted: dayData.search?.complete || 0,
@@ -139,10 +163,15 @@ const Analytics: React.FC = () => {
 					<div className="filters">
 						<div className="filters__header">
 							<div className="filters__header-content">
-								<Calendar size={24} className="filters__icon filters__icon--main" />
+								<Calendar
+									size={24}
+									className="filters__icon filters__icon--main"
+								/>
 								<div>
 									<h3 className="filters__title">Date Range</h3>
-									<p className="filters__subtitle">Filter analytics by date range</p>
+									<p className="filters__subtitle">
+										Filter analytics by date range
+									</p>
 								</div>
 							</div>
 						</div>
@@ -155,7 +184,7 @@ const Analytics: React.FC = () => {
 									</label>
 									<DatePicker
 										selected={startDate}
-										onChange={(date) => setStartDate(date)}
+										onChange={(date: Date | null) => setStartDate(date)}
 										selectsStart
 										startDate={startDate}
 										endDate={endDate}
@@ -171,11 +200,11 @@ const Analytics: React.FC = () => {
 									</label>
 									<DatePicker
 										selected={endDate}
-										onChange={(date) => setEndDate(date)}
+										onChange={(date: Date | null) => setEndDate(date)}
 										selectsEnd
 										startDate={startDate}
 										endDate={endDate}
-										minDate={startDate}
+										minDate={startDate || undefined}
 										maxDate={new Date()}
 										placeholderText="Select end date"
 										dateFormat="MMM d, yyyy"
@@ -183,7 +212,10 @@ const Analytics: React.FC = () => {
 									/>
 								</div>
 								{(startDate || endDate) && (
-									<button onClick={handleClearDates} className="filter-clear-btn">
+									<button
+										onClick={handleClearDates}
+										className="filter-clear-btn"
+									>
 										Clear Dates
 									</button>
 								)}
@@ -222,22 +254,35 @@ const Analytics: React.FC = () => {
 								</div>
 							</div>
 							<div className="trends-chart">
-							<div className="chart-legend">
-								<div className="legend-item">
-									<span className="legend-dot" style={{ backgroundColor: '#d97706' }}></span>
-									<span>Search</span>
+								<div className="chart-legend">
+									<div className="legend-item">
+										<span
+											className="legend-dot"
+											style={{ backgroundColor: "#d97706" }}
+										></span>
+										<span>Search</span>
+									</div>
+									<div className="legend-item">
+										<span
+											className="legend-dot"
+											style={{ backgroundColor: "#a86434" }}
+										></span>
+										<span>Confirmation</span>
+									</div>
+									<div className="legend-item">
+										<span
+											className="legend-dot"
+											style={{ backgroundColor: "#78350f" }}
+										></span>
+										<span>Payment</span>
+									</div>
 								</div>
-								<div className="legend-item">
-									<span className="legend-dot" style={{ backgroundColor: '#a86434' }}></span>
-									<span>Confirmation</span>
-								</div>
-								<div className="legend-item">
-									<span className="legend-dot" style={{ backgroundColor: '#78350f' }}></span>
-									<span>Payment</span>
-								</div>
-							</div>
 								<div className="chart-container">
-									<svg className="chart-svg" viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
+									<svg
+										className="chart-svg"
+										viewBox="0 0 800 300"
+										preserveAspectRatio="xMidYMid meet"
+									>
 										{/* Grid lines */}
 										<g className="grid">
 											{[0, 25, 50, 75, 100].map((percent) => {
@@ -276,14 +321,22 @@ const Analytics: React.FC = () => {
 													strokeWidth="3"
 													points={trendsChartData
 														.map((d, i) => {
-															const x = 50 + (i / (trendsChartData.length - 1)) * 700;
-															const maxVal = Math.max(...trendsChartData.map(d => 
-																Math.max(d.searchEntered, d.confirmEntered, d.paymentEntered)
-															));
-															const y = 250 - ((d.searchEntered / (maxVal || 1)) * 200);
+															const x =
+																50 + (i / (trendsChartData.length - 1)) * 700;
+															const maxVal = Math.max(
+																...trendsChartData.map((d) =>
+																	Math.max(
+																		d.searchEntered,
+																		d.confirmEntered,
+																		d.paymentEntered
+																	)
+																)
+															);
+															const y =
+																250 - (d.searchEntered / (maxVal || 1)) * 200;
 															return `${x},${y}`;
 														})
-														.join(' ')}
+														.join(" ")}
 												/>
 												{/* Confirm line */}
 												<polyline
@@ -292,14 +345,22 @@ const Analytics: React.FC = () => {
 													strokeWidth="3"
 													points={trendsChartData
 														.map((d, i) => {
-															const x = 50 + (i / (trendsChartData.length - 1)) * 700;
-															const maxVal = Math.max(...trendsChartData.map(d => 
-																Math.max(d.searchEntered, d.confirmEntered, d.paymentEntered)
-															));
-															const y = 250 - ((d.confirmEntered / (maxVal || 1)) * 200);
+															const x =
+																50 + (i / (trendsChartData.length - 1)) * 700;
+															const maxVal = Math.max(
+																...trendsChartData.map((d) =>
+																	Math.max(
+																		d.searchEntered,
+																		d.confirmEntered,
+																		d.paymentEntered
+																	)
+																)
+															);
+															const y =
+																250 - (d.confirmEntered / (maxVal || 1)) * 200;
 															return `${x},${y}`;
 														})
-														.join(' ')}
+														.join(" ")}
 												/>
 												{/* Payment line */}
 												<polyline
@@ -308,38 +369,59 @@ const Analytics: React.FC = () => {
 													strokeWidth="3"
 													points={trendsChartData
 														.map((d, i) => {
-															const x = 50 + (i / (trendsChartData.length - 1)) * 700;
-															const maxVal = Math.max(...trendsChartData.map(d => 
-																Math.max(d.searchEntered, d.confirmEntered, d.paymentEntered)
-															));
-															const y = 250 - ((d.paymentEntered / (maxVal || 1)) * 200);
+															const x =
+																50 + (i / (trendsChartData.length - 1)) * 700;
+															const maxVal = Math.max(
+																...trendsChartData.map((d) =>
+																	Math.max(
+																		d.searchEntered,
+																		d.confirmEntered,
+																		d.paymentEntered
+																	)
+																)
+															);
+															const y =
+																250 - (d.paymentEntered / (maxVal || 1)) * 200;
 															return `${x},${y}`;
 														})
-														.join(' ')}
+														.join(" ")}
 												/>
 												{/* Data points */}
 												{trendsChartData.map((d, i) => {
-													const x = 50 + (i / (trendsChartData.length - 1)) * 700;
-													const maxVal = Math.max(...trendsChartData.map(d => 
-														Math.max(d.searchEntered, d.confirmEntered, d.paymentEntered)
-													));
+													const x =
+														50 + (i / (trendsChartData.length - 1)) * 700;
+													const maxVal = Math.max(
+														...trendsChartData.map((d) =>
+															Math.max(
+																d.searchEntered,
+																d.confirmEntered,
+																d.paymentEntered
+															)
+														)
+													);
 													return (
 														<g key={d.fullDate}>
 															<circle
 																cx={x}
-																cy={250 - ((d.searchEntered / (maxVal || 1)) * 200)}
+																cy={
+																	250 - (d.searchEntered / (maxVal || 1)) * 200
+																}
 																r="4"
 																fill="#d97706"
 															/>
 															<circle
 																cx={x}
-																cy={250 - ((d.confirmEntered / (maxVal || 1)) * 200)}
+																cy={
+																	250 - (d.confirmEntered / (maxVal || 1)) * 200
+																}
 																r="4"
 																fill="#a86434"
 															/>
 															<circle
 																cx={x}
-																cy={250 - ((d.paymentEntered / (maxVal || 1)) * 200)}
+																cy={
+																	250 - (d.paymentEntered / (maxVal || 1)) * 200
+																}
 																r="4"
 																fill="#78350f"
 															/>
@@ -352,7 +434,8 @@ const Analytics: React.FC = () => {
 										{/* X-axis labels */}
 										<g className="x-axis">
 											{trendsChartData.map((d, i) => {
-												if (trendsChartData.length > 10 && i % 2 !== 0) return null;
+												if (trendsChartData.length > 10 && i % 2 !== 0)
+													return null;
 												const x = 50 + (i / (trendsChartData.length - 1)) * 700;
 												return (
 													<text
@@ -392,7 +475,11 @@ const Analytics: React.FC = () => {
 								return (
 									<div key={stage.key} className="stage-card">
 										<div className="stage-card__header">
-											<Icon size={24} className="stage-card__icon" style={{ color: stage.color }} />
+											<Icon
+												size={24}
+												className="stage-card__icon"
+												style={{ color: stage.color }}
+											/>
 											<div>
 												<h3 className="stage-card__title">{stage.name}</h3>
 												<p className="stage-card__description">
