@@ -1,0 +1,342 @@
+/* About Page - TIOCA Design System */
+
+.about-page {
+	min-height: 100vh;
+	background: var(--color-background);
+	padding-top: 96px;
+}
+
+.about-container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: var(--spacing-xl) var(--spacing-md);
+}
+
+/* Hero Section */
+.about-hero {
+	background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+	border-radius: var(--border-radius-lg);
+	padding: var(--spacing-xl);
+	margin-bottom: var(--spacing-xl);
+	text-align: center;
+	box-shadow: var(--shadow-lg);
+	color: var(--color-linen);
+}
+
+.about-hero h1 {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-bottom: var(--spacing-md);
+	color: var(--color-linen);
+}
+
+.about-hero p {
+	font-size: 1.25rem;
+	line-height: 1.6;
+	max-width: 800px;
+	margin: 0 auto;
+	color: rgba(255, 255, 255, 0.95);
+}
+
+/* Main Content Grid */
+.about-content {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: var(--spacing-xl);
+	margin-bottom: var(--spacing-xl);
+}
+
+.about-section {
+	background: #f2e7d8;
+	border-radius: var(--border-radius-lg);
+	padding: var(--spacing-xl);
+	box-shadow: var(--shadow-md);
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.about-section:hover {
+	transform: translateY(-4px);
+	box-shadow: var(--shadow-lg);
+}
+
+.about-section h2 {
+	font-size: 1.75rem;
+	font-weight: 600;
+	color: var(--color-text-primary);
+	margin-bottom: var(--spacing-md);
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-sm);
+}
+
+.about-section .icon {
+	font-size: 1.5rem;
+	color: var(--color-primary);
+}
+
+.about-section p {
+	color: var(--color-text-secondary);
+	line-height: 1.6;
+	margin-bottom: var(--spacing-md);
+}
+
+.about-section ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.about-section ul li {
+	color: var(--color-text-secondary);
+	padding: var(--spacing-sm) 0;
+	padding-left: var(--spacing-lg);
+	position: relative;
+	line-height: 1.6;
+}
+
+.about-section ul li::before {
+	content: "•";
+	position: absolute;
+	left: var(--spacing-sm);
+	color: var(--color-primary);
+	font-weight: bold;
+	font-size: 1.25rem;
+}
+
+/* Pod Quality Grid */
+.pod-quality-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	gap: var(--spacing-md);
+	margin-top: var(--spacing-lg);
+}
+
+.pod-quality-card {
+	background: var(--color-linen);
+	border: 2px solid var(--color-border);
+	border-radius: var(--border-radius-md);
+	padding: var(--spacing-md);
+	text-align: center;
+	transition: all 0.2s ease;
+}
+
+.pod-quality-card:hover {
+	border-color: var(--color-primary);
+	transform: translateY(-2px);
+}
+
+.pod-quality-card h3 {
+	color: var(--color-primary);
+	font-size: 1.25rem;
+	font-weight: 600;
+	margin-bottom: var(--spacing-sm);
+	text-transform: capitalize;
+}
+
+.pod-quality-card .dimensions {
+	color: var(--color-text-secondary);
+	font-size: 0.9rem;
+	margin-bottom: var(--spacing-xs);
+}
+
+.pod-quality-card .description {
+	color: var(--color-text-secondary);
+	font-size: 0.95rem;
+	line-height: 1.4;
+}
+
+/* Policies Section */
+.policies-section {
+	background: #f2e7d8;
+	border-radius: var(--border-radius-lg);
+	padding: var(--spacing-xl);
+	margin-bottom: var(--spacing-xl);
+	box-shadow: var(--shadow-md);
+}
+
+.policies-section h2 {
+	font-size: 1.75rem;
+	font-weight: 600;
+	color: var(--color-text-primary);
+	margin-bottom: var(--spacing-lg);
+}
+
+.policies-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: var(--spacing-lg);
+}
+
+.policy-card {
+	background: var(--color-linen);
+	border-radius: var(--border-radius-md);
+	padding: var(--spacing-lg);
+	border: 1px solid var(--color-border);
+}
+
+.policy-card h3 {
+	color: var(--color-primary);
+	font-size: 1.25rem;
+	font-weight: 600;
+	margin-bottom: var(--spacing-md);
+}
+
+.policy-card p {
+	color: var(--color-text-secondary);
+	line-height: 1.6;
+	margin-bottom: var(--spacing-sm);
+}
+
+.policy-card a {
+	color: var(--color-primary);
+	text-decoration: none;
+	font-weight: 600;
+	transition: color 0.2s ease;
+}
+
+.policy-card a:hover {
+	color: var(--color-secondary);
+	text-decoration: underline;
+}
+
+/* Contact Section */
+.contact-section {
+	background: linear-gradient(135deg, #f2e7d8 0%, #e8ddcf 100%);
+	border-radius: var(--border-radius-lg);
+	padding: var(--spacing-xl);
+	text-align: center;
+	box-shadow: var(--shadow-md);
+}
+
+.contact-section h2 {
+	font-size: 1.75rem;
+	font-weight: 600;
+	color: var(--color-text-primary);
+	margin-bottom: var(--spacing-md);
+}
+
+.contact-section p {
+	color: var(--color-text-secondary);
+	font-size: 1.1rem;
+	line-height: 1.6;
+	max-width: 600px;
+	margin: 0 auto var(--spacing-lg);
+}
+
+.contact-info {
+	display: flex;
+	justify-content: center;
+	gap: var(--spacing-xl);
+	flex-wrap: wrap;
+	margin-top: var(--spacing-lg);
+}
+
+.contact-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--spacing-xs);
+}
+
+.contact-item .icon {
+	font-size: 2rem;
+	color: var(--color-primary);
+	margin-bottom: var(--spacing-xs);
+}
+
+.contact-item strong {
+	color: var(--color-text-primary);
+	font-weight: 600;
+	font-size: 0.9rem;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.contact-item span {
+	color: var(--color-text-secondary);
+	font-size: 1rem;
+}
+
+/* Features List */
+.features-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: var(--spacing-md);
+	margin-top: var(--spacing-md);
+}
+
+.feature-item {
+	background: var(--color-linen);
+	border-radius: var(--border-radius-md);
+	padding: var(--spacing-md);
+	text-align: center;
+	border: 1px solid var(--color-border);
+}
+
+.feature-item .icon {
+	font-size: 2rem;
+	color: var(--color-primary);
+	margin-bottom: var(--spacing-sm);
+}
+
+.feature-item h4 {
+	color: var(--color-text-primary);
+	font-size: 1rem;
+	font-weight: 600;
+	margin-bottom: var(--spacing-xs);
+}
+
+.feature-item p {
+	color: var(--color-text-secondary);
+	font-size: 0.9rem;
+	line-height: 1.4;
+	margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	.about-page {
+		padding-top: 80px;
+	}
+
+	.about-container {
+		padding: var(--spacing-md);
+	}
+
+	.about-hero {
+		padding: var(--spacing-lg);
+	}
+
+	.about-hero h1 {
+		font-size: 1.75rem;
+	}
+
+	.about-hero p {
+		font-size: 1rem;
+	}
+
+	.about-content {
+		grid-template-columns: 1fr;
+	}
+
+	.about-section {
+		padding: var(--spacing-lg);
+	}
+
+	.pod-quality-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.policies-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.contact-info {
+		flex-direction: column;
+		gap: var(--spacing-md);
+	}
+
+	.features-list {
+		grid-template-columns: 1fr;
+	}
+}

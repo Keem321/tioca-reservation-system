@@ -67,6 +67,9 @@ export default function Profile() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [itemsPerPage, setItemsPerPage] = useState(5);
 
+	// Search/filter state
+	const [searchQuery, setSearchQuery] = useState("");
+
 	// Queries
 	const {
 		data: profile,
@@ -87,11 +90,32 @@ export default function Profile() {
 		}
 	}, [profile?.currencyPreference, dispatch]);
 
+	// Filter reservations based on search query
+	const filteredReservations = activeReservations.filter((res) => {
+		if (!searchQuery) return true;
+		
+		const query = searchQuery.toLowerCase();
+		const podId = (typeof res.roomId === "string" ? res.roomId : res.roomId?.podId || "").toLowerCase();
+		const checkInDate = new Date(res.checkInDate).toLocaleDateString().toLowerCase();
+		const checkOutDate = new Date(res.checkOutDate).toLocaleDateString().toLowerCase();
+		
+		return (
+			podId.includes(query) ||
+			checkInDate.includes(query) ||
+			checkOutDate.includes(query)
+		);
+	});
+
 	// Pagination calculations
-	const totalPages = Math.ceil(activeReservations.length / itemsPerPage);
+	const totalPages = Math.ceil(filteredReservations.length / itemsPerPage);
 	const startIndex = (currentPage - 1) * itemsPerPage;
 	const endIndex = startIndex + itemsPerPage;
-	const paginatedReservations = activeReservations.slice(startIndex, endIndex);
+	const paginatedReservations = filteredReservations.slice(startIndex, endIndex);
+
+	// Reset to page 1 when search query changes
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [searchQuery]);
 
 	// Mutations
 	const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
@@ -445,6 +469,28 @@ export default function Profile() {
 					<div className="reservations-section">
 						<h2>My Active Reservations</h2>
 
+						{/* Search Box */}
+						{!reservationsLoading && activeReservations.length > 0 && (
+							<div className="search-container">
+								<input
+									type="text"
+									placeholder="Search by room number or date..."
+									value={searchQuery}
+									onChange={(e) => setSearchQuery(e.target.value)}
+									className="search-input"
+								/>
+								{searchQuery && (
+									<button
+										onClick={() => setSearchQuery("")}
+										className="clear-search"
+										aria-label="Clear search"
+									>
+										&times;
+									</button>
+								)}
+							</div>
+						)}
+
 						{reservationsLoading && <p>Loading reservations...</p>}
 
 						{!reservationsLoading && activeReservations.length === 0 && (
@@ -453,7 +499,13 @@ export default function Profile() {
 							</p>
 						)}
 
-						{!reservationsLoading && activeReservations.length > 0 && (
+						{!reservationsLoading && filteredReservations.length === 0 && activeReservations.length > 0 && (
+							<p className="no-reservations">
+								No reservations match your search.
+							</p>
+						)}
+
+						{!reservationsLoading && filteredReservations.length > 0 && (
 							<>
 								<div className="reservations-list">
 									{paginatedReservations.map((res) => (
@@ -540,7 +592,7 @@ export default function Profile() {
 									currentPage={currentPage}
 									totalPages={totalPages}
 									onPageChange={setCurrentPage}
-									totalItems={activeReservations.length}
+									totalItems={filteredReservations.length}
 									itemsPerPage={itemsPerPage}
 									onItemsPerPageChange={setItemsPerPage}
 								/>
