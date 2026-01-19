@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import Navbar from "../components/landing/Navbar";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -97,6 +97,8 @@ export default function RoomManagement() {
 	const [search, setSearch] = useState("");
 	const [filterFloor, setFilterFloor] = useState<"" | PodFloor>("");
 	const [filterStatus, setFilterStatus] = useState<"" | Room["status"]>("");
+
+	const resetPage = () => setCurrentPage(1);
 
 	// Pagination state
 	const [currentPage, setCurrentPage] = useState(1);
@@ -199,11 +201,6 @@ export default function RoomManagement() {
 		allRoomsStartIndex,
 		allRoomsEndIndex
 	);
-
-	// Reset to page 1 when filters or tab changes
-	useEffect(() => {
-		setCurrentPage(1);
-	}, [search, filterFloor, filterStatus, tab, startDate, endDate]);
 
 	// Per-floor summary for the overview grid
 	const floorKeys = useMemo<PodFloor[]>(
@@ -356,19 +353,28 @@ export default function RoomManagement() {
 				<div className="rm-tabs">
 					<button
 						className={tab === "booked" ? "active" : ""}
-						onClick={() => setTab("booked")}
+						onClick={() => {
+							setTab("booked");
+							resetPage();
+						}}
 					>
 						Booked (Next 2 Weeks)
 					</button>
 					<button
 						className={tab === "all" ? "active" : ""}
-						onClick={() => setTab("all")}
+						onClick={() => {
+							setTab("all");
+							resetPage();
+						}}
 					>
 						All Rooms
 					</button>
 					<button
 						className={tab === "floor" ? "active" : ""}
-						onClick={() => setTab("floor")}
+						onClick={() => {
+							setTab("floor");
+							resetPage();
+						}}
 					>
 						By Floor
 					</button>
@@ -645,7 +651,10 @@ export default function RoomManagement() {
 									type="text"
 									placeholder="Search by Pod ID (e.g., 201)"
 									value={search}
-									onChange={(e) => setSearch(e.target.value)}
+									onChange={(e) => {
+										setSearch(e.target.value);
+										resetPage();
+									}}
 									className={`filter-input ${
 										search ? "filter-input--active" : ""
 									}`}
@@ -658,9 +667,10 @@ export default function RoomManagement() {
 								<span className="filter-label-text">Floor</span>
 								<select
 									value={filterFloor}
-									onChange={(e) =>
-										setFilterFloor(e.target.value as "" | PodFloor)
-									}
+									onChange={(e) => {
+										setFilterFloor(e.target.value as "" | PodFloor);
+										resetPage();
+									}}
 									className={`filter-input ${
 										filterFloor ? "filter-input--active" : ""
 									}`}
@@ -679,9 +689,10 @@ export default function RoomManagement() {
 								<span className="filter-label-text">Status</span>
 								<select
 									value={filterStatus}
-									onChange={(e) =>
-										setFilterStatus(e.target.value as "" | Room["status"])
-									}
+									onChange={(e) => {
+										setFilterStatus(e.target.value as "" | Room["status"]);
+										resetPage();
+									}}
 									className={`filter-input ${
 										filterStatus ? "filter-input--active" : ""
 									}`}
@@ -704,11 +715,12 @@ export default function RoomManagement() {
 										</span>
 										<DatePicker
 											selected={startDate ? new Date(startDate) : null}
-											onChange={(date: Date | null) =>
+											onChange={(date: Date | null) => {
 												setStartDate(
 													date ? date.toISOString().split("T")[0] : ""
-												)
-											}
+												);
+												resetPage();
+											}}
 											dateFormat="MMM d, yyyy"
 											className={`filter-input ${
 												startDate ? "filter-input--active" : ""
@@ -725,9 +737,12 @@ export default function RoomManagement() {
 										</span>
 										<DatePicker
 											selected={endDate ? new Date(endDate) : null}
-											onChange={(date: Date | null) =>
-												setEndDate(date ? date.toISOString().split("T")[0] : "")
-											}
+											onChange={(date: Date | null) => {
+												setEndDate(
+													date ? date.toISOString().split("T")[0] : ""
+												);
+												resetPage();
+											}}
 											minDate={startDate ? new Date(startDate) : undefined}
 											dateFormat="MMM d, yyyy"
 											className={`filter-input ${
