@@ -182,7 +182,7 @@ function App() {
 					<Route
 						path="/manage/analytics"
 						element={
-							<ProtectedRoute requiredRole="manager">
+							<ProtectedRoute requiredRole="admin">
 								<Analytics />
 							</ProtectedRoute>
 						}

@@ -1,14 +1,14 @@
 /**
  * Role-based authorization middleware with role hierarchy
- * 
+ *
  * Role Hierarchy:
  * - admin: Full access (can do everything)
  * - manager: Operational access (view reservations, check-in/out, view reports)
  * - user: Standard guest access
- * 
+ *
  * Admins can access all manager endpoints (role inheritance).
- * 
- * Usage: 
+ *
+ * Usage:
  *   app.post('/rooms', requireRole('admin'), createRoom);
  *   app.get('/reservations', requireRole('manager'), getReservations);
  */
@@ -16,7 +16,7 @@
 /**
  * Check if a user's role satisfies the required role(s)
  * Implements role hierarchy where admin can access manager endpoints
- * 
+ *
  * @param {string} userRole - The user's role
  * @param {string[]} requiredRoles - Array of allowed roles
  * @returns {boolean} True if user has sufficient permissions

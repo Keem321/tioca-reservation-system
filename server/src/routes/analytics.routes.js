@@ -5,7 +5,11 @@ import {
 	getRecentEvents,
 	getDailyTrends,
 } from "../controllers/analytics.controller.js";
-import { requireAuth, requireRole } from "../middleware/roleAuth.js";
+import {
+	requireAuth,
+	requireRole,
+	requireAdmin,
+} from "../middleware/roleAuth.js";
 
 const router = express.Router();
 
@@ -22,12 +26,7 @@ router.post("/track", trackEvent);
  * Query params: startDate?, endDate?
  * Requires manager role
  */
-router.get(
-	"/summary",
-	requireAuth,
-	requireRole("manager"),
-	getAnalyticsSummary
-);
+router.get("/summary", requireAuth, requireAdmin(), getAnalyticsSummary);
 
 /**
  * GET /api/analytics/events
@@ -35,12 +34,7 @@ router.get(
  * Query params: limit?
  * Requires manager role
  */
-router.get(
-	"/events",
-	requireAuth,
-	requireRole("manager"),
-	getRecentEvents
-);
+router.get("/events", requireAuth, requireAdmin(), getRecentEvents);
 
 /**
  * GET /api/analytics/trends
@@ -48,11 +42,6 @@ router.get(
  * Query params: startDate?, endDate?
  * Requires manager role
  */
-router.get(
-	"/trends",
-	requireAuth,
-	requireRole("manager"),
-	getDailyTrends
-);
+router.get("/trends", requireAuth, requireAdmin(), getDailyTrends);
 
 export default router;

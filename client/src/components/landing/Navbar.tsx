@@ -7,6 +7,7 @@ import { logout } from "../../features/authSlice";
 import type { RootState, AppDispatch } from "../../store";
 import { isManagerOrAbove, type UserRole } from "../../utils/roleUtils";
 import "./Navbar.css";
+import RoleGuard from "../RoleGuard";
 
 /**
  * Navbar Component
@@ -249,15 +250,17 @@ const Navbar: React.FC = () => {
 								>
 									Payments Management
 								</button>
-								<button
-									onClick={() => {
-										navigate("/manage/analytics");
-										setManagerMenuOpen(false);
-									}}
-									className="navbar__dropdown-item"
-								>
-									Analytics
-								</button>
+								<RoleGuard requiredRoles="admin">
+									<button
+										onClick={() => {
+											navigate("/manage/analytics");
+											setManagerMenuOpen(false);
+										}}
+										className="navbar__dropdown-item"
+									>
+										Analytics
+									</button>
+								</RoleGuard>
 							</div>
 						)}
 					</div>
