@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import type { StripeElementsOptions } from "@stripe/stripe-js";
+import { useAnalyticsTracking } from "../hooks/useAnalytics";
 import {
 	Elements,
 	CardElement,
@@ -47,6 +48,9 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const { formatMoney } = useFormatMoney();
+
+	// Track analytics completion when payment succeeds
+	const { trackComplete } = useAnalyticsTracking("payment");
 
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -187,6 +191,7 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 				}).unwrap();
 
 				if (confirmResult.success) {
+					trackComplete();
 					navigate("/payment/success", {
 						state: { reservation: confirmResult.reservation },
 						replace: true,
@@ -275,6 +280,7 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 
 				if (confirmResult.success) {
 					// Navigate first, then reset booking state after navigation completes
+					trackComplete();
 					navigate("/payment/success", {
 						state: { reservation: confirmResult.reservation },
 						replace: true, // Replace current history entry to prevent back button issues

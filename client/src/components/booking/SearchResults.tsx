@@ -19,6 +19,7 @@ interface SearchResultsProps {
 	nights: number;
 	checkIn: string;
 	checkOut: string;
+	onBookingComplete?: () => void;
 }
 
 const SearchResults: React.FC<SearchResultsProps> = ({
@@ -26,6 +27,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 	nights,
 	checkIn,
 	checkOut,
+	onBookingComplete,
 }) => {
 	if (results.length === 0) {
 		return (
@@ -53,6 +55,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 						nights={nights}
 						checkIn={checkIn}
 						checkOut={checkOut}
+						onBookingComplete={onBookingComplete}
 					/>
 				))}
 			</div>

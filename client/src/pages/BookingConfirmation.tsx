@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../hooks";
 import { useToast } from "../components/useToast";
+import { useAnalyticsTracking } from "../hooks/useAnalytics";
 import {
 	useCreateReservationMutation,
 	useGetAvailableSlotsQuery,
@@ -81,6 +82,9 @@ const BookingConfirmation: React.FC = () => {
 		(state) => state.booking as BookingState
 	);
 	const { user } = useAppSelector((state) => state.auth);
+
+	// Track analytics for confirm stage
+	const { trackComplete } = useAnalyticsTracking("confirm");
 
 	// Handle breadcrumb navigation
 	const handleBreadcrumbClick = (step: number) => {
@@ -574,6 +578,7 @@ const BookingConfirmation: React.FC = () => {
 			try {
 				const reservation = await createReservation(reservationData).unwrap();
 				dispatch(setPendingReservation(reservation));
+				trackComplete();
 				navigate("/payment");
 			} catch (err) {
 				const apiError = err as { data?: { error?: string }; status?: number };
@@ -729,6 +734,7 @@ const BookingConfirmation: React.FC = () => {
 
 			// Store reservation and navigate to payment
 			dispatch(setPendingReservation(reservation));
+			trackComplete();
 			navigate("/payment");
 		} catch (err) {
 			const apiError = err as { data?: { error?: string }; status?: number };

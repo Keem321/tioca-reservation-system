@@ -7,6 +7,7 @@ import { userApi } from "./features/userApi";
 import { paymentsApi } from "./features/paymentsApi";
 import { holdsApi } from "./features/holdsApi";
 import { offeringsApi } from "./features/offeringsApi";
+import { analyticsApi } from "./features/analyticsApi";
 import bookingReducer from "./features/bookingSlice";
 import groupBookingReducer from "./features/groupBookingSlice";
 import authReducer, { logout } from "./features/authSlice";
@@ -36,6 +37,7 @@ export const store = configureStore({
 		[paymentsApi.reducerPath]: paymentsApi.reducer,
 		[holdsApi.reducerPath]: holdsApi.reducer,
 		[offeringsApi.reducerPath]: offeringsApi.reducer,
+		[analyticsApi.reducerPath]: analyticsApi.reducer,
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware()
@@ -46,6 +48,7 @@ export const store = configureStore({
 				paymentsApi.middleware,
 				holdsApi.middleware,
 				offeringsApi.middleware,
+				analyticsApi.middleware,
 			])
 			.concat(((api) => (next) => (action: unknown) => {
 				// Clear all RTK Query caches when user logs out
@@ -57,6 +60,7 @@ export const store = configureStore({
 					api.dispatch(holdsApi.util.resetApiState());
 					api.dispatch(roomsApi.util.resetApiState());
 					api.dispatch(offeringsApi.util.resetApiState());
+					api.dispatch(analyticsApi.util.resetApiState());
 				}
 				return next(action);
 			}) as Middleware),

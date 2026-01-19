@@ -12,6 +12,7 @@ import paymentRouter from "./payment.routes.js";
 import holdRouter from "./hold.routes.js";
 import offeringRouter from "./offering.routes.js";
 import authRouter from "./auth.js";
+import analyticsRouter from "./analytics.routes.js";
 import { sessionActivityMiddleware } from "../middleware/sessionActivity.js";
 
 // middleware MUST import strategies to register them with passport
@@ -32,6 +33,7 @@ apiRouter.use("/payments", paymentRouter);
 apiRouter.use("/holds", holdRouter);
 apiRouter.use("/offerings", offeringRouter);
 apiRouter.use("/auth", authRouter); // Auth routes now under /api/auth
+apiRouter.use("/analytics", analyticsRouter);
 
 // Public router (for non-API routes like health check)
 const publicRouter = Router();

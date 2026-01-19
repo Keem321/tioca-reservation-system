@@ -6,6 +6,7 @@ import Navbar from "../components/landing/Navbar";
 import type { Reservation } from "../types/reservation";
 import type { RootState } from "../store";
 import { useFormatMoney } from "../hooks/useFormatMoney";
+import { useAnalyticsTracking } from "../hooks/useAnalytics";
 import "./PaymentSuccess.css";
 
 /**
@@ -22,6 +23,9 @@ const PaymentSuccess: React.FC = () => {
 	);
 	const user = useSelector((state: RootState) => state.auth.user);
 	const hasChecked = useSelector((state: RootState) => state.auth.hasChecked);
+
+	// Track analytics for success stage
+	useAnalyticsTracking("success");
 
 	// Track if this is the initial mount (to detect page refresh)
 	const isInitialMount = useRef(true);

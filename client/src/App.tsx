@@ -26,6 +26,7 @@ import ReservationVerify from "./pages/ReservationVerify";
 import SessionTimeoutTest from "./pages/SessionTimeoutTest";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Analytics from "./pages/Analytics";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SessionTimeoutWarning from "./components/SessionTimeoutWarning";
 import { useSessionTimeout } from "./utils/useSessionTimeout";
@@ -175,6 +176,14 @@ function App() {
 						element={
 							<ProtectedRoute requiredRole="manager">
 								<PaymentsManagement />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/manage/analytics"
+						element={
+							<ProtectedRoute requiredRole="manager">
+								<Analytics />
 							</ProtectedRoute>
 						}
 					/>
