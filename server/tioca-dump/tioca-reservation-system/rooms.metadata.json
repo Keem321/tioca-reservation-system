@@ -1,1 +1,1 @@
-{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"c7f6d4e5efa9420b94ce3a82424349f5","collectionName":"rooms","type":"collection"}
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"podId":{"$numberInt":"1"}},"name":"podId_1","unique":true}],"uuid":"7859f8a335d84e23ac83043ff74992c5","collectionName":"rooms","type":"collection"}
