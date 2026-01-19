@@ -1,5 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
+// Use the same configurable base URL pattern as other APIs.
+// Falls back to relative /api for prod/static hosting, never to localhost.
+const ANALYTICS_BASE_URL = import.meta.env.VITE_API_URL
+	? `${import.meta.env.VITE_API_URL}/analytics`
+	: "/api/analytics";
+
 interface AnalyticsSummary {
 	success: boolean;
 	data: {
@@ -38,7 +44,7 @@ interface DailyTrends {
 export const analyticsApi = createApi({
 	reducerPath: "analyticsApi",
 	baseQuery: fetchBaseQuery({
-		baseUrl: "/api/analytics",
+		baseUrl: ANALYTICS_BASE_URL,
 		credentials: "include",
 	}),
 	endpoints: (builder) => ({

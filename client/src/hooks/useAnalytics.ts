@@ -1,9 +1,14 @@
 import { useEffect, useRef, useCallback } from "react";
 
+// Keep analytics tracking aligned with API base configuration.
+const TRACK_URL = import.meta.env.VITE_API_URL
+	? `${import.meta.env.VITE_API_URL}/analytics/track`
+	: "/api/analytics/track";
+
 /**
  * Analytics Hook
  * Tracks anonymous user behavior through the booking funnel
- * 
+ *
  * Stages:
  * - search: User is on booking/search page
  * - confirm: User is on booking confirmation page
@@ -35,12 +40,12 @@ const getSessionId = (): string => {
 const trackEvent = async (
 	stage: "search" | "confirm" | "payment" | "success",
 	event: "enter" | "exit" | "complete",
-	metadata?: Record<string, unknown>
+	metadata?: Record<string, unknown>,
 ) => {
 	try {
 		const sessionId = getSessionId();
-		
-		await fetch("/api/analytics/track", {
+
+		await fetch(TRACK_URL, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -65,7 +70,7 @@ const trackEvent = async (
  */
 export const useAnalyticsTracking = (
 	stage: "search" | "confirm" | "payment" | "success",
-	enabled: boolean = true
+	enabled: boolean = true,
 ) => {
 	const hasTrackedEnter = useRef(false);
 
@@ -91,7 +96,7 @@ export const useAnalyticsTracking = (
 				trackEvent(stage, "complete", metadata);
 			}
 		},
-		[stage, enabled]
+		[stage, enabled],
 	);
 
 	return { trackComplete };
