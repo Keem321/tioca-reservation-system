@@ -33,6 +33,7 @@ interface PodCardProps {
 	};
 	recommendationReason?: string;
 	availabilityDescription?: string;
+	onBookingComplete?: () => void; // Analytics tracking callback
 }
 
 const PodCard: React.FC<PodCardProps> = ({
@@ -43,6 +44,7 @@ const PodCard: React.FC<PodCardProps> = ({
 	checkOut,
 	recommendationReason,
 	availabilityDescription,
+	onBookingComplete,
 }) => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
@@ -62,6 +64,12 @@ const PodCard: React.FC<PodCardProps> = ({
 		// Auto-assign the first available room in the pool
 		const assigned = assignablePool[0];
 		dispatch(setSelectedRoom(assigned));
+		
+		// Track analytics completion
+		if (onBookingComplete) {
+			onBookingComplete();
+		}
+		
 		navigate("/booking/confirm", {
 			state: {
 				room: assigned,

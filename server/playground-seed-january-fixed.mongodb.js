@@ -36,6 +36,9 @@ try {
 try {
 	db.holds.drop();
 } catch (e) {}
+try {
+	db.analyticsevents.drop();
+} catch (e) {}
 
 print("✓ All collections dropped\n");
 
@@ -1329,7 +1332,157 @@ if (reservations.length > 0) {
 }
 
 // ============================================
-// STEP 8: SUMMARY REPORT
+// STEP 8: SEED ANALYTICS EVENTS
+// ============================================
+print("STEP 6: Seeding analytics events...");
+
+const analyticsEvents = [];
+
+// Helper function to generate session ID
+function genSessionId(prefix) {
+	return `${prefix}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+// Helper to add analytics event
+function addAnalyticsEvent(sessionId, stage, event, dayOffset, hourOffset = 0) {
+	const timestamp = new Date(2026, 0, dayOffset, hourOffset, 0, 0);
+	analyticsEvents.push({
+		sessionId,
+		stage,
+		event,
+		metadata: {},
+		ipAddress: `192.168.1.${Math.floor(Math.random() * 255)}`,
+		userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+		createdAt: timestamp,
+		updatedAt: timestamp,
+	});
+}
+
+// Scenario 1: Successful booking flow (completed all stages)
+// 15 successful sessions throughout January
+for (let i = 0; i < 15; i++) {
+	const day = 3 + i * 2; // Spread throughout month
+	const sessionId = genSessionId("success");
+	addAnalyticsEvent(sessionId, "search", "enter", day, 10);
+	addAnalyticsEvent(sessionId, "search", "complete", day, 10);
+	addAnalyticsEvent(sessionId, "search", "exit", day, 10);
+	addAnalyticsEvent(sessionId, "confirm", "enter", day, 10);
+	addAnalyticsEvent(sessionId, "confirm", "complete", day, 10);
+	addAnalyticsEvent(sessionId, "confirm", "exit", day, 10);
+	addAnalyticsEvent(sessionId, "payment", "enter", day, 10);
+	addAnalyticsEvent(sessionId, "payment", "complete", day, 10);
+	addAnalyticsEvent(sessionId, "payment", "exit", day, 10);
+	addAnalyticsEvent(sessionId, "success", "enter", day, 10);
+}
+
+// Scenario 2: Bounced at search (browsed but didn't select room)
+// 12 sessions that bounced at search
+for (let i = 0; i < 12; i++) {
+	const day = 2 + i * 2;
+	const sessionId = genSessionId("bounce-search");
+	addAnalyticsEvent(sessionId, "search", "enter", day, 14);
+	addAnalyticsEvent(sessionId, "search", "exit", day, 14);
+}
+
+// Scenario 3: Bounced at confirmation (selected room but didn't proceed)
+// 8 sessions that bounced at confirmation
+for (let i = 0; i < 8; i++) {
+	const day = 4 + i * 3;
+	const sessionId = genSessionId("bounce-confirm");
+	addAnalyticsEvent(sessionId, "search", "enter", day, 15);
+	addAnalyticsEvent(sessionId, "search", "complete", day, 15);
+	addAnalyticsEvent(sessionId, "search", "exit", day, 15);
+	addAnalyticsEvent(sessionId, "confirm", "enter", day, 15);
+	addAnalyticsEvent(sessionId, "confirm", "exit", day, 15);
+}
+
+// Scenario 4: Bounced at payment (got to payment but didn't complete)
+// 5 sessions that bounced at payment
+for (let i = 0; i < 5; i++) {
+	const day = 5 + i * 4;
+	const sessionId = genSessionId("bounce-payment");
+	addAnalyticsEvent(sessionId, "search", "enter", day, 16);
+	addAnalyticsEvent(sessionId, "search", "complete", day, 16);
+	addAnalyticsEvent(sessionId, "search", "exit", day, 16);
+	addAnalyticsEvent(sessionId, "confirm", "enter", day, 16);
+	addAnalyticsEvent(sessionId, "confirm", "complete", day, 16);
+	addAnalyticsEvent(sessionId, "confirm", "exit", day, 16);
+	addAnalyticsEvent(sessionId, "payment", "enter", day, 16);
+	addAnalyticsEvent(sessionId, "payment", "exit", day, 16);
+}
+
+// Scenario 5: More realistic browsing patterns - various times of day
+// 10 additional search bounces at different hours
+const hours = [9, 11, 13, 15, 17, 19, 20, 21, 22, 23];
+for (let i = 0; i < 10; i++) {
+	const day = 1 + Math.floor(i * 2.5);
+	const sessionId = genSessionId("browse");
+	addAnalyticsEvent(sessionId, "search", "enter", day, hours[i]);
+	addAnalyticsEvent(sessionId, "search", "exit", day, hours[i]);
+}
+
+// Scenario 6: Quick conversions (fast decisions - within same hour)
+// 5 quick successful bookings
+for (let i = 0; i < 5; i++) {
+	const day = 8 + i * 4;
+	const sessionId = genSessionId("quick");
+	addAnalyticsEvent(sessionId, "search", "enter", day, 18);
+	addAnalyticsEvent(sessionId, "search", "complete", day, 18);
+	addAnalyticsEvent(sessionId, "search", "exit", day, 18);
+	addAnalyticsEvent(sessionId, "confirm", "enter", day, 18);
+	addAnalyticsEvent(sessionId, "confirm", "complete", day, 18);
+	addAnalyticsEvent(sessionId, "confirm", "exit", day, 18);
+	addAnalyticsEvent(sessionId, "payment", "enter", day, 18);
+	addAnalyticsEvent(sessionId, "payment", "complete", day, 18);
+	addAnalyticsEvent(sessionId, "payment", "exit", day, 18);
+	addAnalyticsEvent(sessionId, "success", "enter", day, 18);
+}
+
+// Scenario 7: Comparison shoppers (multiple search sessions, eventually book)
+// 3 sessions where user came back multiple times
+for (let i = 0; i < 3; i++) {
+	const baseDay = 10 + i * 6;
+	// First visit - just browsing
+	const sessionId1 = genSessionId(`shopper${i}-visit1`);
+	addAnalyticsEvent(sessionId1, "search", "enter", baseDay, 10);
+	addAnalyticsEvent(sessionId1, "search", "exit", baseDay, 10);
+	
+	// Second visit - got to confirmation but bounced
+	const sessionId2 = genSessionId(`shopper${i}-visit2`);
+	addAnalyticsEvent(sessionId2, "search", "enter", baseDay + 1, 14);
+	addAnalyticsEvent(sessionId2, "search", "complete", baseDay + 1, 14);
+	addAnalyticsEvent(sessionId2, "search", "exit", baseDay + 1, 14);
+	addAnalyticsEvent(sessionId2, "confirm", "enter", baseDay + 1, 14);
+	addAnalyticsEvent(sessionId2, "confirm", "exit", baseDay + 1, 14);
+	
+	// Third visit - completed booking
+	const sessionId3 = genSessionId(`shopper${i}-visit3`);
+	addAnalyticsEvent(sessionId3, "search", "enter", baseDay + 2, 19);
+	addAnalyticsEvent(sessionId3, "search", "complete", baseDay + 2, 19);
+	addAnalyticsEvent(sessionId3, "search", "exit", baseDay + 2, 19);
+	addAnalyticsEvent(sessionId3, "confirm", "enter", baseDay + 2, 19);
+	addAnalyticsEvent(sessionId3, "confirm", "complete", baseDay + 2, 19);
+	addAnalyticsEvent(sessionId3, "confirm", "exit", baseDay + 2, 19);
+	addAnalyticsEvent(sessionId3, "payment", "enter", baseDay + 2, 19);
+	addAnalyticsEvent(sessionId3, "payment", "complete", baseDay + 2, 19);
+	addAnalyticsEvent(sessionId3, "payment", "exit", baseDay + 2, 19);
+	addAnalyticsEvent(sessionId3, "success", "enter", baseDay + 2, 19);
+}
+
+// Insert all analytics events
+if (analyticsEvents.length > 0) {
+	try {
+		db.analyticsevents.insertMany(analyticsEvents);
+		print(`✓ Inserted ${analyticsEvents.length} analytics events\n`);
+	} catch (e) {
+		print(`⚠️  Analytics events insertion failed: ${e.message}\n`);
+	}
+} else {
+	print("⚠️  No analytics events to insert\n");
+}
+
+// ============================================
+// STEP 9: SUMMARY REPORT
 // ============================================
 print("========================================");
 print("SEEDING COMPLETE - SUMMARY REPORT");
@@ -1340,7 +1493,8 @@ print(`Offerings: ${db.offerings.countDocuments()}`);
 print(`Rooms: ${db.rooms.countDocuments()}`);
 print(`Users: ${db.users.countDocuments()}`);
 print(`Reservations: ${db.reservations.countDocuments()}`);
-print(`Payments: ${db.payments.countDocuments()}\n`);
+print(`Payments: ${db.payments.countDocuments()}`);
+print(`Analytics Events: ${db.analyticsevents.countDocuments()}\n`);
 
 print("--- USER ACCOUNTS (Staff) ---");
 print("Admin: admin@tioca.com / password123");
@@ -1405,6 +1559,24 @@ try {
 	print("  (No revenue data)");
 }
 
+try {
+	const analyticsSummary = db.analyticsevents.aggregate([
+		{ $group: { _id: "$stage", count: { $sum: 1 } } },
+		{ $sort: { _id: 1 } }
+	]).toArray();
+	print("\n--- ANALYTICS EVENTS BY STAGE ---");
+	analyticsSummary.forEach((s) => {
+		print(`  ${s._id}: ${s.count} events`);
+	});
+	
+	const uniqueSessions = db.analyticsevents.distinct("sessionId").length;
+	print(`\nTotal unique sessions tracked: ${uniqueSessions}`);
+} catch (e) {
+	print("\n--- ANALYTICS EVENTS ---");
+	print("  (No analytics data)");
+}
+
 print("\n========================================");
 print("✓ Dataset ready for testing!");
+print("✓ Includes analytics tracking data!");
 print("========================================\n");

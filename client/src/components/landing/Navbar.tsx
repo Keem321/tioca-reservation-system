@@ -249,6 +249,15 @@ const Navbar: React.FC = () => {
 								>
 									Payments Management
 								</button>
+								<button
+									onClick={() => {
+										navigate("/manage/analytics");
+										setManagerMenuOpen(false);
+									}}
+									className="navbar__dropdown-item"
+								>
+									Analytics
+								</button>
 							</div>
 						)}
 					</div>

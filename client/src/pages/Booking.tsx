@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useAnalyticsTracking } from "../hooks/useAnalytics";
 
 interface RoomWithAvailability extends Room {
 	availabilityInfo?: {
@@ -50,6 +51,9 @@ const Booking: React.FC = () => {
 	const { isGroupBooking, timeslots } = useSelector(
 		(state: RootState) => state.groupBooking
 	);
+
+	// Track analytics for search stage
+	const { trackComplete } = useAnalyticsTracking("search");
 	const [shouldSearch, setShouldSearch] = useState(false);
 	const [groupSearchResults, setGroupSearchResults] = useState<{
 		primary: Array<{
@@ -239,6 +243,7 @@ const Booking: React.FC = () => {
 									nights={getNights()}
 									checkIn={checkIn}
 									checkOut={checkOut}
+									onBookingComplete={trackComplete}
 								/>
 
 								{recommendedGroups.length > 0 && (
@@ -292,6 +297,7 @@ const Booking: React.FC = () => {
 															availabilityInfo={availInfo}
 															recommendationReason={badgeText}
 															availabilityDescription={descriptionText}
+															onBookingComplete={trackComplete}
 														/>
 													</div>
 												);
@@ -434,15 +440,16 @@ const Booking: React.FC = () => {
 									<div className="group-results__actions">
 										<button
 											className="group-results__book-btn"
-											onClick={() =>
+											onClick={() => {
+												trackComplete();
 												navigate("/booking/confirm", {
 													state: {
 														isGroupBooking: true,
 														groupResults: groupSearchResults,
 														timeslots: timeslots,
 													},
-												})
-											}
+												});
+											}}
 										>
 											Continue with Group Booking
 										</button>

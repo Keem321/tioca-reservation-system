@@ -1,0 +1,628 @@
+/* Analytics Page - TIOCA Design System */
+
+.analytics-page {
+	min-height: 100vh;
+	padding: var(--spacing-xl) var(--spacing-md);
+	max-width: 1400px;
+	margin: 0 auto;
+	background-color: var(--color-background);
+}
+
+.analytics-page__container {
+	width: 100%;
+}
+
+/* Header */
+.analytics-page__header {
+	margin-bottom: var(--spacing-xl);
+}
+
+.analytics-page__header h1 {
+	color: var(--color-text-primary);
+	font-size: 2.5rem;
+	font-weight: 600;
+	margin-bottom: var(--spacing-sm);
+}
+
+.analytics-page__subtitle {
+	color: var(--color-text-secondary);
+	font-size: 1.1rem;
+	margin: 0;
+}
+
+/* Loading & Error States */
+.analytics-page__loading,
+.analytics-page__error {
+	background: #faf8f5;
+	padding: 3rem;
+	border-radius: var(--border-radius-lg);
+	text-align: center;
+	box-shadow: var(--shadow-md);
+}
+
+.analytics-page__error h2 {
+	color: var(--color-deep-walnut);
+	margin-bottom: 1rem;
+}
+
+/* Filters - Matching RoomManagement style */
+.filters {
+	margin-bottom: var(--spacing-xl);
+	padding: var(--spacing-xl) var(--spacing-xl) 2rem;
+	background: linear-gradient(135deg, #f7f0e6 0%, #f2e7d8 100%);
+	border-radius: var(--border-radius-lg);
+	box-shadow: var(--shadow-lg);
+	border: 1px solid rgba(168, 100, 52, 0.1);
+	transition: all 0.3s ease;
+}
+
+.filters__header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: var(--spacing-lg);
+}
+
+.filters__header-content {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-md);
+}
+
+.filters__icon {
+	color: var(--color-primary);
+	flex-shrink: 0;
+}
+
+.filters__icon--main {
+	color: #8d5524;
+}
+
+.filters__title {
+	margin: 0;
+	color: var(--color-text-primary);
+	font-size: 1.25rem;
+	font-weight: 600;
+}
+
+.filters__subtitle {
+	margin: 0;
+	color: var(--color-text-secondary);
+	font-size: 0.9rem;
+}
+
+.filters__content {
+	width: 100%;
+}
+
+.filter-row {
+	display: flex;
+	gap: var(--spacing-lg);
+	align-items: flex-end;
+	flex-wrap: wrap;
+}
+
+.filter-group {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-sm);
+	min-width: 200px;
+}
+
+.filter-group__label {
+	font-weight: 600;
+	color: var(--color-deep-walnut);
+	font-size: 0.9rem;
+}
+
+.filter-group__datepicker {
+	padding: var(--spacing-sm) var(--spacing-md);
+	border: 2px solid var(--color-border);
+	border-radius: var(--border-radius-md);
+	font-size: 1rem;
+	transition: all 0.2s ease;
+	background: #faf8f5;
+	width: 100%;
+}
+
+.filter-group__datepicker:focus {
+	outline: none;
+	border-color: var(--color-primary);
+	box-shadow: 0 0 0 3px rgba(168, 100, 52, 0.1);
+}
+
+.filter-clear-btn {
+	padding: var(--spacing-sm) var(--spacing-lg);
+	background: var(--color-secondary);
+	color: white;
+	border: none;
+	border-radius: var(--border-radius-md);
+	cursor: pointer;
+	font-weight: 600;
+	transition: all 0.2s ease;
+	height: fit-content;
+	align-self: flex-end;
+}
+
+.filter-clear-btn:hover {
+	background: var(--color-primary);
+	transform: translateY(-1px);
+	box-shadow: var(--shadow-md);
+}
+
+/* Overall Metrics */
+.analytics-page__overall {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	gap: var(--spacing-lg);
+	margin-bottom: var(--spacing-xl);
+}
+
+.metric-card {
+	background: #faf8f5;
+	padding: var(--spacing-xl);
+	border-radius: var(--border-radius-lg);
+	box-shadow: var(--shadow-md);
+	text-align: center;
+	transition: all 0.3s ease;
+	border: 2px solid transparent;
+}
+
+.metric-card:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--shadow-lg);
+	border-color: rgba(168, 100, 52, 0.1);
+}
+
+.metric-card--highlight {
+	background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+	color: white;
+}
+
+.metric-card__label {
+	font-size: 0.9rem;
+	font-weight: 600;
+	margin-bottom: var(--spacing-sm);
+	color: var(--color-text-secondary);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.metric-card--highlight .metric-card__label {
+	color: rgba(255, 255, 255, 0.9);
+}
+
+.metric-card__value {
+	font-size: 3rem;
+	font-weight: 700;
+	color: var(--color-deep-walnut);
+	line-height: 1;
+}
+
+.metric-card--highlight .metric-card__value {
+	color: white;
+}
+
+/* Trends Chart */
+.analytics-page__trends {
+	background: #faf8f5;
+	padding: var(--spacing-xl);
+	border-radius: var(--border-radius-lg);
+	box-shadow: var(--shadow-md);
+	margin-bottom: var(--spacing-xl);
+	border: 2px solid rgba(168, 100, 52, 0.1);
+}
+
+.trends-header {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-md);
+	margin-bottom: var(--spacing-xl);
+}
+
+.trends-icon {
+	color: var(--color-primary);
+}
+
+.trends-header h2 {
+	color: var(--color-deep-walnut);
+	margin: 0;
+	font-size: 1.5rem;
+	font-weight: 600;
+}
+
+.trends-subtitle {
+	color: var(--color-text-secondary);
+	font-size: 0.9rem;
+	margin: 0;
+}
+
+.trends-chart {
+	width: 100%;
+}
+
+.chart-legend {
+	display: flex;
+	justify-content: center;
+	gap: var(--spacing-xl);
+	margin-bottom: var(--spacing-lg);
+	flex-wrap: wrap;
+}
+
+.legend-item {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-sm);
+	font-size: 0.9rem;
+	color: var(--color-text-secondary);
+	font-weight: 500;
+}
+
+.legend-dot {
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	display: inline-block;
+}
+
+.chart-container {
+	width: 100%;
+	overflow-x: auto;
+}
+
+.chart-svg {
+	width: 100%;
+	height: auto;
+	min-height: 300px;
+}
+
+/* Stages */
+.analytics-page__stages {
+	margin-bottom: var(--spacing-xl);
+}
+
+.analytics-page__stages h2 {
+	color: var(--color-deep-walnut);
+	margin-bottom: var(--spacing-lg);
+	font-size: 1.8rem;
+	font-weight: 600;
+}
+
+.stages-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+	gap: var(--spacing-lg);
+}
+
+.stage-card {
+	background: #faf8f5;
+	padding: var(--spacing-xl);
+	border-radius: var(--border-radius-lg);
+	box-shadow: var(--shadow-md);
+	transition: all 0.3s ease;
+	border: 2px solid transparent;
+}
+
+.stage-card:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--shadow-lg);
+	border-color: rgba(168, 100, 52, 0.1);
+}
+
+.stage-card__header {
+	display: flex;
+	gap: var(--spacing-md);
+	margin-bottom: var(--spacing-lg);
+	align-items: flex-start;
+}
+
+.stage-card__icon {
+	flex-shrink: 0;
+}
+
+.stage-card__title {
+	color: var(--color-deep-walnut);
+	font-size: 1.3rem;
+	margin: 0 0 var(--spacing-xs) 0;
+	font-weight: 600;
+}
+
+.stage-card__description {
+	color: var(--color-text-secondary);
+	font-size: 0.9rem;
+	margin: 0;
+}
+
+.stage-card__metrics {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: var(--spacing-md);
+	margin-bottom: var(--spacing-lg);
+	padding-bottom: var(--spacing-lg);
+	border-bottom: 2px solid var(--color-linen);
+}
+
+.stage-metric {
+	text-align: center;
+}
+
+.stage-metric__label {
+	font-size: 0.85rem;
+	color: var(--color-text-secondary);
+	margin-bottom: var(--spacing-xs);
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.stage-metric__value {
+	font-size: 2rem;
+	font-weight: 700;
+	color: var(--color-deep-walnut);
+	line-height: 1;
+}
+
+.stage-metric__value--success {
+	color: #16a34a;
+}
+
+.stage-metric__value--danger {
+	color: #c2410c;
+}
+
+.stage-card__rates {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-md);
+}
+
+.rate-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: var(--spacing-md);
+	background: var(--color-linen);
+	border-radius: var(--border-radius-md);
+	transition: all 0.2s ease;
+}
+
+.rate-item:hover {
+	background: #f7f0e6;
+}
+
+.rate-item__label {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-sm);
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: var(--color-text-secondary);
+}
+
+.rate-item__value {
+	font-size: 1.3rem;
+	font-weight: 700;
+}
+
+.rate-item__value--success {
+	color: #16a34a;
+}
+
+.rate-item__value--danger {
+	color: #c2410c;
+}
+
+/* Info Section */
+.analytics-page__info {
+	background: #faf8f5;
+	padding: var(--spacing-xl);
+	border-radius: var(--border-radius-lg);
+	box-shadow: var(--shadow-md);
+	border: 2px solid rgba(168, 100, 52, 0.1);
+}
+
+.analytics-page__info h3 {
+	color: var(--color-deep-walnut);
+	margin-bottom: var(--spacing-md);
+	font-size: 1.3rem;
+	font-weight: 600;
+}
+
+.analytics-page__info ul {
+	list-style: none;
+	padding: 0;
+	margin: 0 0 var(--spacing-lg) 0;
+}
+
+.analytics-page__info li {
+	padding: var(--spacing-sm) 0;
+	color: var(--color-text-primary);
+	line-height: 1.6;
+	border-bottom: 1px solid var(--color-linen);
+}
+
+.analytics-page__info li:last-child {
+	border-bottom: none;
+}
+
+.analytics-page__info strong {
+	color: var(--color-deep-walnut);
+	font-weight: 600;
+}
+
+.analytics-page__note {
+	margin: 0;
+	padding: var(--spacing-md);
+	background: var(--color-linen);
+	border-radius: var(--border-radius-md);
+	color: var(--color-text-secondary);
+	font-size: 0.9rem;
+	font-style: italic;
+	border-left: 4px solid var(--color-primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	.analytics-page {
+		padding: var(--spacing-md);
+	}
+
+	.analytics-page__header h1 {
+		font-size: 2rem;
+	}
+
+	.filter-row {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.filter-group {
+		min-width: 100%;
+	}
+
+	.filter-clear-btn {
+		align-self: stretch;
+	}
+
+	.analytics-page__overall {
+		grid-template-columns: 1fr;
+	}
+
+	.stages-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.stage-card__metrics {
+		grid-template-columns: 1fr;
+	}
+
+	.metric-card__value {
+		font-size: 2.5rem;
+	}
+
+	.chart-legend {
+		gap: var(--spacing-md);
+	}
+}
+
+/* DatePicker custom styling - Matching booking pages */
+.react-datepicker-wrapper {
+	width: 100%;
+}
+
+.react-datepicker__input-container {
+	width: 100%;
+}
+
+.react-datepicker {
+	font-family: inherit !important;
+	border: 2px solid var(--color-deep-walnut) !important;
+	border-radius: 16px !important;
+	box-shadow: 0 12px 40px rgba(44, 22, 7, 0.25), 0 4px 16px rgba(44, 22, 7, 0.15) !important;
+	background-color: var(--color-linen) !important;
+}
+
+.react-datepicker__header {
+	background-color: var(--color-deep-walnut) !important;
+	border-bottom: none !important;
+	border-top-left-radius: 14px !important;
+	border-top-right-radius: 14px !important;
+	padding-top: 1.25rem !important;
+	padding-bottom: 0.5rem !important;
+}
+
+.react-datepicker__current-month {
+	color: white !important;
+	font-weight: 600 !important;
+	font-size: 1rem !important;
+	margin-bottom: 0.5rem !important;
+}
+
+.react-datepicker__day-name {
+	color: var(--color-linen) !important;
+	font-weight: 600 !important;
+	font-size: 0.75rem !important;
+	width: 2.5rem !important;
+	line-height: 2.5rem !important;
+	margin: 0.2rem !important;
+}
+
+.react-datepicker__day {
+	color: var(--color-text-primary) !important;
+	font-weight: 500 !important;
+	width: 2.5rem !important;
+	line-height: 2.5rem !important;
+	margin: 0.25rem !important;
+	border-radius: 8px !important;
+	transition: all 0.2s ease !important;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--in-selecting-range,
+.react-datepicker__day--in-range,
+.react-datepicker__day--keyboard-selected {
+	background-color: var(--color-primary) !important;
+	color: white !important;
+	font-weight: 700 !important;
+	border-radius: 8px !important;
+}
+
+.react-datepicker__day--selected:hover,
+.react-datepicker__day--keyboard-selected:hover {
+	background-color: var(--color-secondary) !important;
+}
+
+.react-datepicker__day--today {
+	font-weight: 700 !important;
+	color: var(--color-primary) !important;
+	background-color: rgba(188, 143, 103, 0.1) !important;
+	border-radius: 8px !important;
+}
+
+.react-datepicker__day:hover {
+	background-color: rgba(188, 143, 103, 0.2) !important;
+	border-radius: 8px !important;
+}
+
+.react-datepicker__day--disabled {
+	color: rgba(44, 22, 7, 0.3) !important;
+	cursor: not-allowed !important;
+}
+
+.react-datepicker__day--disabled:hover {
+	background-color: transparent !important;
+}
+
+.react-datepicker__navigation {
+	top: 1rem !important;
+}
+
+.react-datepicker__navigation-icon::before {
+	border-color: white !important;
+	border-width: 2px 2px 0 0 !important;
+	height: 7px !important;
+	width: 7px !important;
+	top: 10px !important;
+}
+
+.react-datepicker__navigation:hover *::before {
+	border-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.react-datepicker__month {
+	margin: 0.8rem !important;
+	padding: 0.5rem !important;
+	background-color: var(--color-linen) !important;
+}
+
+.react-datepicker__triangle {
+	display: none !important;
+}
+
+.react-datepicker-popper {
+	z-index: 9999 !important;
+}
+
+.react-datepicker-popper[data-placement^="bottom"] {
+	padding-top: 8px !important;
+}
