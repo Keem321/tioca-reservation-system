@@ -499,6 +499,7 @@ const PaymentForm: React.FC<{ reservation: Reservation }> = ({
 const Payment: React.FC = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
+	const { formatMoney } = useFormatMoney();
 	const { pendingReservation } = useAppSelector(
 		(state) => state.booking as BookingState
 	);
